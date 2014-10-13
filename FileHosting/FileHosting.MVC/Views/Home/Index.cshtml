@@ -1,0 +1,38 @@
+﻿@using FileHosting.MVC.Helpers
+@model FileHosting.MVC.ViewModels.HomeIndexViewModel
+@{
+    ViewBag.Title = "Home page";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <ul class="nav nav-pills nav-justified" role="tablist">
+        @foreach (var item in Model.FileSections)
+        {
+            <li><a href="@Url.Action("Index", "Files", new { section = item.Key })">@item.Value</a></li>
+        }
+    </ul>
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-heading">
+            <h2 class="panel-title">News</h2>
+        </div>
+        <div class="panel-body">
+            @if (Model.News != null && Model.News.Any())
+            {
+            }
+            else
+            {
+                <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no published news!</strong></div>
+            }
+        </div>
+    </div>
+    @if (Model.News != null && Model.News.Any())
+    {
+        <br />
+        <div>
+            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+        </div>
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
+    }
+</div>

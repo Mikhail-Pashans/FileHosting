@@ -1,0 +1,93 @@
+﻿.container {
+    width: 920px !important;
+}
+
+
+/* Styles for validation helpers
+-----------------------------------------------------------*/
+.field-validation-error {
+    font-weight: bold;
+    color: #f00;    
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #f00;
+    background-color: #fee;    
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #f00;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+
+/*-------------------------------------------------------------------------------*/
+.logo {
+    position: relative;
+    display: block;
+    padding-left: 80px;
+    padding-right: 25px;
+    margin-right: 50px;
+}
+
+.logo .logo-img {
+    position: absolute;
+    left: 0;
+    top: -7px;
+}
+
+#img-supercaptcha {
+    height: 100px !important;
+}
+
+hr {
+    border-color: rgb(56, 97, 187) !important;
+}
+
+.display-inline {
+    display: inline !important;
+}
+
+.display-inline-block {
+    display: inline-block !important;
+}
+
+.form-custom {
+    padding: 0 !important;
+}
+
+.well-custom {
+    margin: 0 auto !important;
+}
+
+.well-account {     
+     width: 600px !important;
+}
+
+.no-margin {
+    margin: 0 !important;
+}
+
+.border-bottom {
+    border-bottom: 1px solid !important;
+}
+
+.form-control-element {
+    width: 300px !important;
+}
+
+.th-control {
+    width: 220px !important;
+}
+
+.th-numbers {
+    width: 100px !important;
+}

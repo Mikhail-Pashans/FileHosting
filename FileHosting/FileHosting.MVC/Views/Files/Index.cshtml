@@ -1,0 +1,69 @@
+﻿@using FileHosting.MVC.Helpers
+@model FileHosting.MVC.ViewModels.FilesIndexViewModel
+@{
+    ViewBag.Title = "Files";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <ul class="nav nav-pills nav-justified" role="tablist">
+        @foreach (var item in Model.FileSectionDictionary)
+        {
+            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key)) { <text> class="active" </text> }>
+                <a href="@Url.Action("Index", new { section = item.Key })">@item.Value</a>
+            </li>
+        }
+    </ul>
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            @if (Model.Files != null && Model.Files.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Section</th>
+                            <th class="th-numbers">Size (KB)</th>
+                            <th class="th-numbers">Upload date</th>
+                            <th class="th-control"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model.Files)
+                        {
+                            <tr>
+                                <td>@file.Id</td>
+                                <td>@file.Name</td>
+                                <td>@file.Section.Name</td>
+                                <td>@file.Size</td>
+                                <td>@file.UploadDate</td>
+                                <td class="text-right">
+                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber })">
+                                        <span class="glyphicon glyphicon-file"></span>&ensp;Details
+                                    </a>
+                                    <a class="btn btn-success" href="@Url.Action("DownloadFile", new { fileId = file.Id })">
+                                        <span class="glyphicon glyphicon-download"></span>&ensp;Download
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no uploaded files!</strong></div>
+            }
+        </div>
+    </div>
+    @if (Model.Files != null && Model.Files.Any())
+    {
+        <br />
+        <div>
+            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+        </div>        
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { section = Model.SectionNumber, page = x }))
+    }
+</div>

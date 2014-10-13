@@ -1,0 +1,114 @@
+﻿@model FileHosting.MVC.ViewModels.FileDetailsViewModel
+@{
+    ViewBag.Title = "File details";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <a class="btn btn-default form-control-element" href="@Url.Action("Index", new { section = Model.Section, page = Model.PageNumber })">
+        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+    </a>
+    <br />
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            <form class="form-horizontal" action="@Url.Action("DownloadFile")" role="form">
+                <input type="hidden" name="fileId" value="@Model.FileModel.FileId" />
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileTitle">Name:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileTitle">@Model.FileModel.Name</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileSection">Section:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileSection">@Model.FileModel.Section</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileTags">Tags:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileTags">@Model.FileModel.Tags</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileDescription">Description:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileDescription">@Model.FileModel.Description</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileDateUpload">Upload date:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileDateUpload">@Model.FileModel.UploadDate</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileSize">Size (KB):</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileSize">@Model.FileModel.Size</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="fileOwner">Owner:</label>
+                    <div class="col-md-10">
+                        <p class="form-control-static" id="fileOwner">@Model.FileModel.User.UserName</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button type="submit" class="btn btn-warning form-control-element">
+                            <span class="glyphicon glyphicon-download"></span>&emsp;Download file
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <div id="commentPanel"></div>            
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function ($) {
+        var getParameterByName = function(url, name) {
+            var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        };
+        
+        var loadComments = function(page, messageType) {
+            $('#commentPanel').load(
+                '/Files/GetCommentsForFile',
+                {
+                    fileId: @Model.FileModel.FileId,
+                    page: page,
+                    messageType: messageType
+                },
+                function() {
+                    var $pagination = $('.pagination');
+                    var $newCommentForm = $('#newCommentForm');
+
+                    $pagination.on('click', 'a', function(event) {
+                        event.preventDefault();                        
+                        var href = $(this).attr('href');
+                        var pageNumber = getParameterByName(href, 'page');
+                        loadComments(pageNumber);
+                    });
+
+                    $newCommentForm.on('submit', function(event) {
+                        event.preventDefault();
+                        $.post(
+                            '/Files/AddCommentToFile',
+                            $(this).serialize(),
+                            function(response) {
+                                loadComments(null, response);
+                            }
+                        );
+                    });
+                }
+            );
+        };
+
+        loadComments(null, null);
+    })(jQuery);
+</script>

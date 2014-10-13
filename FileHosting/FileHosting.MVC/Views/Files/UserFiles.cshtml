@@ -1,0 +1,72 @@
+﻿@using FileHosting.Domain.Enums
+@using FileHosting.MVC.Helpers
+@model FileHosting.MVC.ViewModels.UserFilesViewModel
+@{
+    ViewBag.Title = "My files";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <a class="btn btn-default form-control-element" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })">
+        <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
+    </a>
+    <br />
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            @if (Model.Files != null && Model.Files.Any())
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Section</th>                            
+                            <th class="th-numbers">Size (KB)</th>
+                            <th class="th-numbers">Upload date</th>
+                            <th class="th-control"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var file in Model.Files)
+                        {
+                            <tr>
+                                <td>@file.Id</td>
+                                <td>@file.Name</td>
+                                <td>@file.Section.Name</td>                                
+                                <td>@file.Size</td>
+                                <td>@file.UploadDate</td>
+                                <td class="text-right">
+                                    <a class="btn btn-warning" href="@Url.Action("FileDetails", new { fileId = file.Id, page = Model.PageInfo.PageNumber })">
+                                        <span class="glyphicon glyphicon-pencil"></span>&ensp;Change
+                                    </a>
+                                    <form class="display-inline" action="@Url.Action("ChangeFile")" method="POST">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="type" value="@FileActionsType.Delete" />
+                                        <input type="hidden" name="fileId" value="@file.Id" />
+                                        <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
+                                        <button class="btn btn-danger" type="submit">
+                                            <span class="glyphicon glyphicon-trash"></span>&ensp;Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-danger no-margin text-center" role="alert"><strong>You have no uploaded files!</strong></div>
+            }
+        </div>
+    </div>
+    @if (Model.Files != null && Model.Files.Any())
+    {
+        <br />
+        <div>
+            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+        </div>                
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new { page = x }))
+    }
+</div>

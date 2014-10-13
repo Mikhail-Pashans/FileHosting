@@ -1,0 +1,90 @@
+﻿@model FileHosting.MVC.ViewModels.UploadNewFilesViewModel
+@{
+    ViewBag.Title = "Upload new file(s)";
+}
+@Styles.Render("~/Content/FineUploader/css")
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <a class="btn btn-default form-control-element" href="@Url.Action("UserFiles", new { page = Model.PageNumber })">
+        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to uploaded files list
+    </a>
+    <br />
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            <form action="@Url.Action("UploadNewFiles")" id="qq-form" role="form">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label class="control-label" for="fileSection">Select section of file(s):</label>
+                    @Html.DropDownList("fileSection", Model.FileSectionSelectList, new { @class = "form-control form-control-element" })
+                </div>
+                <div class="form-group">
+                    <div id="jquery-wrapped-fine-uploader"></div>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn btn-warning form-control-element">
+                        <span class="glyphicon glyphicon-upload"></span>&emsp;Start file(s) upload
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/fineuploader")
+
+<script type="text/template" id="qq-template">
+    <div class="qq-uploader-selector qq-uploader">
+        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+            <span>Drop files here to upload</span>
+        </div>
+        <div class="qq-upload-button-selector btn btn-info form-control-element">
+            <span class="glyphicon glyphicon-folder-open"></span>&emsp;Select file(s) to upload
+        </div>
+        <span class="qq-drop-processing-selector qq-drop-processing">
+            <span>Processing dropped files...</span>
+            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+        </span>
+        <ul class="qq-upload-list-selector list-group">
+            <li class="list-group-item list-group-item-success">
+                <div class="qq-progress-bar-container-selector">
+                    <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                </div>
+                <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                <span class="qq-upload-file-selector qq-upload-file"></span>
+                <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                <span class="qq-upload-size-selector qq-upload-size"></span>
+                <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancel</a>
+                <a class="qq-upload-retry-selector qq-upload-retry" href="#">Retry</a>
+                <a class="qq-upload-delete-selector qq-upload-delete" href="#">Delete</a>
+                <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+            </li>
+        </ul>
+    </div>
+</script>
+
+<script type="text/javascript">
+    (function ($) {
+        $('#jquery-wrapped-fine-uploader').fineUploader({
+            maxConnections: 1,
+            validation: {                
+                sizeLimit: 10737418240 // 10 GB = 10 * 1024 * 1024 * 1024 bytes
+            },
+            failedUploadTextDisplay: {
+                mode: 'custom',
+                maxChars: 300,
+                responseProperty: 'error',
+                enableTooltip: true
+            },
+            text: {
+                defaultResponseError: 'Upload failed! An unknown upload error occurred.'
+            },
+            classes: {
+                success: 'alert alert-success',
+                fail: 'alert alert-error'
+            }
+        });
+    })(jQuery);
+</script>
