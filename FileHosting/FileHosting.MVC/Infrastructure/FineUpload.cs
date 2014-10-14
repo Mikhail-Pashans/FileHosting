@@ -1,4 +1,5 @@
 using System.IO;
+using System.Security.AccessControl;
 using System.Web.Mvc;
 
 namespace FileHosting.MVC.Infrastructure
@@ -14,7 +15,7 @@ namespace FileHosting.MVC.Infrastructure
         {
             if (autoCreateDirectory)
             {
-                var directory = new FileInfo(destination).Directory;
+                var directory = new FileInfo(destination).Directory;                
                 if (directory != null) directory.Create();
             }
 

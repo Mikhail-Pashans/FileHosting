@@ -99,7 +99,8 @@ namespace FileHosting.MVC.Providers
                 Comments = new List<Comment>(),
                 Downloads = new List<Download>(),
                 Files = new List<File>(),
-                FilesWithPermissions = new List<File>(),
+                FilesWithPermission = new List<File>(),
+                FilesWithSubscription = new List<File>(),
                 News = new List<News>(),
                 Roles = new List<Role>(),                        
             };

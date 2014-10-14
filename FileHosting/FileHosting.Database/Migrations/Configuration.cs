@@ -18,14 +18,15 @@ namespace FileHosting.Database.Migrations
         {
             //var user = new User
             //{
-            //    Name = "admin",
+            //    Name = "Admin",
             //    Email = "jolly.roger.1988@gmail.com",
             //    Password = Crypto.HashPassword("mike1988"),
             //    CreationDate = DateTime.UtcNow,
             //    Comments = new List<Comment>(),
             //    Downloads = new List<Download>(),
             //    Files = new List<File>(),
-            //    FilesWithPermissions = new List<File>(),
+            //    FilesWithPermission = new List<File>(),
+            //    FilesWithSubscription = new List<File>(),
             //    News = new List<News>(),
             //    Roles = new List<Role>(),
             //};

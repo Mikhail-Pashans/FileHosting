@@ -7,7 +7,14 @@ namespace FileHosting.Domain.Models
         public int CommentId { get; set; }
         public int Number { get; set; }
         public string Author { get; set; }
-        public DateTime PublishDate { get; set; }
+
+        private DateTime _publishDate;
+        public DateTime PublishDate
+        {
+            get { return _publishDate.ToLocalTime(); }
+            set { _publishDate = value; }
+        }
+
         public string Text { get; set; }
     }
 }

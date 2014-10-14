@@ -13,7 +13,7 @@ namespace FileHosting.Database.Models
         public decimal Size { get; set; }
         public string Path { get; set; }
         public bool IsAllowedAnonymousBrowsing { get; set; }
-        public bool IsAllowedAnonymousComments { get; set; }
+        public bool IsAllowedAnonymousAction { get; set; }
 
         public int SectionId { get; set; }
         public virtual Section Section { get; set; }
@@ -26,6 +26,8 @@ namespace FileHosting.Database.Models
         public virtual ICollection<Comment> Comments { get; set; }
 
         public virtual ICollection<Download> Downloads { get; set; }
+
+        public virtual ICollection<User> SubscribedUsers { get; set; }
         
         public virtual ICollection<Tag> Tags { get; set; }                        
     }

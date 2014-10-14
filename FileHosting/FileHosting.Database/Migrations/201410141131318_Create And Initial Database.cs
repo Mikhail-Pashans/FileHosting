@@ -7,7 +7,7 @@ namespace FileHosting.Database.Migrations
         public override void Up()
         {
             CreateTable(
-                "dbo.Comment",
+                "dbo.Comments",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -18,13 +18,13 @@ namespace FileHosting.Database.Migrations
                         AuthorId = c.Int(),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.User", t => t.AuthorId)
-                .ForeignKey("dbo.File", t => t.FileId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.AuthorId)
+                .ForeignKey("dbo.Files", t => t.FileId, cascadeDelete: true)
                 .Index(t => t.FileId)
                 .Index(t => t.AuthorId);
             
             CreateTable(
-                "dbo.User",
+                "dbo.Users",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -36,7 +36,7 @@ namespace FileHosting.Database.Migrations
                 .PrimaryKey(t => t.Id);
             
             CreateTable(
-                "dbo.Download",
+                "dbo.Downloads",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -45,13 +45,13 @@ namespace FileHosting.Database.Migrations
                         UserId = c.Int(),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.File", t => t.FileId, cascadeDelete: true)
-                .ForeignKey("dbo.User", t => t.UserId)
+                .ForeignKey("dbo.Files", t => t.FileId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.UserId)
                 .Index(t => t.FileId)
                 .Index(t => t.UserId);
             
             CreateTable(
-                "dbo.File",
+                "dbo.Files",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -62,18 +62,18 @@ namespace FileHosting.Database.Migrations
                         Size = c.Decimal(nullable: false, precision: 10, scale: 2),
                         Path = c.String(nullable: false, maxLength: 300),
                         IsAllowedAnonymousBrowsing = c.Boolean(nullable: false),
-                        IsAllowedAnonymousComments = c.Boolean(nullable: false),
+                        IsAllowedAnonymousAction = c.Boolean(nullable: false),
                         SectionId = c.Int(nullable: false),
                         OwnerId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.User", t => t.OwnerId)
-                .ForeignKey("dbo.Section", t => t.SectionId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.OwnerId)
+                .ForeignKey("dbo.Sections", t => t.SectionId, cascadeDelete: true)
                 .Index(t => t.SectionId)
                 .Index(t => t.OwnerId);
             
             CreateTable(
-                "dbo.Section",
+                "dbo.Sections",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -82,7 +82,7 @@ namespace FileHosting.Database.Migrations
                 .PrimaryKey(t => t.Id);
             
             CreateTable(
-                "dbo.Tag",
+                "dbo.Tags",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -102,11 +102,11 @@ namespace FileHosting.Database.Migrations
                         AuthorId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.Id)
-                .ForeignKey("dbo.User", t => t.AuthorId)
+                .ForeignKey("dbo.Users", t => t.AuthorId)
                 .Index(t => t.AuthorId);
             
             CreateTable(
-                "dbo.Role",
+                "dbo.Roles",
                 c => new
                     {
                         Id = c.Int(nullable: false, identity: true),
@@ -115,41 +115,54 @@ namespace FileHosting.Database.Migrations
                 .PrimaryKey(t => t.Id);
             
             CreateTable(
-                "dbo.FilesAndUsers",
+                "dbo.Files&PermittedUsers",
                 c => new
                     {
                         FileId = c.Int(nullable: false),
                         UserId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => new { t.FileId, t.UserId })
-                .ForeignKey("dbo.File", t => t.FileId, cascadeDelete: true)
-                .ForeignKey("dbo.User", t => t.UserId, cascadeDelete: true)
+                .ForeignKey("dbo.Files", t => t.FileId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
                 .Index(t => t.FileId)
                 .Index(t => t.UserId);
             
             CreateTable(
-                "dbo.FilesAndTags",
+                "dbo.Files&SubscribedUsers",
+                c => new
+                    {
+                        FileId = c.Int(nullable: false),
+                        UserId = c.Int(nullable: false),
+                    })
+                .PrimaryKey(t => new { t.FileId, t.UserId })
+                .ForeignKey("dbo.Files", t => t.FileId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .Index(t => t.FileId)
+                .Index(t => t.UserId);
+            
+            CreateTable(
+                "dbo.Files&Tags",
                 c => new
                     {
                         FileId = c.Int(nullable: false),
                         TagId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => new { t.FileId, t.TagId })
-                .ForeignKey("dbo.File", t => t.FileId, cascadeDelete: true)
-                .ForeignKey("dbo.Tag", t => t.TagId, cascadeDelete: true)
+                .ForeignKey("dbo.Files", t => t.FileId, cascadeDelete: true)
+                .ForeignKey("dbo.Tags", t => t.TagId, cascadeDelete: true)
                 .Index(t => t.FileId)
                 .Index(t => t.TagId);
             
             CreateTable(
-                "dbo.UsersAndRoles",
+                "dbo.Users&Roles",
                 c => new
                     {
                         UserId = c.Int(nullable: false),
                         RoleId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => new { t.UserId, t.RoleId })
-                .ForeignKey("dbo.User", t => t.UserId, cascadeDelete: true)
-                .ForeignKey("dbo.Role", t => t.RoleId, cascadeDelete: true)
+                .ForeignKey("dbo.Users", t => t.UserId, cascadeDelete: true)
+                .ForeignKey("dbo.Roles", t => t.RoleId, cascadeDelete: true)
                 .Index(t => t.UserId)
                 .Index(t => t.RoleId);
             
@@ -157,43 +170,48 @@ namespace FileHosting.Database.Migrations
         
         public override void Down()
         {
-            DropForeignKey("dbo.Comment", "FileId", "dbo.File");
-            DropForeignKey("dbo.Comment", "AuthorId", "dbo.User");
-            DropForeignKey("dbo.UsersAndRoles", "RoleId", "dbo.Role");
-            DropForeignKey("dbo.UsersAndRoles", "UserId", "dbo.User");
-            DropForeignKey("dbo.News", "AuthorId", "dbo.User");
-            DropForeignKey("dbo.Download", "UserId", "dbo.User");
-            DropForeignKey("dbo.Download", "FileId", "dbo.File");
-            DropForeignKey("dbo.FilesAndTags", "TagId", "dbo.Tag");
-            DropForeignKey("dbo.FilesAndTags", "FileId", "dbo.File");
-            DropForeignKey("dbo.File", "SectionId", "dbo.Section");
-            DropForeignKey("dbo.File", "OwnerId", "dbo.User");
-            DropForeignKey("dbo.FilesAndUsers", "UserId", "dbo.User");
-            DropForeignKey("dbo.FilesAndUsers", "FileId", "dbo.File");
-            DropIndex("dbo.UsersAndRoles", new[] { "RoleId" });
-            DropIndex("dbo.UsersAndRoles", new[] { "UserId" });
-            DropIndex("dbo.FilesAndTags", new[] { "TagId" });
-            DropIndex("dbo.FilesAndTags", new[] { "FileId" });
-            DropIndex("dbo.FilesAndUsers", new[] { "UserId" });
-            DropIndex("dbo.FilesAndUsers", new[] { "FileId" });
+            DropForeignKey("dbo.Comments", "FileId", "dbo.Files");
+            DropForeignKey("dbo.Comments", "AuthorId", "dbo.Users");
+            DropForeignKey("dbo.Users&Roles", "RoleId", "dbo.Roles");
+            DropForeignKey("dbo.Users&Roles", "UserId", "dbo.Users");
+            DropForeignKey("dbo.News", "AuthorId", "dbo.Users");
+            DropForeignKey("dbo.Downloads", "UserId", "dbo.Users");
+            DropForeignKey("dbo.Downloads", "FileId", "dbo.Files");
+            DropForeignKey("dbo.Files&Tags", "TagId", "dbo.Tags");
+            DropForeignKey("dbo.Files&Tags", "FileId", "dbo.Files");
+            DropForeignKey("dbo.Files&SubscribedUsers", "UserId", "dbo.Users");
+            DropForeignKey("dbo.Files&SubscribedUsers", "FileId", "dbo.Files");
+            DropForeignKey("dbo.Files", "SectionId", "dbo.Sections");
+            DropForeignKey("dbo.Files", "OwnerId", "dbo.Users");
+            DropForeignKey("dbo.Files&PermittedUsers", "UserId", "dbo.Users");
+            DropForeignKey("dbo.Files&PermittedUsers", "FileId", "dbo.Files");
+            DropIndex("dbo.Users&Roles", new[] { "RoleId" });
+            DropIndex("dbo.Users&Roles", new[] { "UserId" });
+            DropIndex("dbo.Files&Tags", new[] { "TagId" });
+            DropIndex("dbo.Files&Tags", new[] { "FileId" });
+            DropIndex("dbo.Files&SubscribedUsers", new[] { "UserId" });
+            DropIndex("dbo.Files&SubscribedUsers", new[] { "FileId" });
+            DropIndex("dbo.Files&PermittedUsers", new[] { "UserId" });
+            DropIndex("dbo.Files&PermittedUsers", new[] { "FileId" });
             DropIndex("dbo.News", new[] { "AuthorId" });
-            DropIndex("dbo.File", new[] { "OwnerId" });
-            DropIndex("dbo.File", new[] { "SectionId" });
-            DropIndex("dbo.Download", new[] { "UserId" });
-            DropIndex("dbo.Download", new[] { "FileId" });
-            DropIndex("dbo.Comment", new[] { "AuthorId" });
-            DropIndex("dbo.Comment", new[] { "FileId" });
-            DropTable("dbo.UsersAndRoles");
-            DropTable("dbo.FilesAndTags");
-            DropTable("dbo.FilesAndUsers");
-            DropTable("dbo.Role");
+            DropIndex("dbo.Files", new[] { "OwnerId" });
+            DropIndex("dbo.Files", new[] { "SectionId" });
+            DropIndex("dbo.Downloads", new[] { "UserId" });
+            DropIndex("dbo.Downloads", new[] { "FileId" });
+            DropIndex("dbo.Comments", new[] { "AuthorId" });
+            DropIndex("dbo.Comments", new[] { "FileId" });
+            DropTable("dbo.Users&Roles");
+            DropTable("dbo.Files&Tags");
+            DropTable("dbo.Files&SubscribedUsers");
+            DropTable("dbo.Files&PermittedUsers");
+            DropTable("dbo.Roles");
             DropTable("dbo.News");
-            DropTable("dbo.Tag");
-            DropTable("dbo.Section");
-            DropTable("dbo.File");
-            DropTable("dbo.Download");
-            DropTable("dbo.User");
-            DropTable("dbo.Comment");
+            DropTable("dbo.Tags");
+            DropTable("dbo.Sections");
+            DropTable("dbo.Files");
+            DropTable("dbo.Downloads");
+            DropTable("dbo.Users");
+            DropTable("dbo.Comments");
         }
     }
 }

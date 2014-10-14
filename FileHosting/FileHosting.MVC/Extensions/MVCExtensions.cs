@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Linq;
 using System.Text;
+using FileHosting.Database.Models;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Web.Mvc;
 
 namespace FileHosting.MVC.Extensions
 {
-    public static class MyExtensions
+    public static class MVCExtensions
     {
         public static bool IsValidEmail(this string email)
         {
@@ -23,13 +20,13 @@ namespace FileHosting.MVC.Extensions
             return false;
         }
 
-        public static string ToHashedString(this string inputString)
-        {
-            var sha = SHA256.Create();
-            var encodedBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(inputString));
+        //public static string ToHashedString(this string inputString)
+        //{
+        //    var sha = SHA256.Create();
+        //    var encodedBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(inputString));
 
-            return BitConverter.ToString(encodedBytes).Replace("-", "").ToLower();
-        }        
+        //    return BitConverter.ToString(encodedBytes).Replace("-", "").ToLower();
+        //}
 
         //public static Dictionary<int, string> EnumToDictionary<TEnum>(this TEnum enumValue) where TEnum : struct
         //{

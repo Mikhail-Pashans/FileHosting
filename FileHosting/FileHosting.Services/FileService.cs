@@ -1,12 +1,12 @@
-﻿using System.Configuration;
-using System.IO;
-using FileHosting.Database;
+﻿using FileHosting.Database;
 using FileHosting.Database.Models;
 using FileHosting.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+using FileHosting.Services.Extensions;
 using File = FileHosting.Database.Models.File;
 
 namespace FileHosting.Services
@@ -50,6 +50,24 @@ namespace FileHosting.Services
                 .ToList();
         }
 
+        public File GetFileById(int fileId)
+        {
+            return _context.FileRepository.FirstOrDefault(f => f.Id == fileId);
+        }
+
+        public File GetFileToDownload(int fileId, User user)
+        {
+            var file = GetFileById(fileId);
+
+            if (file == null) return null;
+
+            _context.DownloadRepository.Add(new Download
+            {
+                File = file,
+                User = user
+            });
+        }
+
         public FileModel GetModelForFile(File file, bool isAuthenticated)
         {
             return isAuthenticated
@@ -58,27 +76,27 @@ namespace FileHosting.Services
                     Id = file.Id,
                     Name = file.Name,
                     Section = file.Section,
-                    Tags = file.Tags.ToList(),
-                    Description = file.Description,
+                    Tags = file.Tags.Any() ? file.Tags.ToTagsString() : "",
+                    Description = string.IsNullOrWhiteSpace(file.Description) ? "" : file.Description,
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
                     IsAllowedAnonymousBrowsing = file.IsAllowedAnonymousBrowsing,
-                    IsAllowedAnonymousComments = file.IsAllowedAnonymousComments
+                    IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
                 }
                 : new FileModel
                 {
                     Id = file.Id,
                     Name = file.Name,
                     Section = file.Section,
-                    Tags = file.Tags.Any() ? file.Tags.ToList() : null,
+                    Tags = file.Tags.Any() ? file.Tags.ToTagsString() : "N/A",
                     Description = string.IsNullOrWhiteSpace(file.Description) ? "N/A" : file.Description,
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
                     Owner = file.Owner,
                     IsAllowedAnonymousBrowsing = file.IsAllowedAnonymousBrowsing,
-                    IsAllowedAnonymousComments = file.IsAllowedAnonymousComments
+                    IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
                 };
         }
 
@@ -89,11 +107,11 @@ namespace FileHosting.Services
             {
                 foreach (var file in files)
                 {
-                    DeleteFile(file, ipAddress, true);
+                    DeleteFile(file, ipAddress);
                 }
             }
 
-            var newFile = new File
+            _context.FileRepository.Add(new File
             {
                 Name = fileName,
                 FullName = fullName,
@@ -103,22 +121,21 @@ namespace FileHosting.Services
                 Path = filePath,
                 Owner = owner,
                 IsAllowedAnonymousBrowsing = true,
-                IsAllowedAnonymousComments = true,
+                IsAllowedAnonymousAction = true,
                 AllowedUsers = new List<User>(),
                 Comments = new List<Comment>(),
                 Downloads = new List<Download>(),
                 Tags = new List<Tag>()
-            };
-            _context.FileRepository.Add(newFile);
+            });
 
             _context.Commit();
-        }        
+        }
 
-        public void DeleteFile(File file, string ipAddress, bool multiple)
+        public void DeleteFile(File file, string ipAddress, bool multiple = true)
         {
             _context.FileRepository.Delete(file);
-            
-            if(!multiple)
+
+            if (!multiple)
                 _context.Commit();
 
             var filePath = Path.Combine(ipAddress, file.Path);
@@ -127,83 +144,65 @@ namespace FileHosting.Services
                 System.IO.File.Delete(filePath);
         }
 
-        //public void ChangeFile(File file, string fileTags, string fileDescription)
-        //{
-        //    var tags = fileTags.Split(new[] { '.', ',', ';', '!', '?', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+        public void ChangeFile(File file, string fileTags, string fileDescription)
+        {
+            _context.FileRepository.Attach(file);
 
-        //    if (tags.Any())
-        //    {
-        //        fileTags = tags.Aggregate("", (current, tag) => current + (tag.StartsWith("#") ? tag + ", " : "#" + tag + ", "));
-        //    }
+            var fileTagsList = fileTags.ToTagsList();
+            if (fileTagsList != null)
+            {
+            }
 
-        //    fileTags = fileTags.Trim(new[] { '.', ',', ';', '!', '?', ' ' });
-            
-        //    Context.FilesRepository.Attach(file);
+            file.Tags = fileTags;
+            file.Description = fileDescription;
 
-        //    file.Tags = fileTags;
-        //    file.Description = fileDescription;
+            _context.Commit();
+        }
 
-        //    Context.Commit();
-        //}
+        public List<CommentModel> GetCommentsForFile(int fileId)
+        {
+            var comments = _context.CommentRepository.Find(c => c.File.Id == fileId && c.IsActive)
+                .OrderBy(c => c.Id)
+                .ToList();
 
-        //public List<CommentModel> GetCommentsForFile(int fileId)
-        //{
-        //    var comments = Context.CommentsRepository.Find(c => c.FileId == fileId && c.IsActive)
-        //        .OrderBy(c => c.CommentId)
-        //        .ToList();
+            if (!comments.Any())
+                return null;
 
-        //    if (!comments.Any())
-        //        return null;
+            var commentModelList = new List<CommentModel>(comments.Count);
+            commentModelList.AddRange(comments.Select((c, i) => new CommentModel
+            {
+                CommentId = c.Id,
+                Number = (i + 1),
+                Author = c.Author == null ? "Guest" : c.Author.Name,
+                PublishDate = c.PublishDate,
+                Text = c.Text
+            }));
 
-        //    var commentModelList = new List<CommentModel>(comments.Count);
-        //    commentModelList.AddRange(comments.Select((c, i) => new CommentModel
-        //    {
-        //        CommentId = c.CommentId,
-        //        Number = (i + 1),
-        //        Author = c.User == null ? "Guest" : c.User.UserName,
-        //        PublishDate = c.PublishDate,
-        //        Text = c.Text
-        //    }));
+            return commentModelList.OrderByDescending(c => c.Number).ToList();
+        }
 
-        //    return commentModelList;
-        //}
+        public void AddCommentToFile(string commentText, File file, User user)
+        {
+            var comment = new Comment
+            {
+                Text = commentText,
+                PublishDate = DateTime.UtcNow,
+                IsActive = true,
+                File = file,
+                Author = user
+            };
+            _context.CommentRepository.Add(comment);
 
-        //public void AddCommentToFile(string commentText, File file, User user)
-        //{
-        //    var comment = new Comment
-        //    {
-        //        Text = commentText,
-        //        PublishDate = DateTime.Now,
-        //        IsActive = true,
-        //        FileId = file.FileId,
-        //        File = file,
-        //        UserId = user != null ? user.UserId : (int?)null,
-        //        User = user,
-        //    };
-        //    Context.CommentsRepository.Add(comment);
+            _context.Commit();
+        }
 
-        //    Context.Commit();
-        //}
+        public void DeleteCommentFromFile(int commentId)
+        {
+            var comment = _context.CommentRepository.GetById(commentId);
 
-        //public void DeleteCommentsFromFile(int fileId, int? commentId)
-        //{
-        //    if (commentId.HasValue)
-        //    {
-        //        var comment = Context.CommentsRepository.GetById(commentId.Value);
+            _context.CommentRepository.Delete(comment);
 
-        //        Context.CommentsRepository.Delete(comment);
-        //    }
-        //    else
-        //    {
-        //        var comments = Context.CommentsRepository.Find(c => c.FileId == fileId);
-
-        //        foreach (var comment in comments)
-        //        {
-        //            Context.CommentsRepository.Delete(comment);
-        //        }
-        //    }            
-
-        //    Context.Commit();
-        //}
+            _context.Commit();
+        }
     }
 }

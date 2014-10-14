@@ -9,7 +9,7 @@ namespace FileHosting.Domain.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public Section Section { get; set; }
-        public List<Tag> Tags { get; set; }
+        public string Tags { get; set; }
         public string Description { get; set; }        
         
         private DateTime _uploaDate;
@@ -23,6 +23,6 @@ namespace FileHosting.Domain.Models
         public string Path { get; set; }
         public User Owner { get; set; }
         public bool IsAllowedAnonymousBrowsing { get; set; }
-        public bool IsAllowedAnonymousComments { get; set; }
+        public bool IsAllowedAnonymousAction { get; set; }
     }    
 }

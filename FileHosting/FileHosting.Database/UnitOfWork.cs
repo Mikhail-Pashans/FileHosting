@@ -126,7 +126,7 @@ namespace FileHosting.Database
 
             //modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
             //modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
-            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            //modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
             // Comments Table
             modelBuilder.Entity<Comment>().HasKey(c => c.Id);
@@ -172,7 +172,7 @@ namespace FileHosting.Database
             modelBuilder.Entity<File>().Property(f => f.Size).IsRequired().HasPrecision(10, 2);
             modelBuilder.Entity<File>().Property(f => f.Path).IsRequired().HasMaxLength(300);
             modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousBrowsing).IsRequired();
-            modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousComments).IsRequired();
+            modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousAction).IsRequired();
             modelBuilder.Entity<File>().HasRequired(f => f.Section)
                 .WithMany(s => s.Files)
                 .HasForeignKey(f => f.SectionId)
@@ -182,19 +182,27 @@ namespace FileHosting.Database
                 .HasForeignKey(f => f.OwnerId)
                 .WillCascadeOnDelete(false);
 
-            // FilesAndTags Table
+            // Files&Tags Table
             modelBuilder.Entity<File>()
                 .HasMany(f => f.Tags)
                 .WithMany(t => t.Files)
-                .Map(ft => ft.ToTable("FilesAndTags")
+                .Map(ft => ft.ToTable("Files&Tags")
                     .MapLeftKey("FileId")
                     .MapRightKey("TagId"));
 
-            // FilesAndUsers Table
+            // Files&PermittedUsers Table
             modelBuilder.Entity<File>()
                 .HasMany(f => f.AllowedUsers)
-                .WithMany(u => u.FilesWithPermissions)
-                .Map(fu => fu.ToTable("FilesAndUsers")
+                .WithMany(u => u.FilesWithPermission)
+                .Map(fu => fu.ToTable("Files&PermittedUsers")
+                    .MapLeftKey("FileId")
+                    .MapRightKey("UserId"));
+
+            // Files&SubscribedUsers Table
+            modelBuilder.Entity<File>()
+                .HasMany(f => f.SubscribedUsers)
+                .WithMany(u => u.FilesWithSubscription)
+                .Map(fu => fu.ToTable("Files&SubscribedUsers")
                     .MapLeftKey("FileId")
                     .MapRightKey("UserId"));
 
@@ -243,11 +251,11 @@ namespace FileHosting.Database
             modelBuilder.Entity<User>().Property(u => u.Password).IsRequired().HasMaxLength(70);
             modelBuilder.Entity<User>().Property(u => u.CreationDate).IsRequired();
 
-            // UsersAndRoles Table
+            // Users&Roles Table
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)                
-                .Map(ur => ur.ToTable("UsersAndRoles")
+                .Map(ur => ur.ToTable("Users&Roles")
                     .MapLeftKey("UserId")
                     .MapRightKey("RoleId"));
 

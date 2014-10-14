@@ -2,9 +2,19 @@
 @model FileHosting.MVC.ViewModels.LoginViewModel
 @if (Request.IsAuthenticated)
 {
-    var user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
+    var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
     <div class="navbar-right">
-        <p class="navbar-text"><span class="glyphicon glyphicon-user"></span>&ensp;Hello, @user.Name!</p>
+        <p class="navbar-text">
+            <span class="glyphicon glyphicon-user"></span>&ensp;
+            Hello, @if (user != null)
+            {
+                @user.Name
+            }
+            else
+            {
+                <text>Guest</text>
+            }!
+        </p>
         <form class="navbar-form form-custom display-inline-block" action="@Url.Action("LogOff", "Account")" method="POST" role="form">
             @Html.AntiForgeryToken()
             <div class="form-group">

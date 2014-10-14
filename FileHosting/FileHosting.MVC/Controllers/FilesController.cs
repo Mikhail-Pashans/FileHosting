@@ -1,8 +1,9 @@
-﻿using FileHosting.MVC.Extensions;
+﻿using FileHosting.Domain.Enums;
 using FileHosting.MVC.Infrastructure;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
+using System;
 using System.Configuration;
 using System.Data;
 using System.IO;
@@ -35,6 +36,8 @@ namespace FileHosting.MVC.Controllers
             var fileSectionDictionary = _homeService.GetFileSectionDictianary();
             
             var sectionNumber = (section ?? 1);
+            if (sectionNumber < 1)
+                sectionNumber = 1;
             if (sectionNumber > fileSectionDictionary.Count)
                 sectionNumber = fileSectionDictionary.Count;
 
@@ -49,6 +52,8 @@ namespace FileHosting.MVC.Controllers
             };
 
             var pageNumber = (page ?? 1);
+            if (pageNumber < 1)
+                pageNumber = 1;
             if (pageNumber > pageInfo.TotalPages)
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
@@ -89,6 +94,8 @@ namespace FileHosting.MVC.Controllers
             };
 
             var pageNumber = (page ?? 1);
+            if (pageNumber < 1)
+                pageNumber = 1;
             if (pageNumber > pageInfo.TotalPages)
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
@@ -140,16 +147,15 @@ namespace FileHosting.MVC.Controllers
             if (string.IsNullOrWhiteSpace(fileName) || string.IsNullOrWhiteSpace(fileExtension))
                 return new FineUploaderResult(false, error: "The file or file name is empty!");
                         
-            var fullName = fileName.ToHashedString() + fileExtension;
+            var fullName = fileName + Guid.NewGuid().ToString().Replace("-", "") + fileExtension;
 
             var fileSectionNumber = int.Parse(upload.FileSection);
 
             var ipAdress = ConfigurationManager.AppSettings["Server"];
 
-            var filePath = string.Format(@"d:\UploadFiles\{0}\{1}", fileSectionNumber, fullName);
+            var filePath = string.Format(@"UploadedFiles\{0}\{1}", fileSectionNumber, fullName);
 
-            //var pathToSave = Path.Combine(ipAdress, filePath);
-            var pathToSave = string.Format(@"{0}\{1}", ipAdress, filePath);
+            var pathToSave = Path.Combine(ipAdress, filePath);
             if (System.IO.File.Exists(pathToSave))
                 return new FineUploaderResult(false, error: "The same file is already exists!");
 
@@ -161,7 +167,7 @@ namespace FileHosting.MVC.Controllers
             
             try
             {
-                _fileService.AddFile(fileName, fullName, fileSize, filePath, ipAdress, fileSection, owner);
+                _fileService.AddFile(fileName + fileExtension, fullName, fileSize, filePath, ipAdress, fileSection, owner);
             }
             catch (DataException ex)
             {
@@ -171,191 +177,189 @@ namespace FileHosting.MVC.Controllers
             return new FineUploaderResult(true, new { message = "Upload is finished successfully!" });
         }
 
-        //public ActionResult DownloadFile(int fileId)
-        //{
-        //    var file = _fileService.FileRepository.GetById(fileId);
-            
-        //    return file == null ? HttpNotFound() : File(file.Path, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
-        //}
+        public ActionResult DownloadFile(int fileId)
+        {
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
 
-        //public ActionResult FileDetails(int fileId, int? section, int? page, MessageType? messageType)
-        //{
-        //    var file = _fileService.FilesRepository.GetById(fileId);
-        //    if (file == null)
-        //        return HttpNotFound();
+            var file = _fileService.GetFileToDownload(fileId, user);
+            if (file == null)
+                return HttpNotFound();            
 
-        //    var sectionNumber = (section ?? 1);
+            var ipAdress = ConfigurationManager.AppSettings["Server"];
+            var pathToDonload = Path.Combine(ipAdress, file.Path);
 
-        //    var pageNumber = (page ?? 1);
+            return File(pathToDonload, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
+        }
 
-        //    FileDetailsViewModel viewModel;
-        //    var filesModel = new FilesModel(_fileService);
+        public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
+        {
+            var file = _fileService.GetFileById(fileId);
+            if (file == null)
+                return HttpNotFound();
 
-        //    var user = ((MyMembershipProvider)Membership.Provider).GetUserByName(User.Identity.Name);
+            var sectionNumber = (section ?? 1);
 
-        //    if (!User.Identity.IsAuthenticated && user == null || !user.Files.Contains(file))
-        //    {
-        //        viewModel = new FileDetailsViewModel
-        //        {
-        //            FileModel = filesModel.GetModelForFile(file, false),
-        //            Section = sectionNumber,
-        //            PageNumber = pageNumber,
-        //            Message = messageType.HasValue
-        //                ? new Message
-        //                {
-        //                    MessageType = messageType.Value,
-        //                    MessageText = messageType == MessageType.Default
-        //                        ? "Error! A comment cannot be empty."
-        //                        : messageType == MessageType.Error
-        //                            ? "Error! The comment was not added."
-        //                            : "Success! The comment was added."
-        //                }
-        //                : null
-        //        };
+            var pageNumber = (page ?? 1);
 
-        //        return View(viewModel);
-        //    }
+            FileDetailsViewModel viewModel;            
 
-        //    viewModel = new FileDetailsViewModel
-        //    {
-        //        FileModel = filesModel.GetModelForFile(file, true),
-        //        PageNumber = pageNumber,
-        //        Message = messageType.HasValue
-        //            ? new Message
-        //            {
-        //                MessageType = messageType.Value,
-        //                MessageText = messageType == MessageType.Default
-        //                    ? "Error! A description and tags cannot be empty."
-        //                    : messageType == MessageType.Error
-        //                        ? "Error! The file changing or deleting failed."
-        //                        : "Success! The file was changed."
-        //            }
-        //            : null
-        //    };
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
 
-        //    return View("ChangeFile", viewModel);
-        //}
+            if (!User.Identity.IsAuthenticated && user == null || !user.Files.Contains(file))
+            {
+                viewModel = new FileDetailsViewModel
+                {
+                    FileModel = _fileService.GetModelForFile(file, false),
+                    Section = sectionNumber,
+                    PageNumber = pageNumber,
+                    Message = messageType.HasValue
+                        ? new Message
+                        {
+                            MessageType = messageType.Value,
+                            MessageText = messageType == ViewModelsMessageType.Default
+                                ? "Error! A comment cannot be empty."
+                                : messageType == ViewModelsMessageType.Error
+                                    ? "Error! The comment was not added."
+                                    : "Success! The comment was added."
+                        }
+                        : null
+                };
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public ActionResult ChangeFile(FileChangeType type, int fileId, int page, string fileTags = null, string fileDescription = null)
-        //{
-        //    var file = _fileService.FilesRepository.GetById(fileId);
-        //    if (file == null)
-        //        return HttpNotFound();
+                return View(viewModel);
+            }
 
-        //    if (!User.Identity.IsAuthenticated && ((MyMembershipProvider)Membership.Provider).GetUserByName(User.Identity.Name) == null)
-        //        return RedirectToAction("Index", "Home");
+            viewModel = new FileDetailsViewModel
+            {
+                FileModel = _fileService.GetModelForFile(file, true),
+                PageNumber = pageNumber,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.Default
+                            ? "Error! A description and tags cannot be empty."
+                            : messageType == ViewModelsMessageType.Error
+                                ? "Error! The file changing or deleting failed."
+                                : "Success! The file was changed."
+                    }
+                    : null
+            };
 
-        //    var filesModel = new FilesModel(_fileService);
+            return View("ChangeFile", viewModel);
+        }
 
-        //    if (type == FileChangeType.Delete)
-        //    {
-        //        try
-        //        {
-        //            filesModel.DeleteFile(file);
-        //        }
-        //        catch (DataException)
-        //        {
-        //            return RedirectToAction("FileDetails", new { fileId, page, messageType = MessageType.Error });
-        //        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeFile(FileActionsType type, int fileId, int page, string fileTags = null, string fileDescription = null)
+        {
+            var file = _fileService.GetFileById(fileId);
+            if (file == null)
+                return HttpNotFound();
 
-        //        return RedirectToAction("UserFiles", new { page });
-        //    }
+            if (!User.Identity.IsAuthenticated && ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+                return RedirectToAction("Index", "Home");
 
-        //    if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
-        //        return RedirectToAction("FileDetails", new { fileId, page, messageType = MessageType.Default });
-        //    try
-        //    {
-        //        filesModel.ChangeFile(file, fileTags, fileDescription);
-        //    }
-        //    catch (DataException)
-        //    {
-        //        return RedirectToAction("FileDetails", new { fileId, page, messageType = MessageType.Error });
-        //    }
+            if (type == FileActionsType.Delete)
+            {
+                var ipAdress = ConfigurationManager.AppSettings["Server"];
+                
+                try
+                {
+                    _fileService.DeleteFile(file, ipAdress, false);
+                }
+                catch (DataException)
+                {
+                    return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Error });
+                }
 
-        //    return RedirectToAction("FileDetails", new { fileId, page, messageType = MessageType.Success });
-        //}
+                return RedirectToAction("UserFiles", new { page });
+            }
 
-        //[HttpPost]
-        //public ActionResult GetCommentsForFile(int fileId, int? page, MessageType? messageType)
-        //{
-        //    const int pageSize = 3;
-        //    var pageNumber = (page ?? 1);
+            if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
+                return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Default });
+            try
+            {
+                _fileService.ChangeFile(file, fileTags, fileDescription);
+            }
+            catch (DataException)
+            {
+                return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Error });
+            }
 
-        //    var filesModel = new FilesModel(_fileService);
+            return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Success });
+        }
 
-        //    var comments = filesModel.GetCommentsForFile(fileId);
-        //    var commentsPerPages = comments == null
-        //        ? null
-        //        : comments.Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToList();
+        [HttpPost]
+        public ActionResult GetCommentsForFile(int fileId, int? page, ViewModelsMessageType? messageType)
+        {
+            var comments = _fileService.GetCommentsForFile(fileId);
+            var commentsPerPages = comments == null
+                ? null
+                : comments.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-        //    var viewModel = new FileCommentsViewModel
-        //    {
-        //        FileId = fileId,
-        //        Comments = commentsPerPages,
-        //        PageInfo = new PageInfo
-        //        {
-        //            PageNumber = pageNumber,
-        //            PageSize = pageSize,
-        //            TotalItems = comments == null ? 0 : comments.Count
-        //        },
-        //        Message = messageType.HasValue
-        //            ? new Message
-        //            {
-        //                MessageType = messageType.Value,
-        //                MessageText = messageType == MessageType.Default
-        //                    ? "Error! The comment cannot be empty."
-        //                    : messageType == MessageType.Error
-        //                        ? "Error! The comment was not added."
-        //                        : "Success! The comment was added."
-        //            }
-        //            : null
-        //    };
+            const int pageSize = 3;
 
-        //    return PartialView("_FileCommentsPartial", viewModel);
-        //}
+            var pageInfo = new PageInfo
+            {
+                PageSize = pageSize,
+                TotalItems = comments == null ? 0 : comments.Count
+            };
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public MessageType AddCommentToFile(int fileId, string newCommentText)
-        //{
-        //    var file = _fileService.FilesRepository.GetById(fileId);
-        //    if (file == null)
-        //        return MessageType.Error;
+            var pageNumber = (page ?? 1);
+            if (pageNumber < 1)
+                pageNumber = 1;
+            if (pageNumber > pageInfo.TotalPages)
+                pageNumber = pageInfo.TotalPages;
+            pageInfo.PageNumber = pageNumber;
 
-        //    if (string.IsNullOrWhiteSpace(newCommentText))
-        //        return MessageType.Default;
+            var viewModel = new FileCommentsViewModel
+            {
+                FileId = fileId,
+                Comments = commentsPerPages,
+                PageInfo = pageInfo,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.Default
+                            ? "Error! The comment cannot be empty."
+                            : messageType == ViewModelsMessageType.Error
+                                ? "Error! The comment was not added."
+                                : "Success! The comment was added."
+                    }
+                    : null
+            };
 
-        //    var user = User.Identity.IsAuthenticated
-        //        ? ((MyMembershipProvider)Membership.Provider).GetUserByName(User.Identity.Name)
-        //        : null;
+            return PartialView("_FileCommentsPartial", viewModel);
+        }
 
-        //    var filesModel = new FilesModel(_fileService);
-        //    try
-        //    {
-        //        filesModel.AddCommentToFile(newCommentText, file, user);
-        //    }
-        //    catch (DataException)
-        //    {
-        //        return MessageType.Error;
-        //    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ViewModelsMessageType AddCommentToFile(int fileId, string newCommentText)
+        {
+            var file = _fileService.GetFileById(fileId);
+            if (file == null)
+                return ViewModelsMessageType.Error;
 
-        //    return MessageType.Success;
-        //}
+            if (string.IsNullOrWhiteSpace(newCommentText))
+                return ViewModelsMessageType.Default;
 
-        //[HttpGet]
-        //public ActionResult Statistics()
-        //{
-        //    if (!User.Identity.IsAuthenticated)
-        //        return RedirectToAction("Index", "Home");
+            var user = User.Identity.IsAuthenticated
+                ? ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name)
+                : null;            
+            try
+            {
+                _fileService.AddCommentToFile(newCommentText, file, user);
+            }
+            catch (DataException)
+            {
+                return ViewModelsMessageType.Error;
+            }
 
-        //    var user = ((MyMembershipProvider)Membership.Provider).GetUserByName(User.Identity.Name);
-
-        //    return user == null ? RedirectToAction("Index", "Home") : RedirectToAction("UserFiles");
-        //}
+            return ViewModelsMessageType.Success;
+        }
 
         #endregion
     }
