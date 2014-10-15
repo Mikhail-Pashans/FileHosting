@@ -8,12 +8,9 @@
     <meta name="description" content="The description of my page" />
     <meta name="author" content="Mikhail Pashans" />
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon">
-
     <title>@ViewBag.Title</title>
-
     @Styles.Render("~/Content/css", "~/Content/Bootstrap/css", "~/Content/Jumbotron/css", "~/Content/PagedList/css")
     @Scripts.Render("~/bundles/jquery", "~/bundles/modernizr")
-
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -50,18 +47,15 @@
             </div>
         </nav>
     </header>
-
     <div class="container">
         @RenderBody()
-    </div>
-    ﻿
+    </div>   ﻿
     <hr />
     <footer>
         <div class="container">
             &copy;&ensp;iTechArt – @DateTime.Now.Year
         </div>
     </footer>
-
     @Scripts.Render("~/bundles/jqueryval", "~/bundles/bootstrap", "~/bundles/jumbotron")
     @RenderSection("scripts", false)
 </body>

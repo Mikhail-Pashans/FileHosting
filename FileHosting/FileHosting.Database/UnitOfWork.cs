@@ -150,7 +150,7 @@ namespace FileHosting.Database
             modelBuilder.Entity<Download>()
                 .Property(d => d.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<Download>().Property(c => c.Date).IsRequired();
+            modelBuilder.Entity<Download>().Property(d => d.Date).IsRequired();
             modelBuilder.Entity<Download>().HasRequired(d => d.File)
                 .WithMany(f => f.Downloads)
                 .HasForeignKey(d => d.FileId)
@@ -230,9 +230,9 @@ namespace FileHosting.Database
             // Sections Table
             modelBuilder.Entity<Section>().HasKey(s => s.Id);
             modelBuilder.Entity<Section>()
-                .Property(t => t.Id)
+                .Property(s => s.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<Section>().Property(t => t.Name).IsRequired().HasMaxLength(50);
+            modelBuilder.Entity<Section>().Property(s => s.Name).IsRequired().HasMaxLength(50);
 
             // Tags Table
             modelBuilder.Entity<Tag>().HasKey(t => t.Id);

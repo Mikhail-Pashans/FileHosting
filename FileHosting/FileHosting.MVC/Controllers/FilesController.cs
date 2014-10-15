@@ -1,4 +1,7 @@
-﻿using FileHosting.Domain.Enums;
+﻿using System.Collections.Generic;
+using System.Web.Routing;
+using FileHosting.Domain.Enums;
+using FileHosting.Domain.Models;
 using FileHosting.MVC.Infrastructure;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
@@ -177,6 +180,8 @@ namespace FileHosting.MVC.Controllers
             return new FineUploaderResult(true, new { message = "Upload is finished successfully!" });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult DownloadFile(int fileId)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
@@ -199,38 +204,45 @@ namespace FileHosting.MVC.Controllers
 
             var sectionNumber = (section ?? 1);
 
+            var pageNumber = (page ?? 1);            
+
+            var viewModel = new FileDetailsViewModel
+            {
+                FileModel = _fileService.GetModelForFile(file, false),
+                SectionNumber = sectionNumber,
+                PageNumber = pageNumber,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.Default
+                            ? "Error! A comment cannot be empty."
+                            : messageType == ViewModelsMessageType.Error
+                                ? "Error! The comment was not added."
+                                : "Success! The comment was added."
+                    }
+                    : null
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public ActionResult EditFile(int fileId, int? page, ViewModelsMessageType? messageType)
+        {
+            var file = _fileService.GetFileById(fileId);
+            if (file == null)
+                return HttpNotFound();
+
+            var user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
+            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
+                return RedirectToAction("Index", "Home");
+
             var pageNumber = (page ?? 1);
-
-            FileDetailsViewModel viewModel;            
-
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-
-            if (!User.Identity.IsAuthenticated && user == null || !user.Files.Contains(file))
+            
+            var viewModel = new FileDetailsViewModel
             {
-                viewModel = new FileDetailsViewModel
-                {
-                    FileModel = _fileService.GetModelForFile(file, false),
-                    Section = sectionNumber,
-                    PageNumber = pageNumber,
-                    Message = messageType.HasValue
-                        ? new Message
-                        {
-                            MessageType = messageType.Value,
-                            MessageText = messageType == ViewModelsMessageType.Default
-                                ? "Error! A comment cannot be empty."
-                                : messageType == ViewModelsMessageType.Error
-                                    ? "Error! The comment was not added."
-                                    : "Success! The comment was added."
-                        }
-                        : null
-                };
-
-                return View(viewModel);
-            }
-
-            viewModel = new FileDetailsViewModel
-            {
-                FileModel = _fileService.GetModelForFile(file, true),
+                FileModel = _fileService.GetModelForFile(file, true),                
                 PageNumber = pageNumber,
                 Message = messageType.HasValue
                     ? new Message
@@ -239,65 +251,78 @@ namespace FileHosting.MVC.Controllers
                         MessageText = messageType == ViewModelsMessageType.Default
                             ? "Error! A description and tags cannot be empty."
                             : messageType == ViewModelsMessageType.Error
-                                ? "Error! The file changing or deleting failed."
+                                ? "Error! The file editing or deleting failed."
                                 : "Success! The file was changed."
                     }
                     : null
             };
 
-            return View("ChangeFile", viewModel);
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ChangeFile(FileActionsType type, int fileId, int page, string fileTags = null, string fileDescription = null)
+        public ActionResult EditFile(int fileId, int page, string fileTags, string fileDescription)
         {
             var file = _fileService.GetFileById(fileId);
             if (file == null)
                 return HttpNotFound();
 
-            if (!User.Identity.IsAuthenticated && ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
-            if (type == FileActionsType.Delete)
-            {
-                var ipAdress = ConfigurationManager.AppSettings["Server"];
-                
-                try
-                {
-                    _fileService.DeleteFile(file, ipAdress, false);
-                }
-                catch (DataException)
-                {
-                    return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Error });
-                }
-
-                return RedirectToAction("UserFiles", new { page });
-            }
-
             if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
-                return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Default });
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Default });
             try
             {
                 _fileService.ChangeFile(file, fileTags, fileDescription);
             }
             catch (DataException)
             {
-                return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Error });
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Error });
             }
 
-            return RedirectToAction("FileDetails", new { fileId, page, messageType = ViewModelsMessageType.Success });
+            return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Success });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteFile(int fileId, int page)
+        {
+            var file = _fileService.GetFileById(fileId);
+            if (file == null)
+                return HttpNotFound();
+
+            var user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
+            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
+                return RedirectToAction("Index", "Home");
+            
+            var ipAdress = ConfigurationManager.AppSettings["Server"];
+
+            try
+            {
+                _fileService.DeleteFile(file, ipAdress, false);
+            }
+            catch (DataException)
+            {
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Error });
+            }
+
+            return RedirectToAction("EditFile", new { page });
         }
 
         [HttpPost]
         public ActionResult GetCommentsForFile(int fileId, int? page, ViewModelsMessageType? messageType)
         {
-            var comments = _fileService.GetCommentsForFile(fileId);
-            var commentsPerPages = comments == null
-                ? null
-                : comments.Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            var isFileOwner = User.Identity.IsAuthenticated &&
+                user != null &&
+                user.Files.Select(f => f.Id).Contains(fileId);
+
+            var comments = isFileOwner
+                ? _fileService.GetCommentsForFile(fileId, true)
+                : _fileService.GetCommentsForFile(fileId, false);
 
             const int pageSize = 3;
 
@@ -314,20 +339,27 @@ namespace FileHosting.MVC.Controllers
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
 
+            var commentsPerPages = comments == null
+                ? null
+                : comments.Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
             var viewModel = new FileCommentsViewModel
             {
                 FileId = fileId,
                 Comments = commentsPerPages,
                 PageInfo = pageInfo,
+                IsFileOwner = isFileOwner,
                 Message = messageType.HasValue
                     ? new Message
                     {
                         MessageType = messageType.Value,
                         MessageText = messageType == ViewModelsMessageType.Default
-                            ? "Error! The comment cannot be empty."
+                            ? "Error! A comment cannot be empty."
                             : messageType == ViewModelsMessageType.Error
-                                ? "Error! The comment was not added."
-                                : "Success! The comment was added."
+                                ? "Error! Adding or deleting a comment failed."
+                                : "Success! Adding or deleting a comment completed."
                     }
                     : null
             };
@@ -359,6 +391,20 @@ namespace FileHosting.MVC.Controllers
             }
 
             return ViewModelsMessageType.Success;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ViewModelsMessageType DeleteCommentFromFile(int fileId, int commentId)
+        {
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            var isFileOwner = User.Identity.IsAuthenticated &&
+                user != null &&
+                user.Files.Select(f => f.Id).Contains(fileId);
+
+            return !isFileOwner || !_fileService.DeleteCommentFromFile(commentId)
+                ? ViewModelsMessageType.Error
+                : ViewModelsMessageType.Success;
         }
 
         #endregion

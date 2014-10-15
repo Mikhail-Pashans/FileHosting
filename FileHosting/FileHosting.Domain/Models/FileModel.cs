@@ -22,6 +22,7 @@ namespace FileHosting.Domain.Models
         public decimal Size { get; set; }        
         public string Path { get; set; }
         public User Owner { get; set; }
+        public List<Download> Downloads { get; set; }
         public bool IsAllowedAnonymousBrowsing { get; set; }
         public bool IsAllowedAnonymousAction { get; set; }
     }    

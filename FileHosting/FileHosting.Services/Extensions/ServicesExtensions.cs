@@ -12,22 +12,16 @@ namespace FileHosting.Services.Extensions
         {
             var tagsString = tags.Aggregate("", (current, tag) => current + ", " + tag.Name);
 
-            tagsString = tagsString.Trim(new[] { '.', ',', ';', '!', '?', ' ' });
+            tagsString = tagsString.Trim(new[] { '.', ',', ';', ':', '!', '?', ' ' });
 
             return tagsString;
         }
 
-        public static List<string> ToTagsList(this string fileTagsString)
+        public static string[] ToTagsArray(this string fileTagsString)
         {
-            var tags = fileTagsString.Split(new[] {'.', ',', ';', '!', '?', ' '}, StringSplitOptions.RemoveEmptyEntries);
-            if (!tags.Any())
-                return null;
+            var tags = fileTagsString.Split(new[] {'.', ',', ';', ':', '!', '?', ' '}, StringSplitOptions.RemoveEmptyEntries);            
 
-            var fileTagsList = new List<string>();
-            
-            fileTagsList.AddRange(tags);
-
-            return fileTagsList;
+            return tags.Any() ? tags.Select(tag => tag.ToLowerInvariant()).ToArray() : null;
         }
     }
 }

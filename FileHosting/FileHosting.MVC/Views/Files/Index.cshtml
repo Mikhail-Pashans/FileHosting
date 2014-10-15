@@ -43,9 +43,13 @@
                                     <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber })">
                                         <span class="glyphicon glyphicon-file"></span>&ensp;Details
                                     </a>
-                                    <a class="btn btn-success" href="@Url.Action("DownloadFile", new { fileId = file.Id })">
-                                        <span class="glyphicon glyphicon-download"></span>&ensp;Download
-                                    </a>
+                                    <form class="display-inline" action="@Url.Action("DownloadFile")" method="POST">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="fileId" value="@file.Id" />
+                                        <button class="btn btn-success">
+                                            <span class="glyphicon glyphicon-download"></span>&ensp;Download
+                                        </button>
+                                    </form>                                    
                                 </td>
                             </tr>
                         }

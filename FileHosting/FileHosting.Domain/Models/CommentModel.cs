@@ -4,7 +4,7 @@ namespace FileHosting.Domain.Models
 {
     public class CommentModel
     {           
-        public int CommentId { get; set; }
+        public int Id { get; set; }
         public int Number { get; set; }
         public string Author { get; set; }
 
@@ -16,5 +16,6 @@ namespace FileHosting.Domain.Models
         }
 
         public string Text { get; set; }
+        public bool IsActive { get; set; }
     }
 }

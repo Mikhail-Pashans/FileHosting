@@ -81,13 +81,21 @@ hr {
 }
 
 .form-control-element {
-    width: 300px !important;
+    width: 200px !important;
 }
 
 .th-control {
     width: 220px !important;
 }
 
+.th-user-control {
+    width: 180px !important;
+}
+
 .th-numbers {
     width: 100px !important;
+}
+
+.position-relative {
+    position: relative !important;
 }

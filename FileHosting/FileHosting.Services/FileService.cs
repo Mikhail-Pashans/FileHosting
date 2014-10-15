@@ -1,4 +1,5 @@
-﻿using FileHosting.Database;
+﻿using System.Data;
+using FileHosting.Database;
 using FileHosting.Database.Models;
 using FileHosting.Domain.Models;
 using System;
@@ -63,9 +64,21 @@ namespace FileHosting.Services
 
             _context.DownloadRepository.Add(new Download
             {
+                Date = DateTime.UtcNow,
                 File = file,
                 User = user
             });
+
+            try
+            {
+                _context.Commit();
+            }
+            catch (DataException)
+            {
+                return null;
+            }            
+
+            return file;
         }
 
         public FileModel GetModelForFile(File file, bool isAuthenticated)
@@ -81,6 +94,7 @@ namespace FileHosting.Services
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
+                    Downloads = file.Downloads.ToList(),
                     IsAllowedAnonymousBrowsing = file.IsAllowedAnonymousBrowsing,
                     IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
                 }
@@ -144,38 +158,64 @@ namespace FileHosting.Services
                 System.IO.File.Delete(filePath);
         }
 
-        public void ChangeFile(File file, string fileTags, string fileDescription)
+        public void ChangeFile(File file, string fileTagsString, string fileDescription)
         {
             _context.FileRepository.Attach(file);
 
-            var fileTagsList = fileTags.ToTagsList();
-            if (fileTagsList != null)
+            var newFileTags = fileTagsString.ToTagsArray();
+            
+            if (newFileTags != null)
             {
+                var fileTags = new List<Tag>(newFileTags.Length);
+                var existingTags = _context.TagRepository.GetAll().Select(t => t.Name).ToArray();
+
+                foreach (var newFileTag in newFileTags)
+                {
+                    if (existingTags.Contains(newFileTag))
+                    {
+                        var tag = newFileTag;
+                        fileTags.Add(_context.TagRepository.First(t => t.Name == tag));
+                    }
+                    else
+                    {
+                        var newTag = new Tag { Name = newFileTag, Files = new List<File>() };
+                        
+                        _context.TagRepository.Add(newTag);
+                        
+                        fileTags.Add(newTag);
+                    }
+                }
+
+                file.Tags = fileTags;
+            }
+            else
+            {
+                file.Tags.Clear();
             }
 
-            file.Tags = fileTags;
             file.Description = fileDescription;
 
             _context.Commit();
         }
 
-        public List<CommentModel> GetCommentsForFile(int fileId)
+        public List<CommentModel> GetCommentsForFile(int fileId, bool isForFileOwner)
         {
-            var comments = _context.CommentRepository.Find(c => c.File.Id == fileId && c.IsActive)
-                .OrderBy(c => c.Id)
-                .ToList();
-
+            var comments = isForFileOwner
+                ? _context.CommentRepository.Find(c => c.File.Id == fileId).ToArray()
+                : _context.CommentRepository.Find(c => c.File.Id == fileId && c.IsActive).ToArray();
+            
             if (!comments.Any())
                 return null;
 
-            var commentModelList = new List<CommentModel>(comments.Count);
-            commentModelList.AddRange(comments.Select((c, i) => new CommentModel
+            var commentModelList = new List<CommentModel>(comments.Length);
+            commentModelList.AddRange(comments.OrderBy(c => c.Id).Select((c, i) => new CommentModel
             {
-                CommentId = c.Id,
+                Id = c.Id,
                 Number = (i + 1),
                 Author = c.Author == null ? "Guest" : c.Author.Name,
                 PublishDate = c.PublishDate,
-                Text = c.Text
+                Text = c.Text,
+                IsActive = c.IsActive
             }));
 
             return commentModelList.OrderByDescending(c => c.Number).ToList();
@@ -196,13 +236,24 @@ namespace FileHosting.Services
             _context.Commit();
         }
 
-        public void DeleteCommentFromFile(int commentId)
+        public bool DeleteCommentFromFile(int commentId)
         {
             var comment = _context.CommentRepository.GetById(commentId);
+            if (comment == null)
+                return false;
 
             _context.CommentRepository.Delete(comment);
 
-            _context.Commit();
+            try
+            {
+                _context.Commit();
+            }
+            catch (DataException)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

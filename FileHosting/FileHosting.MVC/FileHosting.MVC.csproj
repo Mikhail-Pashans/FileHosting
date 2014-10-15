@@ -266,7 +266,7 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Account\Login.cshtml" />
     <Content Include="Views\Account\Register.cshtml" />
-    <Content Include="Views\Files\ChangeFile.cshtml" />
+    <Content Include="Views\Files\EditFile.cshtml" />
     <Content Include="Views\Files\FileDetails.cshtml" />
     <Content Include="Views\Files\Index.cshtml" />
     <Content Include="Views\Files\UploadNewFiles.cshtml" />

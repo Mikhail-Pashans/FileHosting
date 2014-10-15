@@ -1,20 +1,27 @@
-﻿@model FileHosting.MVC.ViewModels.FileDetailsViewModel
+﻿@using FileHosting.Domain.Enums
+@model FileHosting.MVC.ViewModels.FileDetailsViewModel
 @{
-    ViewBag.Title = "File details";
+    ViewBag.Title = "Edit file";
 }
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary form-control-element" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber })">
-        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+    <a class="btn btn-primary form-control-element" href="@Url.Action("UserFiles", new { page = Model.PageNumber })">
+        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
     </a>
     <br />
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
-            <form class="form-horizontal" action="@Url.Action("DownloadFile")" method="POST" role="form">
+            @if (Model.Message != null)
+            {
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.Success ? "alert-success" : "alert-danger";
+                <div class="alert @alertType alert-custom text-center" role="alert"><strong>@Model.Message.MessageText</strong></div>
+            }
+            <form class="form-horizontal" action="@Url.Action("EditFile")" method="POST" role="form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+                <input type="hidden" name="page" value="@Model.PageNumber" />
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileId">#:</label>
                     <div class="col-md-10">
@@ -36,13 +43,13 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileTags">Tags:</label>
                     <div class="col-md-10">
-                        <div class="form-control-static" id="fileTags">@Model.FileModel.Tags</div>
+                        <textarea class="form-control" id="fileTags" name="fileTags" rows="3">@Model.FileModel.Tags</textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileDescription">Description:</label>
                     <div class="col-md-10">
-                        <div class="form-control-static" id="fileDescription">@Model.FileModel.Description</div>
+                        <textarea class="form-control" id="fileDescription" name="fileDescription" rows="5">@Model.FileModel.Description</textarea>
                     </div>
                 </div>
                 <div class="form-group">
@@ -58,18 +65,38 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileOwner">Owner:</label>
+                    <label class="col-md-2 control-label" for="fileStatistics">Statistics:</label>
                     <div class="col-md-10">
-                        <div class="form-control-static" id="fileOwner">@Model.FileModel.Owner.Name</div>
+                        <div class="form-control-static" id="fileStatistics">
+                            The file has been downloaded <strong>@Model.FileModel.Downloads.Count</strong> times:
+                            @if (Model.FileModel.Downloads.Any())
+                            {
+                                <ul>
+                                    <li>By registered users – <strong>@Model.FileModel.Downloads.Count(d => d.User != null)</strong></li>
+                                    <li>By anonimous users – <strong>@Model.FileModel.Downloads.Count(d => d.User == null)</strong></li>
+                                </ul>
+                            }
+                        </div>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-warning form-control-element">
-                            <span class="glyphicon glyphicon-download"></span>&emsp;Download file
-                        </button>
+                        <button class="btn btn-success" type="submit" id="saveButton">
+                            <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
+                        </button>&emsp;
+                        <a class="btn btn-default" id="cancel-button" href="javascript:void(0)">
+                            <span class="glyphicon glyphicon-remove"></span>&emsp;Cancel changes
+                        </a>&emsp;
+                        <a class="btn btn-danger" id="remove-button" href="javascript:void(0)">
+                            <span class="glyphicon glyphicon-trash"></span>&emsp;Delete file
+                        </a>
                     </div>
                 </div>
+            </form>
+            <form id="removeForm" action="@Url.Action("DeleteFile")" method="POST">
+                @Html.AntiForgeryToken()                
+                <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+                <input type="hidden" name="page" value="@Model.PageNumber" />
             </form>
             <div id="commentPanel"></div>
         </div>
@@ -78,6 +105,21 @@
 
 <script type="text/javascript">
     (function ($) {
+        var $tagsElement = $('#fileTags');
+        var $descriptionElement = $('#fileDescription');        
+
+        var tagsValue = $tagsElement.val();
+        var descriptionValue = $descriptionElement.val();
+
+        $('#cancel-button').on('click', function () {
+            $tagsElement.val(tagsValue);
+            $descriptionElement.val(descriptionValue);
+        });
+
+        $('#remove-button').on('click', function () {
+            $('#removeForm').submit();
+        });
+        
         var getParameterByName = function(url, name) {
             var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
             return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
@@ -94,6 +136,7 @@
                 function() {
                     var $pagination = $('.pagination');
                     var $newCommentForm = $('#newCommentForm');
+                    var $deleteCommentForm = $('#deleteCommentForm');
 
                     $pagination.on('click', 'a', function(event) {
                         event.preventDefault();
@@ -104,9 +147,22 @@
 
                     $newCommentForm.on('submit', function(event) {
                         event.preventDefault();
+                        var form = $(this);
                         $.post(
-                            '/Files/AddCommentToFile',
-                            $(this).serialize(),
+                            form.attr('action'),
+                            form.serialize(),
+                            function(response) {
+                                loadComments(null, response);
+                            }
+                        );
+                    });
+
+                    $deleteCommentForm.on('submit', function(event) {
+                        event.preventDefault();
+                        var form = $(this);
+                        $.post(
+                            form.attr('action'),
+                            form.serialize(),
                             function(response) {
                                 loadComments(null, response);
                             }
@@ -116,6 +172,6 @@
             );
         };
 
-        loadComments(null, null);
+        loadComments(null, null);        
     })(jQuery);
 </script>

@@ -7,7 +7,7 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-default form-control-element" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })">
+    <a class="btn btn-primary form-control-element" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })">
         <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
     </a>
     <br />
@@ -24,7 +24,7 @@
                             <th>Section</th>                            
                             <th class="th-numbers">Size (KB)</th>
                             <th class="th-numbers">Upload date</th>
-                            <th class="th-control"></th>
+                            <th class="th-user-control"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -37,10 +37,10 @@
                                 <td>@file.Size</td>
                                 <td>@file.UploadDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-warning" href="@Url.Action("FileDetails", new { fileId = file.Id, page = Model.PageInfo.PageNumber })">
-                                        <span class="glyphicon glyphicon-pencil"></span>&ensp;Change
+                                    <a class="btn btn-warning" href="@Url.Action("EditFile", new { fileId = file.Id, page = Model.PageInfo.PageNumber })">
+                                        <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
-                                    <form class="display-inline" action="@Url.Action("ChangeFile")" method="POST">
+                                    <form class="display-inline" action="@Url.Action("DeleteFile")" method="POST">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="type" value="@FileActionsType.Delete" />
                                         <input type="hidden" name="fileId" value="@file.Id" />
