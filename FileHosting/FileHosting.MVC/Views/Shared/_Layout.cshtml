@@ -33,12 +33,18 @@
                         <li @if (Request.RawUrl == "/") { <text> class="active" </text> }>
                             <a href="/"><span class="glyphicon glyphicon-home"></span>&ensp;Home</a>
                         </li>
-                        @if (Roles.Provider.IsUserInRole(User.Identity.Name, "RegisteredUser"))
+                        @if (User.Identity.IsAuthenticated)
                         {
-                            <li @if (Request.RawUrl.StartsWith("/Files/UserFiles")) { <text> class="active" </text> }>
+                            <li @if (Request.RawUrl.StartsWith("/Files/UserFiles")) { <text> class="active" </text>   }>
                                 <a href="@Url.Action("UserFiles", "Files")"><span class="glyphicon glyphicon-list-alt"></span>&ensp;My files</a>
                             </li>
-                        }
+                            if (Roles.Provider.IsUserInRole(User.Identity.Name, "Administrator"))
+                            {
+                                <li @if (Request.RawUrl.StartsWith("/Admin")) { <text> class="active" </text>  }>
+                                    <a href="@Url.Action("Index", "Admin")"><span class="glyphicon glyphicon-cog"></span>&ensp;Administration</a>
+                                </li>
+                            }
+                        }                        
                     </ul>
                     @{
                         Html.RenderPartial("_LoginPartial", new LoginViewModel());

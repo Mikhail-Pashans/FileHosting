@@ -29,9 +29,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileTitle">Name:</label>
+                    <label class="col-md-2 control-label" for="fileName">Name:</label>
                     <div class="col-md-10">
-                        <div class="form-control-static" id="fileTitle">@Model.FileModel.Name</div>
+                        <div class="form-control-static" id="fileName">@Model.FileModel.Name</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -53,9 +53,9 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileDateUpload">Upload date:</label>
+                    <label class="col-md-2 control-label" for="fileUploadDate">Upload date:</label>
                     <div class="col-md-10">
-                        <div class="form-control-static" id="fileDateUpload">@Model.FileModel.UploadDate</div>
+                        <div class="form-control-static" id="fileUploadDate">@Model.FileModel.UploadDate</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -68,7 +68,7 @@
                     <label class="col-md-2 control-label" for="fileStatistics">Statistics:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="fileStatistics">
-                            The file has been downloaded <strong>@Model.FileModel.Downloads.Count</strong> times:
+                            The file has been downloaded for <strong>@Model.FileModel.Downloads.Count</strong> times:
                             @if (Model.FileModel.Downloads.Any())
                             {
                                 <ul>
@@ -98,80 +98,9 @@
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
                 <input type="hidden" name="page" value="@Model.PageNumber" />
             </form>
-            <div id="commentPanel"></div>
+            <div id="commentsPanel"></div>
         </div>
     </div>
 </div>
 
-<script type="text/javascript">
-    (function ($) {
-        var $tagsElement = $('#fileTags');
-        var $descriptionElement = $('#fileDescription');        
-
-        var tagsValue = $tagsElement.val();
-        var descriptionValue = $descriptionElement.val();
-
-        $('#cancel-button').on('click', function () {
-            $tagsElement.val(tagsValue);
-            $descriptionElement.val(descriptionValue);
-        });
-
-        $('#remove-button').on('click', function () {
-            $('#removeForm').submit();
-        });
-        
-        var getParameterByName = function(url, name) {
-            var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
-            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-        };
-
-        var loadComments = function(page, messageType) {
-            $('#commentPanel').load(
-                '/Files/GetCommentsForFile',
-                {
-                    fileId: @Model.FileModel.Id,
-                    page: page,
-                    messageType: messageType
-                },
-                function() {
-                    var $pagination = $('.pagination');
-                    var $newCommentForm = $('#newCommentForm');
-                    var $deleteCommentForm = $('#deleteCommentForm');
-
-                    $pagination.on('click', 'a', function(event) {
-                        event.preventDefault();
-                        var href = $(this).attr('href');
-                        var pageNumber = getParameterByName(href, 'page');
-                        loadComments(pageNumber);
-                    });
-
-                    $newCommentForm.on('submit', function(event) {
-                        event.preventDefault();
-                        var form = $(this);
-                        $.post(
-                            form.attr('action'),
-                            form.serialize(),
-                            function(response) {
-                                loadComments(null, response);
-                            }
-                        );
-                    });
-
-                    $deleteCommentForm.on('submit', function(event) {
-                        event.preventDefault();
-                        var form = $(this);
-                        $.post(
-                            form.attr('action'),
-                            form.serialize(),
-                            function(response) {
-                                loadComments(null, response);
-                            }
-                        );
-                    });
-                }
-            );
-        };
-
-        loadComments(null, null);        
-    })(jQuery);
-</script>
+@Scripts.Render("~/bundles/custom")

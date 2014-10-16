@@ -153,6 +153,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NewsController.cs" />
@@ -160,6 +161,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\FileThrottleResult.cs" />
     <Compile Include="Helpers\PagingHelpers.cs" />
     <Compile Include="Infrastructure\FineUpload.cs" />
     <Compile Include="Infrastructure\FineUploadResult.cs" />
@@ -167,6 +169,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Providers\MyMembershipProvider.cs" />
     <Compile Include="Providers\MyRoleProvider.cs" />
+    <Compile Include="ViewModels\AdminIndexViewModel.cs" />
     <Compile Include="ViewModels\FileCommentsViewModel.cs" />
     <Compile Include="ViewModels\FileDetailsViewModel.cs" />
     <Compile Include="ViewModels\FilesIndexViewModel.cs" />
@@ -175,6 +178,7 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
     <Compile Include="ViewModels\UploadNewFilesViewModel.cs" />
+    <Compile Include="ViewModels\UserDetailsViewModel.cs" />
     <Compile Include="ViewModels\UserFilesViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -230,28 +234,29 @@
     <Content Include="Content\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\Bootstrap\bootstrap-theme.css.map" />
     <Content Include="Content\Bootstrap\bootstrap.css.map" />
-    <None Include="Scripts\jquery-2.1.1.intellisense.js" />
+    <None Include="Scripts\jQuery\jquery-2.1.1.intellisense.js" />
     <Content Include="Infrastructure\readme.txt" />
-    <Content Include="Scripts\all.fineuploader-5.0.2.min.js" />
-    <Content Include="Scripts\bootstrap.js" />
-    <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="Scripts\ie-emulation-modes-warning.js" />
-    <Content Include="Scripts\ie10-viewport-bug-workaround.js" />
-    <Content Include="Scripts\jquery-2.1.1.js" />
-    <Content Include="Scripts\jquery-2.1.1.min.js" />
-    <Content Include="Scripts\jquery-2.1.1.min.map" />
-    <Content Include="Scripts\jquery-ui-1.11.1.js" />
-    <Content Include="Scripts\jquery-ui.min-1.11.1.js" />
-    <None Include="Scripts\jquery.validate-vsdoc.js" />
-    <Content Include="Scripts\jquery.unobtrusive-ajax.js" />
-    <Content Include="Scripts\jquery.unobtrusive-ajax.min.js" />
-    <Content Include="Scripts\jquery.validate.js" />
-    <Content Include="Scripts\jquery.validate.min.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
-    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\knockout-3.2.0.debug.js" />
-    <Content Include="Scripts\knockout-3.2.0.js" />
-    <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\CustomScripts\details-and-edit-file.js" />
+    <Content Include="Scripts\FineUploader\all.fineuploader-5.0.2.min.js" />
+    <Content Include="Scripts\Bootstrap\bootstrap.js" />
+    <Content Include="Scripts\Bootstrap\bootstrap.min.js" />
+    <Content Include="Scripts\Jumbotron\ie-emulation-modes-warning.js" />
+    <Content Include="Scripts\Jumbotron\ie10-viewport-bug-workaround.js" />
+    <Content Include="Scripts\jQuery\jquery-2.1.1.js" />
+    <Content Include="Scripts\jQuery\jquery-2.1.1.min.js" />
+    <Content Include="Scripts\jQuery\jquery-2.1.1.min.map" />
+    <Content Include="Scripts\jQueryUI\jquery-ui-1.11.1.js" />
+    <Content Include="Scripts\jQueryUI\jquery-ui.min-1.11.1.js" />
+    <None Include="Scripts\jQueryValidate\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jQueryUnobtrusive\jquery.unobtrusive-ajax.js" />
+    <Content Include="Scripts\jQueryUnobtrusive\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="Scripts\jQueryValidate\jquery.validate.js" />
+    <Content Include="Scripts\jQueryValidate\jquery.validate.min.js" />
+    <Content Include="Scripts\jQueryValidate\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jQueryValidate\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\Knockout\knockout-3.2.0.debug.js" />
+    <Content Include="Scripts\Knockout\knockout-3.2.0.js" />
+    <Content Include="Scripts\Modernizr\modernizr-2.8.3.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -275,6 +280,8 @@
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\News\Index.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\Admin\Index.cshtml" />
+    <Content Include="Views\Admin\UserDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

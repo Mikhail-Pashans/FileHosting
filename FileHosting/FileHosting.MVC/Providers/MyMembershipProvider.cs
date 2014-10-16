@@ -148,6 +148,27 @@ namespace FileHosting.MVC.Providers
             return user;
         }
 
+        public bool ChangeUserPassword(int userId, string newUserPassword)
+        {                        
+            var user = _context.UserRepository.GetById(userId);
+            if (user == null)
+                return false;
+            _context.UserRepository.Attach(user);
+
+            user.Password = Crypto.HashPassword(newUserPassword);
+
+            try
+            {
+                _context.Commit();
+            }
+            catch (DataException)
+            {
+                return false;
+            }                
+
+            return true;
+        }
+
         #endregion
 
         #region  Non-implemented MembershipProvider methods

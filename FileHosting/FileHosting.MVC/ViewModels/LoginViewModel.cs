@@ -4,9 +4,9 @@ namespace FileHosting.MVC.ViewModels
 {
     public class LoginViewModel : IViewModel
     {
-        [Required(ErrorMessage = "The \"E-mail adress\" field is required!")]        
-        [DataType(DataType.EmailAddress)]        
-        [Display(Name = "E-mail adress *")]
+        [Required(ErrorMessage = "The \"E-mail address\" field is required!")]        
+        [DataType(DataType.EmailAddress)]
+        [Display(Name = "E-mail address *")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "The \"Password\" field is required!")]

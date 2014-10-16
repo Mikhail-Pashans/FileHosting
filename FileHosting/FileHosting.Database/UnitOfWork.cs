@@ -169,7 +169,7 @@ namespace FileHosting.Database
             modelBuilder.Entity<File>().Property(f => f.FullName).IsRequired().HasMaxLength(300);
             modelBuilder.Entity<File>().Property(f => f.Description).IsOptional();
             modelBuilder.Entity<File>().Property(f => f.UploadDate).IsRequired();
-            modelBuilder.Entity<File>().Property(f => f.Size).IsRequired().HasPrecision(10, 2);
+            modelBuilder.Entity<File>().Property(f => f.Size).IsRequired();
             modelBuilder.Entity<File>().Property(f => f.Path).IsRequired().HasMaxLength(300);
             modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousBrowsing).IsRequired();
             modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousAction).IsRequired();

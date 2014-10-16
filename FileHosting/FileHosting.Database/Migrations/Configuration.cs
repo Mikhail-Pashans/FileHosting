@@ -1,10 +1,10 @@
 using FileHosting.Database.Models;
+using System;
 using System.Collections.Generic;
 using System.Web.Helpers;
 
 namespace FileHosting.Database.Migrations
 {
-    using System;
     using System.Data.Entity.Migrations;
 
     internal sealed class Configuration : DbMigrationsConfiguration<FileHosting.Database.UnitOfWork>
@@ -16,6 +16,18 @@ namespace FileHosting.Database.Migrations
 
         protected override void Seed(FileHosting.Database.UnitOfWork context)
         {
+            //var sections = new List<Section>
+            //{
+            //    new Section { Name = "Bookkeeping", Files = new List<File>() },
+            //    new Section { Name = "Management", Files = new List<File>() },
+            //    new Section { Name = "Support", Files = new List<File>() }
+            //};
+
+            //foreach (var section in sections)
+            //{
+            //    context.SectionRepository.Add(section);
+            //}
+            
             //var user = new User
             //{
             //    Name = "Admin",
@@ -28,13 +40,13 @@ namespace FileHosting.Database.Migrations
             //    FilesWithPermission = new List<File>(),
             //    FilesWithSubscription = new List<File>(),
             //    News = new List<News>(),
-            //    Roles = new List<Role>(),
-            //};
+            //    Roles = new List<Role>()
+            //};            
             //context.UserRepository.Add(user);
 
             //var roles = new List<Role>
             //{
-            //    new Role { Name = "Administrator", Users = new List<User>() },
+            //    new Role { Name = "Administrator", Users = new List<User>{ user } },
             //    new Role { Name = "Moderator", Users = new List<User>() },
             //    new Role { Name = "RegisteredUser", Users = new List<User>() }
             //};
@@ -43,23 +55,6 @@ namespace FileHosting.Database.Migrations
             //{
             //    context.RoleRepository.Add(role);
             //}
-
-            //var sections = new List<Section>
-            //{
-            //    new Section { Name = "Bookkeeping", Files = new List<File>() },
-            //    new Section { Name = "Management", Files = new List<File>() },
-            //    new Section { Name = "Support", Files = new List<File>() },
-            //};
-
-            //foreach (var section in sections)
-            //{
-            //    context.SectionRepository.Add(section);
-            //}
-
-            //context.Commit();
-
-            //var userRole = context.RoleRepository.GetById(1);
-            //if (userRole != null) user.Roles.Add(userRole);
 
             //context.Commit();
         }

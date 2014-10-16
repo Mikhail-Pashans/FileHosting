@@ -1,13 +1,13 @@
-﻿using System.Data;
-using FileHosting.Database;
+﻿using FileHosting.Database;
 using FileHosting.Database.Models;
 using FileHosting.Domain.Models;
+using FileHosting.Services.Extensions;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
-using FileHosting.Services.Extensions;
 using File = FileHosting.Database.Models.File;
 
 namespace FileHosting.Services
@@ -60,7 +60,8 @@ namespace FileHosting.Services
         {
             var file = GetFileById(fileId);
 
-            if (file == null) return null;
+            if (file == null)
+                return null;
 
             _context.DownloadRepository.Add(new Download
             {
@@ -76,7 +77,7 @@ namespace FileHosting.Services
             catch (DataException)
             {
                 return null;
-            }            
+            }
 
             return file;
         }
@@ -131,7 +132,7 @@ namespace FileHosting.Services
                 FullName = fullName,
                 Section = fileSection,
                 UploadDate = DateTime.UtcNow,
-                Size = decimal.Round((decimal)fileSize / 1024, 2),
+                Size = fileSize,
                 Path = filePath,
                 Owner = owner,
                 IsAllowedAnonymousBrowsing = true,
@@ -243,6 +244,28 @@ namespace FileHosting.Services
                 return false;
 
             _context.CommentRepository.Delete(comment);
+
+            try
+            {
+                _context.Commit();
+            }
+            catch (DataException)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool ChangeCommentState(int commentId, bool isActive)
+        {
+            var comment = _context.CommentRepository.GetById(commentId);
+            if (comment == null)
+                return false;
+
+            _context.CommentRepository.Attach(comment);
+
+            comment.IsActive = isActive;
 
             try
             {

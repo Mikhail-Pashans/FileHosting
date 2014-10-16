@@ -60,6 +60,10 @@ hr {
     display: inline-block !important;
 }
 
+.margin-left {
+    margin-left: 20px !important;
+}
+
 .form-custom {
     padding: 0 !important;
 }
@@ -94,8 +98,4 @@ hr {
 
 .th-numbers {
     width: 100px !important;
-}
-
-.position-relative {
-    position: relative !important;
 }

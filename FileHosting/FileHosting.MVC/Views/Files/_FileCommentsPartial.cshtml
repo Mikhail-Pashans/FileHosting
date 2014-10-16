@@ -9,15 +9,17 @@
 @if (Model.Message != null)
 {
     var alertType = Model.Message.MessageType == ViewModelsMessageType.Success ? "alert-success" : "alert-danger";
-    <div class="alert @alertType alert-custom text-center" role="alert"><strong>@Model.Message.MessageText</strong></div>
+    <div class="alert @alertType alert-custom text-center" role="alert">
+        <strong>@Model.Message.MessageText</strong>
+    </div>
 }
 @if (Model.Comments != null && Model.Comments.Any())
 {
     foreach (var comment in Model.Comments)
     {
-        <div class="well">
-            <div class="form-group no-margin">
-                <label class="control-label border-bottom" for="commentText">
+        <div class="panel @if (comment.IsActive) { <text>panel-info</text> } else { <text>panel-danger</text> }">
+            <div class="panel-heading">
+                <strong>
                     #@comment.Number
                     &emsp;&emsp;&emsp;
                     Author:&ensp;
@@ -25,23 +27,27 @@
                     &emsp;&emsp;&emsp;
                     Publish date:&ensp;
                     @comment.PublishDate
-                    &emsp;&emsp;&emsp;
-                    <input type="checkbox" @if (comment.IsActive) { <text> checked="checked" </text>   } />&nbsp;Is active
-                </label>
+                </strong>
                 @if (Model.IsFileOwner)
                 {
                     <div class="pull-right">
-                        <form action="@Url.Action("DeleteCommentFromFile")" method="POST" id="deleteCommentForm">
+                        <div class="checkbox-inline">
+                            <input class="activateCommentCheckbox" type="checkbox" @if (comment.IsActive) { <text> checked="checked" </text> } value="@comment.Id" />
+                            <strong>Is Active</strong>
+                        </div>
+                        <form class="deleteCommentForm display-inline margin-left" action="@Url.Action("DeleteCommentFromFile")" method="POST">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="fileId" value="@Model.FileId" />
                             <input type="hidden" name="commentId" value="@comment.Id" />
-                            <button type="submit" class="close" title="Delete comment">
-                                <span class="glyphicon glyphicon-remove"></span>
+                            <button class="close" type="submit" title="Delete comment">
+                                <span class="glyphicon glyphicon-trash"></span>
                             </button>
                         </form>
                     </div>
                 }
-                <div class="form-control-static" id="commentText">@comment.Text</div>
+            </div>
+            <div class="panel-body">
+                @comment.Text
             </div>
         </div>
     }
@@ -52,7 +58,7 @@
 }
 else
 {
-    <div class="alert alert-danger text-center" role="alert"><strong>There are no comments yet!</strong></div>
+    <div class="alert alert-danger text-center" role="alert"><strong>There are no any comments yet!</strong></div>
 }
 <form action="@Url.Action("AddCommentToFile")" method="POST" role="form" id="newCommentForm">
     @Html.AntiForgeryToken()

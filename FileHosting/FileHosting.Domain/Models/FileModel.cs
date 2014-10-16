@@ -19,7 +19,13 @@ namespace FileHosting.Domain.Models
             set { _uploaDate = value; }
         }
 
-        public decimal Size { get; set; }        
+        private long _size;
+
+        public decimal Size
+        {
+            get { return decimal.Round((decimal) _size/1024, 2); }
+            set { _size = (long)value; }
+        }        
         public string Path { get; set; }
         public User Owner { get; set; }
         public List<Download> Downloads { get; set; }

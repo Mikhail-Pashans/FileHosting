@@ -10,7 +10,7 @@ namespace FileHosting.Database.Models
         public string FullName { get; set; }
         public string Description { get; set; }
         public DateTime UploadDate { get; set; }
-        public decimal Size { get; set; }
+        public long Size { get; set; }
         public string Path { get; set; }
         public bool IsAllowedAnonymousBrowsing { get; set; }
         public bool IsAllowedAnonymousAction { get; set; }

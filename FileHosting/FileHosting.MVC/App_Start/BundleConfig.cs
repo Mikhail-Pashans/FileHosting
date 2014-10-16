@@ -3,54 +3,48 @@
 namespace FileHosting.MVC
 {
     public class BundleConfig
-    {
-        // For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
+    {        
         public static void RegisterBundles(BundleCollection bundles)
         {
             /*-----------------------------jQuery---------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                "~/Scripts/jquery-{version}.js",
-                "~/Scripts/jquery-{version}.min.js"));
+                "~/Scripts/jQuery/jquery-{version}.js",
+                "~/Scripts/jQuery/jquery-{version}.min.js"));
 
             /*-----------------------------jQueryUI-------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/jqueryui").Include(
-                "~/Scripts/jquery-ui-{version}.js"));
+                "~/Scripts/jQueryUI/jquery-ui-{version}.js"));
 
             /*-----------------------------jQueryValidataion----------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
-                "~/Scripts/jquery.unobtrusive*",
-                "~/Scripts/jquery.validate*"));
+                "~/Scripts/jQueryUnobtrusive/jquery.unobtrusive*",
+                "~/Scripts/jQueryValidate/jquery.validate*"));
 
             /*-----------------------------Modernizr------------------------------------*/            
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
-                "~/Scripts/modernizr-*"));
+                "~/Scripts/Modernizr/modernizr-*"));
 
             /*-----------------------------FineUploader---------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/fineuploader").Include(
-                "~/Scripts/all.fineuploader-5.0.2.min.js"));
+                "~/Scripts/FineUploader/all.fineuploader-5.0.2.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/FineUploader/css").Include(
                 "~/Content/FineUploader/fineuploader-5.0.2.min.css"));
 
             /*-----------------------------Bootstrap------------------------------------*/
-            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
-                //"~/Scripts/bootstrap.js",
-                "~/Scripts/bootstrap.min.js"));
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(                
+                "~/Scripts/Bootstrap/bootstrap.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/Bootstrap/css").Include(
                 "~/Content/Bootstrap/bootstrap.min.css"));
 
             /*-----------------------------Jumbotron------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/jumbotorn").Include(
-               "~/Scripts/ie10-viewport-bug-workaround.js",
-               "~/Scripts/ie-emulation-modes-warning.js"));
+               "~/Scripts/Jumbotron/ie10-viewport-bug-workaround.js",
+               "~/Scripts/Jumbotron/ie-emulation-modes-warning.js"));
 
             bundles.Add(new StyleBundle("~/Content/Jumbotron/css").Include(
-                "~/Content/Jumbotron/jumbotron.css"));
-
-            /*-----------------------------PagedList------------------------------------*/
-            bundles.Add(new StyleBundle("~/Content/PagedList/css").Include(
-                "~/Content/PagedList/PagedList.css"));
+                "~/Content/Jumbotron/jumbotron.css"));            
 
             /*-----------------------------Content--------------------------------------*/
             bundles.Add(new StyleBundle("~/Content/css").Include(
@@ -69,6 +63,10 @@ namespace FileHosting.MVC
                 "~/Content/themes/base/jquery.ui.datepicker.css",
                 "~/Content/themes/base/jquery.ui.progressbar.css",
                 "~/Content/themes/base/jquery.ui.theme.css"));
+
+            /*-----------------------------CustomScripts--------------------------------*/
+            bundles.Add(new ScriptBundle("~/bundles/custom").IncludeDirectory(
+               "~/Scripts/CustomScripts", "*.js"));
         }
     }
 }

@@ -59,7 +59,7 @@ namespace FileHosting.Database.Migrations
                         FullName = c.String(nullable: false, maxLength: 300),
                         Description = c.String(),
                         UploadDate = c.DateTime(nullable: false),
-                        Size = c.Decimal(nullable: false, precision: 10, scale: 2),
+                        Size = c.Long(nullable: false),
                         Path = c.String(nullable: false, maxLength: 300),
                         IsAllowedAnonymousBrowsing = c.Boolean(nullable: false),
                         IsAllowedAnonymousAction = c.Boolean(nullable: false),

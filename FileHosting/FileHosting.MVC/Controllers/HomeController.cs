@@ -5,6 +5,7 @@ using System.Web.Mvc;
 
 namespace FileHosting.MVC.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly NewsService _newsService;
