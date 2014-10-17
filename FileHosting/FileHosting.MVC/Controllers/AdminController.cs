@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using System.Web.Security;
-using FileHosting.MVC.Providers;
+﻿using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
+using System.Linq;
+using System.Web.Mvc;
+using System.Web.Security;
 
 namespace FileHosting.MVC.Controllers
 {

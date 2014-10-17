@@ -48,8 +48,15 @@
     height: 100px !important;
 }
 
-hr {
+/*hr {
     border-color: rgb(56, 97, 187) !important;
+}*/
+
+hr {
+    background-image: url(../Content/themes/base/images/gauze.png) !important;
+    height: .75em !important;
+    border: none !important;
+    margin: .75em 0 !important;
 }
 
 .display-inline {

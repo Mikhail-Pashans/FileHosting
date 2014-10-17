@@ -65,7 +65,8 @@ namespace FileHosting.Services
                     Id = u.Id,
                     Name = u.Name,
                     Email = u.Email,
-                    CreationDate = u.CreationDate
+                    CreationDate = u.CreationDate,
+                    Roles = u.Roles.ToList()
                 })
                 .FirstOrDefault();
 

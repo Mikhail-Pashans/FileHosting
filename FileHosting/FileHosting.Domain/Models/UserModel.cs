@@ -18,7 +18,7 @@ namespace FileHosting.Domain.Models
             set { _creationDate = value; }
         }
 
-        //public virtual ICollection<Role> Roles { get; set; }
+        public List<Role> Roles { get; set; }
         
         //public virtual ICollection<File> Files { get; set; }
         
