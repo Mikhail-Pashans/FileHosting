@@ -1,10 +1,10 @@
-﻿using System.Web.Mvc;
+﻿using System.Collections.Generic;
 
 namespace FileHosting.MVC.ViewModels
 {
     public class UploadNewFilesViewModel
     {
-        public SelectList FileSectionSelectList { get; set; }
+        public Dictionary<int, string> FileSectionsDictionary { get; set; }
         public int PageNumber { get; set; }
     }
 }

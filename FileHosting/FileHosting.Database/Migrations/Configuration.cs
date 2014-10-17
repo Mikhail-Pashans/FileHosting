@@ -27,13 +27,15 @@ namespace FileHosting.Database.Migrations
             //{
             //    context.SectionRepository.Add(section);
             //}
-            
-            //var user = new User
+
+            //var admin = new User
             //{
             //    Name = "Admin",
             //    Email = "jolly.roger.1988@gmail.com",
             //    Password = Crypto.HashPassword("mike1988"),
             //    CreationDate = DateTime.UtcNow,
+            //    DownloadAmountLimit = null,
+            //    DownloadSpeedLimit = null,
             //    Comments = new List<Comment>(),
             //    Downloads = new List<Download>(),
             //    Files = new List<File>(),
@@ -41,14 +43,55 @@ namespace FileHosting.Database.Migrations
             //    FilesWithSubscription = new List<File>(),
             //    News = new List<News>(),
             //    Roles = new List<Role>()
-            //};            
-            //context.UserRepository.Add(user);
+            //};
+
+            //var user1 = new User
+            //{
+            //    Name = "User-1",
+            //    Email = "poshlivsenahren@mail.ru",
+            //    Password = Crypto.HashPassword("mike1988"),
+            //    CreationDate = DateTime.UtcNow,
+            //    DownloadAmountLimit = null,
+            //    DownloadSpeedLimit = null,
+            //    Comments = new List<Comment>(),
+            //    Downloads = new List<Download>(),
+            //    Files = new List<File>(),
+            //    FilesWithPermission = new List<File>(),
+            //    FilesWithSubscription = new List<File>(),
+            //    News = new List<News>(),
+            //    Roles = new List<Role>()
+            //};
+
+            //var user2 = new User
+            //{
+            //    Name = "User-2",
+            //    Email = "mikhail.pashans@tut.by",
+            //    Password = Crypto.HashPassword("mike1988"),
+            //    CreationDate = DateTime.UtcNow,
+            //    DownloadAmountLimit = null,
+            //    DownloadSpeedLimit = null,
+            //    Comments = new List<Comment>(),
+            //    Downloads = new List<Download>(),
+            //    Files = new List<File>(),
+            //    FilesWithPermission = new List<File>(),
+            //    FilesWithSubscription = new List<File>(),
+            //    News = new List<News>(),
+            //    Roles = new List<Role>()
+            //};
+            
+            //var users = new List<User> { admin, user1, user2 };
+
+            //foreach (var user in users)
+            //{
+            //    context.UserRepository.Add(user);
+            //}            
 
             //var roles = new List<Role>
             //{
-            //    new Role { Name = "Administrator", Users = new List<User>{ user } },
-            //    new Role { Name = "Moderator", Users = new List<User>() },
-            //    new Role { Name = "RegisteredUser", Users = new List<User>() }
+            //    new Role { Id = 1, Name = "Administrator", Users = new List<User>{ admin } },
+            //    new Role { Id = 2, Name = "Moderator", Users = new List<User>() },
+            //    new Role { Id = 3, Name = "RegisteredUser", Users = new List<User>{ user1, user2 } },
+            //    new Role { Id = 4, Name = "BlockedUser", Users = new List<User>() }
             //};
 
             //foreach (var role in roles)

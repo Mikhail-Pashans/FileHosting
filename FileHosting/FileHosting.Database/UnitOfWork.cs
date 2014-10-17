@@ -250,6 +250,8 @@ namespace FileHosting.Database
             modelBuilder.Entity<User>().Property(u => u.Email).IsRequired().HasMaxLength(50);
             modelBuilder.Entity<User>().Property(u => u.Password).IsRequired().HasMaxLength(70);
             modelBuilder.Entity<User>().Property(u => u.CreationDate).IsRequired();
+            modelBuilder.Entity<User>().Property(u => u.DownloadAmountLimit).IsOptional().HasPrecision(10, 2);
+            modelBuilder.Entity<User>().Property(u => u.DownloadSpeedLimit).IsOptional().HasPrecision(10, 2);
 
             // Users&Roles Table
             modelBuilder.Entity<User>()

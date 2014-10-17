@@ -76,6 +76,10 @@
     <Compile Include="Migrations\201410161332163_Create And Initial Database.Designer.cs">
       <DependentUpon>201410161332163_Create And Initial Database.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201410171334062_Add New Fields To Users Table.cs" />
+    <Compile Include="Migrations\201410171334062_Add New Fields To Users Table.Designer.cs">
+      <DependentUpon>201410171334062_Add New Fields To Users Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Download.cs" />
@@ -98,6 +102,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201410161332163_Create And Initial Database.resx">
       <DependentUpon>201410161332163_Create And Initial Database.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201410171334062_Add New Fields To Users Table.resx">
+      <DependentUpon>201410171334062_Add New Fields To Users Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

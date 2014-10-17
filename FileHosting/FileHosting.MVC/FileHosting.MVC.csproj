@@ -178,10 +178,11 @@
     <Compile Include="ViewModels\LoginViewModel.cs" />
     <Compile Include="ViewModels\RegisterViewModel.cs" />
     <Compile Include="ViewModels\UploadNewFilesViewModel.cs" />
-    <Compile Include="ViewModels\UserDetailsViewModel.cs" />
+    <Compile Include="ViewModels\EditUserViewModel.cs" />
     <Compile Include="ViewModels\UserFilesViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Bootstrap\bootstrap-select.min.css" />
     <Content Include="Content\Bootstrap\bootstrap-theme.css" />
     <Content Include="Content\Bootstrap\bootstrap-theme.min.css" />
     <Content Include="Content\Bootstrap\bootstrap.css" />
@@ -237,6 +238,7 @@
     <Content Include="Content\Bootstrap\bootstrap.css.map" />
     <None Include="Scripts\jQuery\jquery-2.1.1.intellisense.js" />
     <Content Include="Infrastructure\readme.txt" />
+    <Content Include="Scripts\Bootstrap\bootstrap-select.min.js" />
     <Content Include="Scripts\CustomScripts\details-and-edit-file.js" />
     <Content Include="Scripts\FineUploader\all.fineuploader-5.0.2.min.js" />
     <Content Include="Scripts\Bootstrap\bootstrap.js" />
@@ -282,7 +284,7 @@
     <Content Include="Views\News\Index.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
-    <Content Include="Views\Admin\UserDetails.cshtml" />
+    <Content Include="Views\Admin\EditUser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

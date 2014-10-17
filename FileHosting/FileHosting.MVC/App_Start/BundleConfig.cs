@@ -33,10 +33,12 @@ namespace FileHosting.MVC
 
             /*-----------------------------Bootstrap------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(                
-                "~/Scripts/Bootstrap/bootstrap.min.js"));
+                "~/Scripts/Bootstrap/bootstrap.min.js",
+                "~/Scripts/Bootstrap/bootstrap-select.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/Bootstrap/css").Include(
-                "~/Content/Bootstrap/bootstrap.min.css"));
+                "~/Content/Bootstrap/bootstrap.min.css",
+                "~/Content/Bootstrap/bootstrap-select.min.css"));
 
             /*-----------------------------Jumbotron------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/jumbotorn").Include(

@@ -2,10 +2,11 @@
 using FileHosting.Services;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web.Security;
 
 namespace FileHosting.MVC.Controllers
 {
-    [AllowAnonymous]
+    [Authorize(Roles = "Administrator, Moderator, RegisteredUser")]
     public class HomeController : Controller
     {
         private readonly NewsService _newsService;
@@ -24,8 +25,12 @@ namespace FileHosting.MVC.Controllers
         #region Actions
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult Index(int? page)
         {
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return RedirectToAction("Login", "Account");
+            
             var news = _newsService.GetActiveNews();
 
             const int pageSize = 10;
@@ -43,7 +48,7 @@ namespace FileHosting.MVC.Controllers
 
             var newPerPages = news.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
-            var fileSections = _homeService.GetFileSectionDictianary();
+            var fileSections = _homeService.GetFileSectionsDictianary();
 
             var viewModel = new HomeIndexViewModel
             {

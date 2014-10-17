@@ -1,0 +1,104 @@
+﻿@model FileHosting.MVC.ViewModels.EditUserViewModel
+@{
+    ViewBag.Title = "Edit User";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <a class="btn btn-primary form-control-element" href="@Url.Action("Index", new { page = Model.PageNumber })">
+        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+    </a>
+    <br />
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            <form class="form-horizontal" action="@Url.Action("EditUser")" method="POST" role="form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserModel.Id" />
+                <input type="hidden" name="userEmail" value="@Model.UserModel.Email" />                
+                <input type="hidden" name="page" value="@Model.PageNumber" />
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="userId">#:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="userId">@Model.UserModel.Id</div>
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="userName">Name:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="userName">@Model.UserModel.Name</div>
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="userEmail">E-mail address:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="userEmail">@Model.UserModel.Email</div>
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="userCreationDate">Creation Date:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="userCreationDate">@Model.UserModel.CreationDate</div>
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="userRoles[]">Roles:</label>
+                    <div class="col-md-10">
+                        @if (Model.Roles.Any())
+                        {
+                            <div class="row-fluid">
+                                <select class="form-control selectpicker" multiple data-width="100%" title="No roles selected" name="userRoles[]">
+                                    @foreach (var role in Model.Roles)
+                                    {
+                                        <option value="@role" @if (Model.UserModel.Roles.Select(r => r.Name).Contains(role)) { <text>selected="selected"</text> }>@role</option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no roles found on this site!</strong></div>
+                        }                                                
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox-inline">
+                            <label>
+                                <input type="checkbox" id="newUserPasswordActivator"><strong>Change user password?</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <input class="form-control" type="password" id="newUserPassword" name="newUserPassword" placeholder="New user password" disabled="disabled">
+                        </div>
+                    </div>
+                </div>                
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button class="btn btn-success" type="submit" id="saveButton">
+                            <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
+                        </button>
+                    </div>
+                </div>
+            </form>            
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function ($) {
+        var $newUserPasswordActivator = $('#newUserPasswordActivator');
+        var $newUserPassword = $('#newUserPassword');        
+
+        $newUserPasswordActivator.on('change', function () {
+            var $checkbox = $(this);
+            var isChecked = $checkbox.prop('checked');
+            if (isChecked) {
+                $newUserPassword.removeAttr('disabled');
+                $newUserPassword.focus();
+            } else {
+                $newUserPassword.attr("disabled", "disabled");
+            }
+        });
+    })(jQuery);
+</script>

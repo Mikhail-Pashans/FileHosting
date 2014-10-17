@@ -36,7 +36,10 @@ namespace FileHosting.MVC.Controllers
         [AllowAnonymous]
         public ActionResult Index(int? section, int? page)
         {
-            var fileSectionDictionary = _homeService.GetFileSectionDictianary();
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return RedirectToAction("Login", "Account");
+
+            var fileSectionDictionary = _homeService.GetFileSectionsDictianary();
 
             var sectionNumber = (section ?? 1);
             if (sectionNumber < 1)
@@ -84,7 +87,7 @@ namespace FileHosting.MVC.Controllers
             if (user == null)
                 return RedirectToAction("Index", "Home");
 
-            var fileSectionsDictionary = _homeService.GetFileSectionDictianary();
+            var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
 
             var files = _fileService.GetFilesForUser(user.Id);
 
@@ -121,13 +124,13 @@ namespace FileHosting.MVC.Controllers
             if (!User.Identity.IsAuthenticated && ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
 
-            var fileSectionSelectList = _homeService.GetFileSectionSelectList();
+            var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
 
             var pageNumber = (page ?? 1);
 
             var viewModel = new UploadNewFilesViewModel
             {
-                FileSectionSelectList = fileSectionSelectList,
+                FileSectionsDictionary = fileSectionsDictionary,
                 PageNumber = pageNumber
             };
 
@@ -154,7 +157,7 @@ namespace FileHosting.MVC.Controllers
 
             var fileSectionNumber = int.Parse(upload.FileSection);
 
-            var ipAdress = ConfigurationManager.AppSettings["Server"];
+            var ipAdress = ConfigurationManager.AppSettings.Get("Server");
 
             var filePath = string.Format(@"UploadedFiles\{0}\{1}", fileSectionNumber, fullName);
 
@@ -185,13 +188,16 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DownloadFile(int fileId)
         {
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return RedirectToAction("Login", "Account");
+            
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
 
             var file = _fileService.GetFileToDownload(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
-            var ipAdress = ConfigurationManager.AppSettings["Server"];
+            var ipAdress = ConfigurationManager.AppSettings.Get("Server");
             var pathToFile = Path.Combine(ipAdress, file.Path);
             const decimal rate = 10;
 
@@ -199,9 +205,12 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [AllowAnonymous]        
         public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
         {
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))            
+                return RedirectToAction("Login", "Account");
+            
             var file = _fileService.GetFileById(fileId);
             if (file == null)
                 return HttpNotFound();
@@ -302,7 +311,7 @@ namespace FileHosting.MVC.Controllers
             if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
-            var ipAdress = ConfigurationManager.AppSettings["Server"];
+            var ipAdress = ConfigurationManager.AppSettings.Get("Server");
 
             try
             {
@@ -313,13 +322,16 @@ namespace FileHosting.MVC.Controllers
                 return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Error });
             }
 
-            return RedirectToAction("EditFile", new { page });
+            return RedirectToAction("UserFiles", new { page });
         }
 
         [HttpPost]
         [AllowAnonymous]
         public ActionResult GetCommentsForFile(int fileId, int? page, ViewModelsMessageType? messageType)
         {
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return RedirectToAction("Login", "Account");
+            
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             var isFileOwner = User.Identity.IsAuthenticated &&
                 user != null &&
@@ -377,6 +389,9 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ViewModelsMessageType AddCommentToFile(int fileId, string newCommentText)
         {
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return ViewModelsMessageType.Error;
+            
             var file = _fileService.GetFileById(fileId);
             if (file == null)
                 return ViewModelsMessageType.Error;

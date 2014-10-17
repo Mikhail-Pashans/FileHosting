@@ -1,4 +1,5 @@
-﻿using FileHosting.Database;
+﻿using System.Data;
+using FileHosting.Database;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Provider;
@@ -74,14 +75,39 @@ namespace FileHosting.MVC.Providers
             return outputResult;
         }
 
+        public override string[] GetAllRoles()
+        {
+            string[] roleNames = { };
+
+            var roles = _context.RoleRepository.GetAll().ToArray();
+
+            if (!roles.Any())
+                return roleNames;
+
+            roleNames = roles.Select(r => r.Name).ToArray();
+
+            return roleNames.Any() ? roleNames : new string[] { };
+        }
+
+        public override void AddUsersToRoles(string[] userEmails, string[] roleNames)
+        {
+            foreach (var user in userEmails.Select(email => _context.UserRepository.FirstOrDefault(u => u.Email == email)).Where(user => user != null))
+            {
+                _context.UserRepository.Attach(user);
+
+                var userRoles = new List<Role>(roleNames.Length);
+
+                userRoles.AddRange(roleNames.Select(name => _context.RoleRepository.First(r => r.Name == name)));
+
+                user.Roles = userRoles;
+
+                _context.Commit();
+            }
+        }
+
         #endregion
 
         #region Non-implemented RoleProvider methods
-
-        public override void AddUsersToRoles(string[] usernames, string[] roleNames)
-        {
-            throw new NotImplementedException();
-        }
 
         public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
         {
@@ -89,11 +115,6 @@ namespace FileHosting.MVC.Providers
         }
 
         public override string[] FindUsersInRole(string roleName, string usernameToMatch)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string[] GetAllRoles()
         {
             throw new NotImplementedException();
         }

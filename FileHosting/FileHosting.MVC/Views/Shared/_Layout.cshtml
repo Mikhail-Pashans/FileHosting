@@ -33,7 +33,7 @@
                         <li @if (Request.RawUrl == "/") { <text> class="active" </text> }>
                             <a href="/"><span class="glyphicon glyphicon-home"></span>&ensp;Home</a>
                         </li>
-                        @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity.IsAuthenticated && !Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                         {
                             <li @if (Request.RawUrl.StartsWith("/Files/UserFiles")) { <text> class="active" </text>   }>
                                 <a href="@Url.Action("UserFiles", "Files")"><span class="glyphicon glyphicon-list-alt"></span>&ensp;My files</a>

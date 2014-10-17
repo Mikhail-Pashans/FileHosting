@@ -17,14 +17,14 @@ namespace FileHosting.Services
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
         }
 
-        public Dictionary<int, string> GetFileSectionDictianary()
+        public Dictionary<int, string> GetFileSectionsDictianary()
         {
             return _context.SectionRepository
                 .GetAll()
                 .ToDictionary(s => s.Id, s=> s.Name);
         }
 
-        public SelectList GetFileSectionSelectList()
+        public SelectList GetFileSectionsSelectList()
         {
             return new SelectList(_context.SectionRepository
                 .GetAll()

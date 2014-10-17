@@ -3,7 +3,7 @@ using System.Web.Mvc;
 
 namespace FileHosting.MVC.Controllers
 {
-    [Authorize (Roles="Moderator")]
+    [Authorize (Roles="Administrator, Moderator")]
     public class NewsController : Controller
     {
         private readonly IUnitOfWork _context;

@@ -29,8 +29,8 @@
                                 <td>@user.Email</td>
                                 <td>@user.CreationDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-info" href="@Url.Action("UserDetails", new { userId = user.Id, page = Model.PageInfo.PageNumber })">
-                                        <span class="glyphicon glyphicon-info-sign"></span>&ensp;Details
+                                    <a class="btn btn-warning" href="@Url.Action("EditUser", new { userId = user.Id, page = Model.PageInfo.PageNumber })">
+                                        <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
                                 </td>
                             </tr>

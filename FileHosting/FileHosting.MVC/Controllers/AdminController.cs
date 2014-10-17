@@ -1,6 +1,7 @@
 ﻿using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
+using System.Data;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -56,7 +57,8 @@ namespace FileHosting.MVC.Controllers
             return View(viewModel);
         }
 
-        public ActionResult UserDetails(int userId, int? page)
+        [HttpGet]
+        public ActionResult EditUser(int userId, int? page)
         {
             var user = _homeService.GetUserById(userId);
             if (user == null)
@@ -64,10 +66,11 @@ namespace FileHosting.MVC.Controllers
 
             var pageNumber = (page ?? 1);
 
-            var viewModel = new UserDetailsViewModel
+            var viewModel = new EditUserViewModel
             {
-                UserModel = user,                
-                PageNumber = pageNumber,                
+                UserModel = user,
+                Roles = Roles.Provider.GetAllRoles(),
+                PageNumber = pageNumber,
             };
 
             return View(viewModel);           
@@ -75,11 +78,28 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ChangeUserPassword(int userId, string newUserPassword, int page)
+        public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword = null)
         {
-            var result = ((MyMembershipProvider)Membership.Provider).ChangeUserPassword(userId, newUserPassword);
+            if (userRoles == null)
+                return RedirectToAction("Index", new { page });
+            
+            try
+            {
+                Roles.Provider.AddUsersToRoles(new[] { userEmail }, userRoles);
+            }
+            catch (DataException)
+            {                
+                return RedirectToAction("Index", new { page });
+            }
 
-            return result ? RedirectToAction("UserDetails", new { userId, page }) : RedirectToAction("Index");
+            var result = true;
+            
+            if (!string.IsNullOrWhiteSpace(newUserPassword))
+            {
+                result = ((MyMembershipProvider)Membership.Provider).ChangeUserPassword(userEmail, newUserPassword);
+            }            
+
+            return result ? RedirectToAction("EditUser", new { userId, page }) : RedirectToAction("Index", new { page });
         }
 
         public ActionResult BlockUser(int userId)

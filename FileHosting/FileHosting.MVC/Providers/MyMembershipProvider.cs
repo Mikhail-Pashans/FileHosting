@@ -89,25 +89,25 @@ namespace FileHosting.MVC.Providers
 
                 return null;
             }
-            
-            var user = new User
-            {                
+
+            var role = _context.RoleRepository.GetById(3);
+
+            _context.UserRepository.Add(new User
+            {
                 Name = userName,
                 Email = email,
                 Password = Crypto.HashPassword(password),
                 CreationDate = DateTime.UtcNow,
+                DownloadAmountLimit = null,
+                DownloadSpeedLimit = null,
                 Comments = new List<Comment>(),
                 Downloads = new List<Download>(),
                 Files = new List<File>(),
                 FilesWithPermission = new List<File>(),
                 FilesWithSubscription = new List<File>(),
                 News = new List<News>(),
-                Roles = new List<Role>(),                        
-            };
-            _context.UserRepository.Add(user);
-
-            var role = _context.RoleRepository.GetById(3);
-            if (role != null) user.Roles.Add(role);
+                Roles = role == null ? new List<Role>() : new List<Role>{ role },
+            });            
 
             try
             {
@@ -148,11 +148,19 @@ namespace FileHosting.MVC.Providers
             return user;
         }
 
-        public bool ChangeUserPassword(int userId, string newUserPassword)
+        public bool ChangeUserPassword(string userEmail, string newUserPassword)
         {                        
-            var user = _context.UserRepository.GetById(userId);
+            var user = _context.UserRepository.FirstOrDefault(u => u.Email == userEmail);
             if (user == null)
                 return false;
+
+            var args = new ValidatePasswordEventArgs(userEmail, newUserPassword, false);
+
+            OnValidatingPassword(args);
+
+            if (args.Cancel)
+                return false;
+            
             _context.UserRepository.Attach(user);
 
             user.Password = Crypto.HashPassword(newUserPassword);

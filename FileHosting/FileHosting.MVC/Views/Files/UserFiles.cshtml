@@ -41,8 +41,7 @@
                                         <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
                                     <form class="display-inline" action="@Url.Action("DeleteFile")" method="POST">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="type" value="@FileActionsType.Delete" />
+                                        @Html.AntiForgeryToken()                                        
                                         <input type="hidden" name="fileId" value="@file.Id" />
                                         <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
                                         <button class="btn btn-danger" type="submit">
