@@ -6,7 +6,7 @@ using System.Web.Security;
 
 namespace FileHosting.MVC.Controllers
 {
-    [Authorize(Roles = "Administrator, Moderator, RegisteredUser")]
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly NewsService _newsService;
@@ -24,8 +24,7 @@ namespace FileHosting.MVC.Controllers
 
         #region Actions
 
-        [HttpGet]
-        [AllowAnonymous]
+        [HttpGet]        
         public ActionResult Index(int? page)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))

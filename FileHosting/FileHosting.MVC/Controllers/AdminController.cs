@@ -1,4 +1,5 @@
-﻿using FileHosting.MVC.Providers;
+﻿using FileHosting.Domain.Enums;
+using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
 using System.Data;
@@ -58,7 +59,7 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditUser(int userId, int? page)
+        public ActionResult EditUser(int userId, int? page, ViewModelsMessageType? messageType)
         {
             var user = _homeService.GetUserById(userId);
             if (user == null)
@@ -71,6 +72,21 @@ namespace FileHosting.MVC.Controllers
                 UserModel = user,
                 Roles = Roles.Provider.GetAllRoles(),
                 PageNumber = pageNumber,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! User changes were saved."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! User changes were not saved."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Warning! User roles cannot be empty."
+                                    : messageType == ViewModelsMessageType.D
+                                        ? "Warning! Download amount limit must be a number."
+                                        : "Warning! Download speed limit must be a number."
+                    }
+                    : null
             };
 
             return View(viewModel);           
@@ -78,33 +94,50 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword = null)
+        public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword, string downloadAmountLimit, string downloadSpeedLimit)
         {
             if (userRoles == null)
-                return RedirectToAction("Index", new { page });
-            
+                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.C });
+
             try
             {
                 Roles.Provider.AddUsersToRoles(new[] { userEmail }, userRoles);
             }
             catch (DataException)
-            {                
-                return RedirectToAction("Index", new { page });
+            {
+                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
             }
 
-            var result = true;
+            decimal amountLimit = 0, speedLimit = 0;
+
+            if (!string.IsNullOrWhiteSpace(downloadAmountLimit))
+            {
+                if (!decimal.TryParse(downloadAmountLimit, out amountLimit))
+                {
+                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.D });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(downloadSpeedLimit))
+            {                
+                if (!decimal.TryParse(downloadSpeedLimit, out speedLimit))
+                {
+                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.E });
+                }
+            }
+
+            bool result;
             
             if (!string.IsNullOrWhiteSpace(newUserPassword))
             {
                 result = ((MyMembershipProvider)Membership.Provider).ChangeUserPassword(userEmail, newUserPassword);
-            }            
+                if (!result)
+                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B }); 
+            }
 
-            return result ? RedirectToAction("EditUser", new { userId, page }) : RedirectToAction("Index", new { page });
-        }
+            result = _homeService.SaveUserChanges(userId, amountLimit, speedLimit);
 
-        public ActionResult BlockUser(int userId)
-        {
-            return new EmptyResult();
+            return RedirectToAction("EditUser", new { userId, page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
         }
 
         #endregion        

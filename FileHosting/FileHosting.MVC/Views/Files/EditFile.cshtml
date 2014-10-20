@@ -15,8 +15,14 @@
         <div class="panel-body">
             @if (Model.Message != null)
             {
-                var alertType = Model.Message.MessageType == ViewModelsMessageType.Success ? "alert-success" : "alert-danger";
-                <div class="alert @alertType alert-custom text-center" role="alert"><strong>@Model.Message.MessageText</strong></div>
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                    ? "alert-success"
+                    : Model.Message.MessageType == ViewModelsMessageType.B || Model.Message.MessageType == ViewModelsMessageType.C
+                        ? "alert-danger"
+                        : "alert-warning";
+                <div class="alert @alertType alert-custom text-center" role="alert">
+                    <strong>@Model.Message.MessageText</strong>
+                </div>
             }
             <form class="form-horizontal" action="@Url.Action("EditFile")" method="POST" role="form">
                 @Html.AntiForgeryToken()
@@ -84,17 +90,17 @@
                         <button class="btn btn-success" type="submit" id="saveButton">
                             <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
                         </button>&emsp;
-                        <a class="btn btn-default" id="cancel-button" href="javascript:void(0)">
+                        <a class="btn btn-default btn-cancel"href="javascript:void(0)">
                             <span class="glyphicon glyphicon-remove"></span>&emsp;Cancel changes
                         </a>&emsp;
-                        <a class="btn btn-danger" id="remove-button" href="javascript:void(0)">
+                        <a class="btn btn-danger btn-delete-file" href="javascript:void(0)">
                             <span class="glyphicon glyphicon-trash"></span>&emsp;Delete file
                         </a>
                     </div>
                 </div>
             </form>
-            <form id="removeForm" action="@Url.Action("DeleteFile")" method="POST">
-                @Html.AntiForgeryToken()                
+            <form id="deleteFileForm" action="@Url.Action("DeleteFile")" method="POST">
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
                 <input type="hidden" name="page" value="@Model.PageNumber" />
             </form>
@@ -102,5 +108,7 @@
         </div>
     </div>
 </div>
+
+@{ Html.RenderPartial("_DeleteConfirmationPartial"); }
 
 @Scripts.Render("~/bundles/custom")

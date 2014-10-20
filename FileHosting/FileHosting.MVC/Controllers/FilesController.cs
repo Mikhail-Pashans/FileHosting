@@ -190,27 +190,77 @@ namespace FileHosting.MVC.Controllers
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return RedirectToAction("Login", "Account");
-            
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
 
-            var file = _fileService.GetFileToDownload(fileId, user);
+            var file = _fileService.GetFileToDownload(fileId);
             if (file == null)
                 return HttpNotFound();
 
             var ipAdress = ConfigurationManager.AppSettings.Get("Server");
             var pathToFile = Path.Combine(ipAdress, file.Path);
-            const decimal rate = 10;
 
-            return new FileThrottleResult(pathToFile, file.Name, rate, "application/octet-stream");
+            var totalDownloadAmountLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
+            var totalDownloadSpeedLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
+            
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            if (user == null)
+            {
+                _fileService.WriteDownload(file, null);
+                
+                return totalDownloadSpeedLimit != 0
+                    ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
+                    : new FilePathResult(pathToFile, "application/octet-stream")
+                    {
+                        FileDownloadName = file.Name
+                    };
+            }                                    
+            
+            if (user.Downloads.Any())
+            {
+                var downloadsSum = user.Downloads.Sum(d => d.File.Size);
+                const decimal devider = 1048576m; // 1024 * 1024
+                var downloadAmount = decimal.Round(downloadsSum / devider, 2);
+
+                if (user.DownloadAmountLimit != 0)
+                {
+                    if (downloadAmount > user.DownloadAmountLimit)
+                        return new EmptyResult();
+                }
+                    
+                if (totalDownloadAmountLimit != 0)
+                {
+                    if (downloadAmount > totalDownloadAmountLimit)
+                        return new EmptyResult();
+                }
+
+                _fileService.WriteDownload(file, user);
+                
+                return user.DownloadSpeedLimit != 0
+                    ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit, "application/octet-stream")
+                    : totalDownloadSpeedLimit != 0
+                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
+                        : new FilePathResult(pathToFile, "application/octet-stream")
+                        {
+                            FileDownloadName = file.Name
+                        };
+            }
+
+            _fileService.WriteDownload(file, user);
+            
+            return totalDownloadSpeedLimit != 0
+                ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
+                : new FilePathResult(pathToFile, "application/octet-stream")
+                {
+                    FileDownloadName = file.Name
+                };
         }
 
         [HttpGet]
-        [AllowAnonymous]        
+        [AllowAnonymous]
         public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))            
+            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return RedirectToAction("Login", "Account");
-            
+
             var file = _fileService.GetFileById(fileId);
             if (file == null)
                 return HttpNotFound();
@@ -228,11 +278,11 @@ namespace FileHosting.MVC.Controllers
                     ? new Message
                     {
                         MessageType = messageType.Value,
-                        MessageText = messageType == ViewModelsMessageType.Default
-                            ? "Error! A comment cannot be empty."
-                            : messageType == ViewModelsMessageType.Error
-                                ? "Error! The comment was not added."
-                                : "Success! The comment was added."
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! Comment was added."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! Comment was not added."
+                                : "Warning! Comment cannot be empty."
                     }
                     : null
             };
@@ -261,11 +311,13 @@ namespace FileHosting.MVC.Controllers
                     ? new Message
                     {
                         MessageType = messageType.Value,
-                        MessageText = messageType == ViewModelsMessageType.Default
-                            ? "Error! A description and tags cannot be empty."
-                            : messageType == ViewModelsMessageType.Error
-                                ? "Error! The file editing or deleting failed."
-                                : "Success! The file was changed."
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! File changes were saved."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! File changes were not saved."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Error! File was not deleted."
+                                    : "Warning! Tags and description cannot be empty."
                     }
                     : null
             };
@@ -286,17 +338,17 @@ namespace FileHosting.MVC.Controllers
                 return RedirectToAction("Index", "Home");
 
             if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
-                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Default });
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.D });
             try
             {
                 _fileService.ChangeFile(file, fileTags, fileDescription);
             }
             catch (DataException)
             {
-                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Error });
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.B });
             }
 
-            return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Success });
+            return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.A });
         }
 
         [HttpPost]
@@ -319,7 +371,7 @@ namespace FileHosting.MVC.Controllers
             }
             catch (DataException)
             {
-                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.Error });
+                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.C });
             }
 
             return RedirectToAction("UserFiles", new { page });
@@ -331,7 +383,7 @@ namespace FileHosting.MVC.Controllers
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return RedirectToAction("Login", "Account");
-            
+
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             var isFileOwner = User.Identity.IsAuthenticated &&
                 user != null &&
@@ -372,11 +424,15 @@ namespace FileHosting.MVC.Controllers
                     ? new Message
                     {
                         MessageType = messageType.Value,
-                        MessageText = messageType == ViewModelsMessageType.Default
-                            ? "Error! A comment cannot be empty."
-                            : messageType == ViewModelsMessageType.Error
-                                ? "Error! Adding or deleting a comment failed."
-                                : "Success! Adding or deleting a comment completed."
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! Comment was added."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! Comment was not added."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Success! Comment was deleted."
+                                    : messageType == ViewModelsMessageType.D
+                                        ? "Error! Comment was not deleted."
+                                        : "Warning! Comment cannot be empty."
                     }
                     : null
             };
@@ -390,14 +446,14 @@ namespace FileHosting.MVC.Controllers
         public ViewModelsMessageType AddCommentToFile(int fileId, string newCommentText)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return ViewModelsMessageType.Error;
-            
+                return ViewModelsMessageType.B;
+
             var file = _fileService.GetFileById(fileId);
             if (file == null)
-                return ViewModelsMessageType.Error;
+                return ViewModelsMessageType.B;
 
             if (string.IsNullOrWhiteSpace(newCommentText))
-                return ViewModelsMessageType.Default;
+                return ViewModelsMessageType.E;
 
             var user = User.Identity.IsAuthenticated
                 ? ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name)
@@ -408,10 +464,10 @@ namespace FileHosting.MVC.Controllers
             }
             catch (DataException)
             {
-                return ViewModelsMessageType.Error;
+                return ViewModelsMessageType.B;
             }
 
-            return ViewModelsMessageType.Success;
+            return ViewModelsMessageType.A;
         }
 
         [HttpPost]
@@ -423,9 +479,9 @@ namespace FileHosting.MVC.Controllers
                 user != null &&
                 user.Files.Select(f => f.Id).Contains(fileId);
 
-            return !isFileOwner || !_fileService.DeleteCommentFromFile(commentId)
-                ? ViewModelsMessageType.Error
-                : ViewModelsMessageType.Success;
+            return isFileOwner && _fileService.DeleteCommentFromFile(commentId)
+                ? ViewModelsMessageType.C
+                : ViewModelsMessageType.D;
         }
 
         [HttpPost]

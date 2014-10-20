@@ -9,7 +9,9 @@
     <ul class="nav nav-pills nav-justified" role="tablist">
         @foreach (var item in Model.FileSections)
         {
-            <li><a href="@Url.Action("Index", "Files", new { section = item.Key })">@item.Value</a></li>
+            <li>
+                <a href="@Url.Action("Index", "Files", new { section = item.Key })">@item.Value</a>
+            </li>
         }
     </ul>
     <br />
@@ -23,7 +25,9 @@
             }
             else
             {
-                <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no any published news!</strong></div>
+                <div class="alert alert-danger no-margin text-center" role="alert">
+                    <strong>There are no any published news!</strong>
+                </div>
             }
         </div>
     </div>

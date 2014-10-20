@@ -9,7 +9,7 @@
     <ul class="nav nav-pills nav-justified" role="tablist">
         @foreach (var item in Model.FileSectionDictionary)
         {
-            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key)) { <text> class="active" </text> }>
+            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key)) { <text> class="active" </text>  }>
                 <a href="@Url.Action("Index", new { section = item.Key })">@item.Value</a>
             </li>
         }
@@ -49,7 +49,7 @@
                                         <button class="btn btn-success">
                                             <span class="glyphicon glyphicon-download"></span>&ensp;Download
                                         </button>
-                                    </form>                                    
+                                    </form>
                                 </td>
                             </tr>
                         }
@@ -58,7 +58,9 @@
             }
             else
             {
-                <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no any uploaded files!</strong></div>
+                <div class="alert alert-danger no-margin text-center" role="alert">
+                    <strong>There are no any uploaded files!</strong>
+                </div>
             }
         </div>
     </div>
@@ -67,7 +69,7 @@
         <br />
         <div>
             Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
-        </div>        
+        </div>
         @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { section = Model.SectionNumber, page = x }))
     }
 </div>

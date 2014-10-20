@@ -1,4 +1,5 @@
-﻿@model FileHosting.MVC.ViewModels.EditUserViewModel
+﻿@using FileHosting.Domain.Enums
+@model FileHosting.MVC.ViewModels.EditUserViewModel
 @{
     ViewBag.Title = "Edit User";
 }
@@ -12,35 +13,46 @@
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
+            @if (Model.Message != null)
+            {
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                    ? "alert-success"
+                    : Model.Message.MessageType == ViewModelsMessageType.B
+                        ? "alert-danger"
+                        : "alert-warning";
+                <div class="alert @alertType alert-custom text-center" role="alert">
+                    <strong>@Model.Message.MessageText</strong>
+                </div>
+            }
             <form class="form-horizontal" action="@Url.Action("EditUser")" method="POST" role="form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="userId" value="@Model.UserModel.Id" />
-                <input type="hidden" name="userEmail" value="@Model.UserModel.Email" />                
+                <input type="hidden" name="userEmail" value="@Model.UserModel.Email" />
                 <input type="hidden" name="page" value="@Model.PageNumber" />
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="userId">#:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="userId">@Model.UserModel.Id</div>
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="userName">Name:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="userName">@Model.UserModel.Name</div>
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="userEmail">E-mail address:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="userEmail">@Model.UserModel.Email</div>
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="userCreationDate">Creation Date:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="userCreationDate">@Model.UserModel.CreationDate</div>
                     </div>
-                </div>                
+                </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="userRoles[]">Roles:</label>
                     <div class="col-md-10">
@@ -50,7 +62,7 @@
                                 <select class="form-control selectpicker" multiple data-width="100%" title="No roles selected" name="userRoles[]">
                                     @foreach (var role in Model.Roles)
                                     {
-                                        <option value="@role" @if (Model.UserModel.Roles.Select(r => r.Name).Contains(role)) { <text>selected="selected"</text> }>@role</option>
+                                        <option value="@role" @if (Model.UserModel.Roles.Select(r => r.Name).Contains(role)) { <text> selected="selected" </text> }>@role</option>
                                     }
                                 </select>
                             </div>
@@ -58,46 +70,75 @@
                         else
                         {
                             <div class="alert alert-danger no-margin text-center" role="alert"><strong>There are no roles found on this site!</strong></div>
-                        }                                                
+                        }
                     </div>
-                </div>                
+                </div>
+                <div id="userSettings">
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox-inline">
+                                <label>
+                                    <input class="activator" type="checkbox"><strong>Set new user password?</strong>
+                                </label>
+                            </div>
+                            <div>
+                                <input class="form-control form-control-element" type="password" name="newUserPassword" placeholder="New user password" disabled="disabled">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox-inline">
+                                <label>
+                                    <input class="activator" type="checkbox" @if (Model.UserModel.DownloadAmountLimit != "") { <text> checked="checked" </text> }><strong>Set download amount limit for user?</strong>
+                                </label>
+                            </div>
+                            <div>
+                                <input class="form-control form-control-element display-inline" type="text" name="downloadAmountLimit" value="@Model.UserModel.DownloadAmountLimit" placeholder="Download amount limit" @if (Model.UserModel.DownloadAmountLimit == "") { <text> disabled="disabled" </text> }>
+                                <strong class="display-inline">Mb</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox-inline">
+                                <label>
+                                    <input class="activator" type="checkbox" @if (Model.UserModel.DownloadSpeedLimit != "") { <text> checked="checked" </text> }><strong>Set download speed limit for user?</strong>
+                                </label>
+                            </div>
+                            <div>
+                                <input class="form-control form-control-element display-inline" type="text" name="downloadSpeedLimit" value="@Model.UserModel.DownloadSpeedLimit" placeholder="Download speed limit" @if (Model.UserModel.DownloadAmountLimit == "") { <text> disabled="disabled" </text> }>
+                                <strong class="display-inline">Kb/s</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <div class="checkbox-inline">
-                            <label>
-                                <input type="checkbox" id="newUserPasswordActivator"><strong>Change user password?</strong>
-                            </label>
-                        </div>
-                        <div>
-                            <input class="form-control" type="password" id="newUserPassword" name="newUserPassword" placeholder="New user password" disabled="disabled">
-                        </div>
-                    </div>
-                </div>                
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button class="btn btn-success" type="submit" id="saveButton">
+                        <button class="btn btn-success form-control-element" type="submit" id="saveButton">
                             <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
                         </button>
                     </div>
                 </div>
-            </form>            
+            </form>
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
     (function ($) {
-        var $newUserPasswordActivator = $('#newUserPasswordActivator');
-        var $newUserPassword = $('#newUserPassword');        
+        var $userSettings = $('#userSettings');
 
-        $newUserPasswordActivator.on('change', function () {
+        $userSettings.on('change', '.activator', function () {
             var $checkbox = $(this);
+            var $input = $checkbox.parent().parent().parent().find('.form-control');
             var isChecked = $checkbox.prop('checked');
             if (isChecked) {
-                $newUserPassword.removeAttr('disabled');
-                $newUserPassword.focus();
+                $input.removeAttr('disabled');
+                $input.focus();
             } else {
-                $newUserPassword.attr("disabled", "disabled");
+                $input.val('');
+                $input.attr("disabled", "disabled");
             }
         });
     })(jQuery);

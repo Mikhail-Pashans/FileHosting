@@ -34,8 +34,8 @@ namespace FileHosting.Database.Migrations
             //    Email = "jolly.roger.1988@gmail.com",
             //    Password = Crypto.HashPassword("mike1988"),
             //    CreationDate = DateTime.UtcNow,
-            //    DownloadAmountLimit = null,
-            //    DownloadSpeedLimit = null,
+            //    DownloadAmountLimit = 0,
+            //    DownloadSpeedLimit = 0,
             //    Comments = new List<Comment>(),
             //    Downloads = new List<Download>(),
             //    Files = new List<File>(),
@@ -51,8 +51,8 @@ namespace FileHosting.Database.Migrations
             //    Email = "poshlivsenahren@mail.ru",
             //    Password = Crypto.HashPassword("mike1988"),
             //    CreationDate = DateTime.UtcNow,
-            //    DownloadAmountLimit = null,
-            //    DownloadSpeedLimit = null,
+            //    DownloadAmountLimit = 0,
+            //    DownloadSpeedLimit = 0,
             //    Comments = new List<Comment>(),
             //    Downloads = new List<Download>(),
             //    Files = new List<File>(),
@@ -68,8 +68,8 @@ namespace FileHosting.Database.Migrations
             //    Email = "mikhail.pashans@tut.by",
             //    Password = Crypto.HashPassword("mike1988"),
             //    CreationDate = DateTime.UtcNow,
-            //    DownloadAmountLimit = null,
-            //    DownloadSpeedLimit = null,
+            //    DownloadAmountLimit = 0,
+            //    DownloadSpeedLimit = 0,
             //    Comments = new List<Comment>(),
             //    Downloads = new List<Download>(),
             //    Files = new List<File>(),
@@ -78,13 +78,13 @@ namespace FileHosting.Database.Migrations
             //    News = new List<News>(),
             //    Roles = new List<Role>()
             //};
-            
+
             //var users = new List<User> { admin, user1, user2 };
 
             //foreach (var user in users)
             //{
             //    context.UserRepository.Add(user);
-            //}            
+            //}
 
             //var roles = new List<Role>
             //{

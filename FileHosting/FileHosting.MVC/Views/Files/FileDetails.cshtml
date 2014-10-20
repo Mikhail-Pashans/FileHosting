@@ -1,4 +1,5 @@
-﻿@model FileHosting.MVC.ViewModels.FileDetailsViewModel
+﻿@using FileHosting.Domain.Enums
+@model FileHosting.MVC.ViewModels.FileDetailsViewModel
 @{
     ViewBag.Title = "File details";
 }
@@ -12,6 +13,17 @@
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
+            @if (Model.Message != null)
+            {
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                    ? "alert-success" :
+                    Model.Message.MessageType == ViewModelsMessageType.B
+                        ? "alert-danger"
+                        : "alert-warning";
+                <div class="alert @alertType alert-custom text-center" role="alert">
+                    <strong>@Model.Message.MessageText</strong>
+                </div>
+            }
             <form class="form-horizontal" action="@Url.Action("DownloadFile")" method="POST" role="form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />

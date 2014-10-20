@@ -11,12 +11,15 @@ namespace FileHosting.Domain.Models
         public string Email { get; set; }
 
         private DateTime _creationDate;
-
         public DateTime CreationDate
         {
             get { return _creationDate.ToLocalTime(); }
             set { _creationDate = value; }
         }
+
+        public string DownloadAmountLimit { get; set; }
+
+        public string DownloadSpeedLimit { get; set; }
 
         public List<Role> Roles { get; set; }
         

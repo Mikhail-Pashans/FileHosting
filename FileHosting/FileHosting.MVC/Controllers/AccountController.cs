@@ -44,7 +44,7 @@ namespace FileHosting.MVC.Controllers
 
             viewModel.Message = new Message
             {
-                MessageType = ViewModelsMessageType.Error,
+                MessageType = ViewModelsMessageType.B,
                 MessageText = "The E-mail address or Password is incorrect!"
             };
 
@@ -85,7 +85,7 @@ namespace FileHosting.MVC.Controllers
 
             viewModel.Message = new Message
             {
-                MessageType = ViewModelsMessageType.Error,
+                MessageType = ViewModelsMessageType.B,
                 MessageText = CreateStatusToString(createStatus)
             };
 

@@ -56,13 +56,15 @@ namespace FileHosting.Services
             return _context.FileRepository.FirstOrDefault(f => f.Id == fileId);
         }
 
-        public File GetFileToDownload(int fileId, User user)
+        public File GetFileToDownload(int fileId)
         {
             var file = GetFileById(fileId);
 
-            if (file == null)
-                return null;
+            return file;
+        }
 
+        public bool WriteDownload(File file, User user)
+        {
             _context.DownloadRepository.Add(new Download
             {
                 Date = DateTime.UtcNow,
@@ -76,10 +78,10 @@ namespace FileHosting.Services
             }
             catch (DataException)
             {
-                return null;
+                return false;
             }
 
-            return file;
+            return true;
         }
 
         public FileModel GetModelForFile(File file, bool isAuthenticated)

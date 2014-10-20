@@ -6,9 +6,11 @@
     <form class="form-horizontal" action="@Url.Action("Login")" method="POST" role="form">
         @Html.AntiForgeryToken()
         <br />
-        @if (Model.Message != null && Model.Message.MessageType == ViewModelsMessageType.Error)
+        @if (Model.Message != null && Model.Message.MessageType == ViewModelsMessageType.B)
         {
-            <div class="alert alert-danger text-center" role="alert"><strong>@Model.Message.MessageText</strong></div>
+            <div class="alert alert-danger text-center" role="alert">
+                <strong>@Model.Message.MessageText</strong>
+            </div>
         }
         <fieldset>
             <div class="form-group ">
@@ -29,7 +31,6 @@
                 <div class="col-md-8 col-md-offset-4">
                     @Html.EditorFor(model => model.RememberMe)&nbsp;
                     @Html.LabelFor(model => model.RememberMe)
-                    @Html.ValidationMessageFor(model => model.RememberMe)
                 </div>
             </div>
             <div class="form-group">

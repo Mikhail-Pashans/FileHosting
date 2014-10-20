@@ -10,8 +10,8 @@ namespace FileHosting.Database.Models
         public string Email { get; set; }
         public string Password { get; set; }        
         public DateTime CreationDate { get; set; }
-        public decimal? DownloadAmountLimit { get; set; }
-        public decimal? DownloadSpeedLimit { get; set; }
+        public decimal DownloadAmountLimit { get; set; }
+        public decimal DownloadSpeedLimit { get; set; }
 
         public virtual ICollection<Comment> Comments { get; set; }
 

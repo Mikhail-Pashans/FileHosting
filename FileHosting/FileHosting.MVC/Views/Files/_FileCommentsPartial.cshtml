@@ -8,7 +8,11 @@
 <h2 class="text-center">Comments</h2>
 @if (Model.Message != null)
 {
-    var alertType = Model.Message.MessageType == ViewModelsMessageType.Success ? "alert-success" : "alert-danger";
+    var alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.C
+        ? "alert-success"
+        : Model.Message.MessageType == ViewModelsMessageType.B || Model.Message.MessageType == ViewModelsMessageType.D
+            ? "alert-danger"
+            : "alert-warning";
     <div class="alert @alertType alert-custom text-center" role="alert">
         <strong>@Model.Message.MessageText</strong>
     </div>
@@ -32,14 +36,14 @@
                 {
                     <div class="pull-right">
                         <div class="checkbox-inline">
-                            <input class="activateCommentCheckbox" type="checkbox" @if (comment.IsActive) { <text> checked="checked" </text> } value="@comment.Id" />
+                            <input class="activate-comment-checkbox" type="checkbox" @if (comment.IsActive) { <text> checked="checked" </text> } value="@comment.Id" />
                             <strong>Is Active</strong>
                         </div>
-                        <form class="deleteCommentForm display-inline margin-left" action="@Url.Action("DeleteCommentFromFile")" method="POST">
+                        <form class="display-inline margin-left delete-comment-form" action="@Url.Action("DeleteCommentFromFile")" method="POST">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="fileId" value="@Model.FileId" />
                             <input type="hidden" name="commentId" value="@comment.Id" />
-                            <button class="close" type="submit" title="Delete comment">
+                            <button class="close btn-delete-comment" type="submit" data-toggle="tooltip" data-placement="top" title="Delete comment">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </button>
                         </form>
@@ -54,12 +58,15 @@
     <div>
         Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
     </div>
-    @Html.PageLinks(Model.PageInfo, x => Url.Action("GetCommentsForFile", new { page = x }))
+    @Html.PageLinks(Model.PageInfo, x => Url.Action("GetCommentsForFile", new { page = x }))    
 }
 else
 {
-    <div class="alert alert-danger text-center" role="alert"><strong>There are no any comments yet!</strong></div>
+    <div class="alert alert-danger text-center" role="alert">
+        <strong>There are no any comments yet!</strong>
+    </div>
 }
+
 <form action="@Url.Action("AddCommentToFile")" method="POST" role="form" id="newCommentForm">
     @Html.AntiForgeryToken()
     <input type="hidden" name="fileId" value="@Model.FileId" />
@@ -77,10 +84,11 @@ else
 <script type="text/javascript">
     (function ($) {
         var $addCommentButton = $('#addCommentButton');
-        var $newCommentText = $('#newCommentText');
-        var $deleteCommentButton = $('#deleteCommentButton');
+        var $newCommentText = $('#newCommentText');        
+        var $closeButtons = $('.close');
 
         $addCommentButton.prop({ disabled: true });
+        $closeButtons.tooltip();
 
         $newCommentText.on('input propertychange', function () {
             if ($(this).val() !== '') {
@@ -88,10 +96,6 @@ else
             } else {
                 $addCommentButton.prop({ disabled: true });
             }
-        });
-
-        $deleteCommentButton.on('click', function () {
-            $('#deleteCommentForm').submit();
         });
     })(jQuery);
 </script>
