@@ -1,10 +1,10 @@
 ﻿.container {
-    width: 920px !important;
+    width: 920px !important;    
 }
 
 
 /* Styles for validation helpers
------------------------------------------------------------*/
+---------------------------------------------------------------------------------*/
 .field-validation-error {
     font-weight: bold;
     color: #f00;    
@@ -79,20 +79,12 @@ hr {
     margin: 0 auto !important;
 }
 
-.well-account {     
-     width: 600px !important;
-}
-
 .no-margin {
     margin: 0 !important;
 }
 
 .border-bottom {
     border-bottom: 1px solid !important;
-}
-
-.form-control-element {
-    width: 200px !important;
 }
 
 .th-control {
@@ -105,4 +97,20 @@ hr {
 
 .th-numbers {
     width: 100px !important;
+}
+
+.width-200 {
+    width: 200px !important;
+}
+
+.width-300 {
+    width: 300px !important;
+}
+
+.width-600 {
+    width: 600px !important;
+}
+
+.width-800 {
+    width: 800px !important;
 }

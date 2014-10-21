@@ -17,9 +17,9 @@ namespace FileHosting.Domain.Models
             set { _creationDate = value; }
         }
 
-        public string DownloadAmountLimit { get; set; }
+        public decimal DownloadAmountLimit { get; set; }
 
-        public string DownloadSpeedLimit { get; set; }
+        public decimal DownloadSpeedLimit { get; set; }
 
         public List<Role> Roles { get; set; }
         

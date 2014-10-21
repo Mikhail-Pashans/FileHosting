@@ -46,6 +46,8 @@
                                     <form class="display-inline" action="@Url.Action("DownloadFile")" method="POST">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="fileId" value="@file.Id" />
+                                        <input type="hidden" name="section" value="@Model.SectionNumber" />
+                                        <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
                                         <button class="btn btn-success">
                                             <span class="glyphicon glyphicon-download"></span>&ensp;Download
                                         </button>

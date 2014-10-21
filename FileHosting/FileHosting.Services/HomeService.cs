@@ -1,13 +1,11 @@
-﻿using System;
+﻿using FileHosting.Database;
+using FileHosting.Database.Models;
+using FileHosting.Domain.Models;
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
-using FileHosting.Database;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using FileHosting.Database.Models;
-using FileHosting.Domain.Enums;
-using FileHosting.Domain.Models;
 
 namespace FileHosting.Services
 {
@@ -69,8 +67,8 @@ namespace FileHosting.Services
                     Name = u.Name,
                     Email = u.Email,
                     CreationDate = u.CreationDate,
-                    DownloadAmountLimit = u.DownloadAmountLimit != 0 ? u.DownloadAmountLimit.ToString() : "",
-                    DownloadSpeedLimit = u.DownloadSpeedLimit != 0 ? u.DownloadSpeedLimit.ToString() : "",
+                    DownloadAmountLimit = u.DownloadAmountLimit,
+                    DownloadSpeedLimit = u.DownloadSpeedLimit,
                     Roles = u.Roles.ToList()
                 })
                 .FirstOrDefault();

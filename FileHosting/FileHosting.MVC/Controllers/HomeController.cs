@@ -28,7 +28,7 @@ namespace FileHosting.MVC.Controllers
         public ActionResult Index(int? page)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return RedirectToAction("Login", "Account");
+                return View("_UnauthorizedAccessAttemp");
             
             var news = _newsService.GetActiveNews();
 

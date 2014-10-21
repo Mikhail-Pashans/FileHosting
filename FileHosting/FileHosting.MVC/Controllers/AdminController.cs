@@ -1,7 +1,10 @@
-﻿using FileHosting.Domain.Enums;
+﻿using System;
+using System.Globalization;
+using FileHosting.Domain.Enums;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
+using System.Configuration;
 using System.Data;
 using System.Linq;
 using System.Web.Mvc;
@@ -28,7 +31,7 @@ namespace FileHosting.MVC.Controllers
         #region Actions
 
         [HttpGet]
-        public ActionResult Index(int? page)
+        public ActionResult Index(int? page, ViewModelsMessageType? messageType)
         {
             var users = _homeService.GetAllUsersList();
             
@@ -49,10 +52,28 @@ namespace FileHosting.MVC.Controllers
 
             var usersPerPages = users.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
+            var totalDownloadAmountLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
+            var totalDownloadSpeedLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
+
             var viewModel = new AdminIndexViewModel
             {
                 Users = usersPerPages,
-                PageInfo = pageInfo,                
+                PageInfo = pageInfo,
+                TotalDownloadAmountLimit = totalDownloadAmountLimit,
+                TotalDownloadSpeedLimit = totalDownloadSpeedLimit,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! Limits were setted."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! Limits were not setted."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Warning! Total download amount limit must be a number."
+                                    : "Warning! Total download speed limit must be a number."
+                    }
+                    : null
             };
 
             return View(viewModel);
@@ -138,6 +159,50 @@ namespace FileHosting.MVC.Controllers
             result = _homeService.SaveUserChanges(userId, amountLimit, speedLimit);
 
             return RedirectToAction("EditUser", new { userId, page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SetLimits(int page, string totalDownloadAmountLimit, string totalDownloadSpeedLimit)
+        {
+            decimal amountLimit = 0, speedLimit = 0;
+
+            if (!string.IsNullOrWhiteSpace(totalDownloadAmountLimit))
+            {
+                if (!decimal.TryParse(totalDownloadAmountLimit, out amountLimit))
+                {
+                    return RedirectToAction("Index", new { page, messageType = ViewModelsMessageType.C });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(totalDownloadSpeedLimit))
+            {
+                if (!decimal.TryParse(totalDownloadSpeedLimit, out speedLimit))
+                {
+                    return RedirectToAction("Index", new { page, messageType = ViewModelsMessageType.D });
+                }
+            }
+
+            var result = true;
+            
+            try
+            {
+                var myConfiguration = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration("~");
+                
+                myConfiguration.AppSettings.Settings.Remove("TotalDownloadAmountLimit");
+                myConfiguration.AppSettings.Settings.Remove("TotalDownloadSpeedLimit");
+
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit", amountLimit.ToString(CultureInfo.InvariantCulture));
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit", speedLimit.ToString(CultureInfo.InvariantCulture));
+
+                myConfiguration.Save();                                                                
+            }
+            catch (NotSupportedException)
+            {
+                result = false;
+            }            
+
+            return RedirectToAction("Index", new { page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
         }
 
         #endregion        

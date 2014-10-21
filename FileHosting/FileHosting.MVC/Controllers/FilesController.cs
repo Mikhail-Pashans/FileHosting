@@ -9,7 +9,9 @@ using System.Configuration;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Web;
 using System.Web.Mvc;
+using System.Web.Providers.Entities;
 using System.Web.Security;
 
 namespace FileHosting.MVC.Controllers
@@ -18,14 +20,14 @@ namespace FileHosting.MVC.Controllers
     public class FilesController : Controller
     {
         private readonly FileService _fileService;
-        private readonly HomeService _homeService;
+        private readonly HomeService _homeService;        
 
         #region Constructor
 
         public FilesController()
         {
             _fileService = new FileService();
-            _homeService = new HomeService();
+            _homeService = new HomeService();            
         }
 
         #endregion
@@ -37,7 +39,7 @@ namespace FileHosting.MVC.Controllers
         public ActionResult Index(int? section, int? page)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return RedirectToAction("Login", "Account");
+                return View("_UnauthorizedAccessAttemp");
 
             var fileSectionDictionary = _homeService.GetFileSectionsDictianary();
 
@@ -186,10 +188,10 @@ namespace FileHosting.MVC.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public ActionResult DownloadFile(int fileId)
+        public ActionResult DownloadFile(int fileId, int section, int page)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return RedirectToAction("Login", "Account");
+                return View("_UnauthorizedAccessAttemp");
 
             var file = _fileService.GetFileToDownload(fileId);
             if (file == null)
@@ -200,58 +202,76 @@ namespace FileHosting.MVC.Controllers
 
             var totalDownloadAmountLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
             var totalDownloadSpeedLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
+            const decimal divider = 1048576; // 1024 * 1024
+            decimal currentDownloadAmount;
             
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
             {
-                _fileService.WriteDownload(file, null);
+                if (totalDownloadAmountLimit != 0)
+                {
+                    var userHostAddress = HttpContext.Request.UserHostAddress;
+
+                    currentDownloadAmount = Convert.ToDecimal(Session[userHostAddress] ?? 0);
+                    currentDownloadAmount += decimal.Round(file.Size / divider, 2);
+
+                    if (currentDownloadAmount > totalDownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, section, page, messageType = ViewModelsMessageType.D });
+
+                    _fileService.WriteDownload(file, null);
+                    Session[userHostAddress] = currentDownloadAmount;
+
+                    return totalDownloadSpeedLimit != 0
+                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
+                        : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
+                }
+
+                _fileService.WriteDownload(file, null);                
                 
                 return totalDownloadSpeedLimit != 0
-                    ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
-                    : new FilePathResult(pathToFile, "application/octet-stream")
-                    {
-                        FileDownloadName = file.Name
-                    };
+                    ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
+                    : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
             }                                    
             
             if (user.Downloads.Any())
             {
                 var downloadsSum = user.Downloads.Sum(d => d.File.Size);
-                const decimal devider = 1048576m; // 1024 * 1024
-                var downloadAmount = decimal.Round(downloadsSum / devider, 2);
+                currentDownloadAmount = decimal.Round(downloadsSum / divider, 2);
 
                 if (user.DownloadAmountLimit != 0)
                 {
-                    if (downloadAmount > user.DownloadAmountLimit)
-                        return new EmptyResult();
+                    if (currentDownloadAmount > user.DownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, section, page, messageType = ViewModelsMessageType.D });
                 }
                     
                 if (totalDownloadAmountLimit != 0)
                 {
-                    if (downloadAmount > totalDownloadAmountLimit)
-                        return new EmptyResult();
+                    if (currentDownloadAmount > totalDownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, section, page, messageType = ViewModelsMessageType.D });
                 }
 
                 _fileService.WriteDownload(file, user);
                 
                 return user.DownloadSpeedLimit != 0
-                    ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit, "application/octet-stream")
+                    ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
                     : totalDownloadSpeedLimit != 0
-                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
-                        : new FilePathResult(pathToFile, "application/octet-stream")
-                        {
-                            FileDownloadName = file.Name
-                        };
+                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
+                        : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
+            }
+
+            if (totalDownloadAmountLimit != 0)
+            {
+                currentDownloadAmount = decimal.Round(file.Size / divider, 2);
+
+                if (currentDownloadAmount > totalDownloadAmountLimit)
+                    return RedirectToAction("FileDetails", new { fileId, section, page, messageType = ViewModelsMessageType.D });
             }
 
             _fileService.WriteDownload(file, user);
             
             return totalDownloadSpeedLimit != 0
-                ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, "application/octet-stream")
-                : new FilePathResult(pathToFile, "application/octet-stream")
-                {
-                    FileDownloadName = file.Name
-                };
+                ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
+                : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
         }
 
         [HttpGet]
@@ -259,7 +279,7 @@ namespace FileHosting.MVC.Controllers
         public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return RedirectToAction("Login", "Account");
+                return View("_UnauthorizedAccessAttemp");
 
             var file = _fileService.GetFileById(fileId);
             if (file == null)
@@ -282,7 +302,9 @@ namespace FileHosting.MVC.Controllers
                             ? "Success! Comment was added."
                             : messageType == ViewModelsMessageType.B
                                 ? "Error! Comment was not added."
-                                : "Warning! Comment cannot be empty."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Warning! Comment cannot be empty."
+                                    : "Warning! You have exceeded the download amount limit. File will not be downloaded."
                     }
                     : null
             };
@@ -382,7 +404,7 @@ namespace FileHosting.MVC.Controllers
         public ActionResult GetCommentsForFile(int fileId, int? page, ViewModelsMessageType? messageType)
         {
             if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return RedirectToAction("Login", "Account");
+                return View("_UnauthorizedAccessAttemp");
 
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             var isFileOwner = User.Identity.IsAuthenticated &&

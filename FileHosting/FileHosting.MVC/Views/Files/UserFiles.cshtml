@@ -6,7 +6,7 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary form-control-element" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })">
+    <a class="btn btn-primary width-200" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })">
         <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
     </a>
     <br />
@@ -43,7 +43,7 @@
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="fileId" value="@file.Id" />
                                         <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
-                                        <button class="btn btn-danger btn-delete-file" type="submit">
+                                        <button class="btn btn-danger" type="submit">
                                             <span class="glyphicon glyphicon-trash"></span>&ensp;Delete
                                         </button>                                        
                                     </form>                                                                       
@@ -70,27 +70,3 @@
         @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new { page = x }))
     }    
 </div>
-
-@{ Html.RenderPartial("_DeleteConfirmationPartial"); }
-
-<script type="text/javascript">
-    (function ($) {
-        var $tbody = $('tbody');
-        var $modal = $('#deleteConfirmation');
-        var $confirmFileButton = $('.btn-confirm');
-
-        $tbody.on('click', '.btn-delete-file', function (event) {
-            event.preventDefault();            
-            var $button = $(this);
-            var $form = $button.parent();
-
-            $modal.modal('show');
-
-            $confirmFileButton.on('click', function (innerEvent) {
-                innerEvent.preventDefault();
-                $form.submit();
-                $modal.modal('hide');
-            });
-        });        
-    })(jQuery);
-</script>

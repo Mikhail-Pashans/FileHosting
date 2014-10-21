@@ -6,7 +6,7 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary form-control-element" href="@Url.Action("UserFiles", new { page = Model.PageNumber })">
+    <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { page = Model.PageNumber })">
         <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
     </a>
     <br />
@@ -18,7 +18,7 @@
                 <div class="form-group">
                     <label class="control-label" for="fileSection">Select a file(s) section:</label>                    
                     <div class="row-fluid">
-                        <select class="form-control form-control-element selectpicker show-tick" data-style="btn-danger" name="fileSection">
+                        <select class="form-control width-200 selectpicker show-tick" data-style="btn-danger" name="fileSection">
                             @foreach (var item in Model.FileSectionsDictionary)
                             {
                                 <option value="@item.Key">@item.Value</option>
@@ -30,7 +30,7 @@
                     <div id="jquery-wrapped-fine-uploader"></div>
                 </div>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-warning form-control-element">
+                    <button type="submit" class="btn btn-warning width-200">
                         <span class="glyphicon glyphicon-upload"></span>&emsp;Start file(s) upload
                     </button>
                 </div>
@@ -46,7 +46,7 @@
         <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
             <span>Drop files here to upload</span>
         </div>
-        <div class="qq-upload-button-selector btn btn-info form-control-element">
+        <div class="qq-upload-button-selector btn btn-info width-200">
             <span class="glyphicon glyphicon-folder-open"></span>&emsp;Select file(s) to upload
         </div>
         <span class="qq-drop-processing-selector qq-drop-processing">
