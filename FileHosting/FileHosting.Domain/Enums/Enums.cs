@@ -6,6 +6,20 @@
         B = 1,
         C = 2,
         D = 3,
-        E = 4
+        E = 4,
+        F = 5
+    }
+
+    public enum FileBrowsingPermission
+    {
+        AllUsers = 0,
+        RegisteredUsers = 1,
+        SpecificUsers = 2
+    }
+
+    public enum SubscribeActionType
+    {
+        Subscribe = 0,
+        Unsubscribe = 1
     }
 }

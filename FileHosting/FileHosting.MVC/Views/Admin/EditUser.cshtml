@@ -2,6 +2,8 @@
 @model FileHosting.MVC.ViewModels.EditUserViewModel
 @{
     ViewBag.Title = "Edit User";
+    var downloadAmountLimit = Model.UserModel.DownloadAmountLimit;
+    var downloadSpeedLimit = Model.UserModel.DownloadSpeedLimit;
 }
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
@@ -79,49 +81,44 @@
                         }
                     </div>
                 </div>
-                <div id="userSettings">
-                    @{
-                        var downloadAmountLimit = Model.UserModel.DownloadAmountLimit;
-                        var downloadSpeedLimit = Model.UserModel.DownloadSpeedLimit;
-                    }
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input class="activator" type="checkbox"><strong>Set new user password?</strong>
-                                </label>
-                            </div>
-                            <div>
-                                <input class="form-control width-200" type="password" name="newUserPassword" placeholder="New user password" disabled="disabled">
-                            </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox-inline">
+                            <label>
+                                <input class="activator" type="checkbox">
+                                <strong>Set new user password?</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <input class="form-control width-200" type="password" name="newUserPassword" placeholder="New user password" disabled="disabled">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input class="activator" type="checkbox" @if (downloadAmountLimit != 0) { <text> checked="checked" </text>  }>
-                                    <strong>Set download amount limit for user?</strong>
-                                </label>
-                            </div>
-                            <div>
-                                <input class="form-control width-200 display-inline" type="text" name="downloadAmountLimit" @if (downloadAmountLimit != 0) { <text> value="@downloadAmountLimit" </text> } placeholder="Download amount limit" @if (downloadAmountLimit == 0) { <text> disabled="disabled" </text> }>
-                                <strong class="display-inline">Mb</strong>
-                            </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox-inline">
+                            <label>
+                                <input class="activator" type="checkbox" @if (downloadAmountLimit != 0) { <text> checked="checked" </text> }>
+                                <strong>Set download amount limit for user?</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <input class="form-control width-200 display-inline" type="text" name="downloadAmountLimit" @if (downloadAmountLimit != 0) { <text> value="@downloadAmountLimit" </text> } placeholder="Download amount limit" @if (downloadAmountLimit == 0) { <text> disabled="disabled" </text> }>
+                            <strong class="display-inline">Mb</strong>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <div class="checkbox-inline">
-                                <label>
-                                    <input class="activator" type="checkbox" @if (downloadSpeedLimit != 0) { <text> checked="checked" </text> }>
-                                    <strong>Set download speed limit for user?</strong>
-                                </label>
-                            </div>
-                            <div>
-                                <input class="form-control width-200 display-inline" type="text" name="downloadSpeedLimit" @if (downloadSpeedLimit != 0) { <text> value="@downloadSpeedLimit" </text> } placeholder="Download speed limit" @if (downloadSpeedLimit == 0) { <text> disabled="disabled" </text>  }>
-                                <strong class="display-inline">Kb/s</strong>
-                            </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <div class="checkbox-inline">
+                            <label>
+                                <input class="activator" type="checkbox" @if (downloadSpeedLimit != 0) { <text> checked="checked" </text> }>
+                                <strong>Set download speed limit for user?</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <input class="form-control width-200 display-inline" type="text" name="downloadSpeedLimit" @if (downloadSpeedLimit != 0) { <text> value="@downloadSpeedLimit" </text> } placeholder="Download speed limit" @if (downloadSpeedLimit == 0) { <text> disabled="disabled" </text> }>
+                            <strong class="display-inline">Kb/s</strong>
                         </div>
                     </div>
                 </div>
@@ -140,9 +137,9 @@
 
 <script type="text/javascript">
     (function ($) {
-        var $userSettings = $('#userSettings');
+        var $form = $('form');
 
-        $userSettings.on('change', '.activator', function () {
+        $form.on('change', '.activator', function () {
             var $checkbox = $(this);
             var $input = $checkbox.parent().parent().parent().find('.form-control');
             var isChecked = $checkbox.prop('checked');

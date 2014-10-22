@@ -1,5 +1,6 @@
 ﻿using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
+using System.Configuration;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -32,7 +33,7 @@ namespace FileHosting.MVC.Controllers
             
             var news = _newsService.GetActiveNews();
 
-            const int pageSize = 10;
+            var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("NewsPageSize"));
 
             var pageInfo = new PageInfo
             {

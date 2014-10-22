@@ -9,5 +9,6 @@ namespace FileHosting.MVC.ViewModels
         public PageInfo PageInfo { get; set; }
         public Dictionary<int, string> FileSectionDictionary { get; set; }
         public int SectionNumber { get; set; }
+        public bool IsAuthenticated { get; set; }
     }
 }

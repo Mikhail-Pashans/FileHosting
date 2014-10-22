@@ -67,6 +67,10 @@ hr {
     display: inline-block !important;
 }
 
+.display-none {
+    display: none !important;
+}
+
 .margin-left {
     margin-left: 20px !important;
 }
@@ -113,4 +117,8 @@ hr {
 
 .width-800 {
     width: 800px !important;
+}
+
+#allowedUsers {
+    margin-top: 12px !important;
 }

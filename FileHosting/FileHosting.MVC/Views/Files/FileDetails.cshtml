@@ -15,7 +15,7 @@
         <div class="panel-body">
             @if (Model.Message != null)
             {
-                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.E || Model.Message.MessageType == ViewModelsMessageType.F
                     ? "alert-success" :
                     Model.Message.MessageType == ViewModelsMessageType.B
                         ? "alert-danger"
@@ -29,7 +29,7 @@
                 </div>
             }
             <form class="form-horizontal" action="@Url.Action("DownloadFile")" method="POST" role="form">
-                @Html.AntiForgeryToken()                
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
                 <input type="hidden" name="section" value="@Model.SectionNumber" />
                 <input type="hidden" name="page" value="@Model.PageNumber" />
@@ -83,11 +83,29 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-warning width-200">
+                        <button type="submit" class="btn btn-warning width-200" @if (!Model.IsAuthenticated && !Model.FileModel.IsAllowedAnonymousAction) { <text> disabled="disabled" </text>  }>
                             <span class="glyphicon glyphicon-download"></span>&emsp;Download file
-                        </button>
+                        </button>&emsp;
+                        @if (Model.IsAuthenticated && !Model.IsOwner && !Model.IsSubscribed)
+                        {
+                            <a class="btn btn-danger btn-subscribe" href="javascript:void(0)">
+                                <span class="glyphicon glyphicon-ok"></span>&emsp;Subscribe to file changes
+                            </a>
+                        }
+                        @if (Model.IsAuthenticated && !Model.IsOwner && Model.IsSubscribed)
+                        {
+                            <a class="btn btn-primary btn-unsubscribe" href="javascript:void(0)">
+                                <span class="glyphicon glyphicon-remove"></span>&emsp;Unsubscribe of file changes
+                            </a>
+                        }
                     </div>
                 </div>
+            </form>
+            <form id="subscribeForm" action="@Url.Action("ChangeSubscription")" method="POST">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+                <input type="hidden" name="page" value="@Model.PageNumber" />
+                <input type="hidden" name="subscription" />
             </form>
             <div id="commentsPanel"></div>
         </div>
@@ -95,3 +113,24 @@
 </div>
 
 @Scripts.Render("~/bundles/custom")
+
+<script type="text/javascript">
+    (function ($) {
+        var $subscribeButon = $('.btn-subscribe');
+        var $unsubscribeButon = $('.btn-unsubscribe');
+        var $subscribeForm = $('#subscribeForm');
+        var $subscription = $('input[name=subscription]', $subscribeForm);
+
+        $subscribeButon.on('click', function (event) {
+            event.preventDefault();
+            $subscription.val('Subscribe');
+            $subscribeForm.submit();            
+        });
+
+        $unsubscribeButon.on('click', function (event) {
+            event.preventDefault();
+            $subscription.val('Unsubscribe');
+            $subscribeForm.submit();
+        });
+    })(jQuery);
+</script>

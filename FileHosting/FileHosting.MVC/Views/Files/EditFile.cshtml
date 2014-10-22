@@ -2,6 +2,11 @@
 @model FileHosting.MVC.ViewModels.FileDetailsViewModel
 @{
     ViewBag.Title = "Edit file";
+    var users = Model.Users;
+    var downloads = Model.FileModel.Downloads;
+    var allowAnonymousBrowsing = Model.FileModel.IsAllowedAnonymousBrowsing;
+    var allowAnonymousAction = Model.FileModel.IsAllowedAnonymousAction;
+    var allowedUsers = Model.FileModel.AllowedUsers;    
 }
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
@@ -53,13 +58,15 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileTags">Tags:</label>
                     <div class="col-md-10">
-                        <textarea class="form-control" id="fileTags" name="fileTags" rows="3">@Model.FileModel.Tags</textarea>
+                        <textarea class="form-control" id="fileTags" name="fileTags" rows="3" data-val-required="Tags cannot be empty!" data-val="true">@Model.FileModel.Tags</textarea>
+                        <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="fileTags"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileDescription">Description:</label>
                     <div class="col-md-10">
-                        <textarea class="form-control" id="fileDescription" name="fileDescription" rows="5">@Model.FileModel.Description</textarea>
+                        <textarea class="form-control" id="fileDescription" name="fileDescription" rows="3" data-val-required="A description cannot be empty!" data-val="true">@Model.FileModel.Description</textarea>
+                        <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="fileDescription"></span>
                     </div>
                 </div>
                 <div class="form-group">
@@ -78,23 +85,57 @@
                     <label class="col-md-2 control-label" for="fileStatistics">Statistics:</label>
                     <div class="col-md-10">
                         <div class="form-control-static" id="fileStatistics">
-                            The file has been downloaded for <strong>@Model.FileModel.Downloads.Count</strong> times:
-                            @if (Model.FileModel.Downloads.Any())
+                            The file has been downloaded for <strong>@downloads.Count</strong> time(s):
+                            @if (downloads.Any())
                             {
                                 <ul>
-                                    <li>By registered users – <strong>@Model.FileModel.Downloads.Count(d => d.User != null)</strong></li>
-                                    <li>By anonymous users – <strong>@Model.FileModel.Downloads.Count(d => d.User == null)</strong></li>
+                                    <li>By registered users – <strong>@downloads.Count(d => d.User != null)</strong></li>
+                                    <li>By anonymous users – <strong>@downloads.Count(d => d.User == null)</strong></li>
                                 </ul>
                             }
                         </div>
                     </div>
                 </div>
+                <hr />
+                <div class="form-group">                    
+                    <div class="col-md-offset-2 col-md-10">
+                        <label>
+                            <strong>File is allowed to browse:</strong>
+                        </label>
+                        <br />
+                        <label class="radio-inline">
+                            <input type="radio" name="browsingPermission" id="browsingPermission1" value="@FileBrowsingPermission.AllUsers" @if (!allowedUsers.Any() && allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To all users
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="browsingPermission" id="browsingPermission2" value="@FileBrowsingPermission.RegisteredUsers" @if (!allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To registered users
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="browsingPermission" id="browsingPermission3" value="@FileBrowsingPermission.SpecificUsers" @if (allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To specific users
+                        </label>
+                        <div class="checkbox-inline @if (!allowAnonymousBrowsing){ <text>display-none</text> }" id="anonymousAction">
+                            <label>
+                                <input type="checkbox" @if (allowAnonymousAction) { <text> checked="checked" </text> } />
+                                <input type="hidden" name="allowAnonymousAction" @if (allowAnonymousAction) { <text> value="true" </text> } else { <text> value="false" </text> } />
+                                <strong>Allow to anonymous users to download this file and write comments to it?</strong>
+                            </label>
+                        </div>
+                        <div class="row-fluid @if (!allowedUsers.Any()){ <text>display-none</text> }" id="allowedUsers">                            
+                            <select class="form-control selectpicker" multiple data-width="100%" title="No users selected" name="allowedUsers[]">
+                                @foreach (var user in users)
+                                {
+                                    <option value="@user.Name" @if (allowedUsers.Select(r => r.Name).Contains(user.Name)) { <text> selected="selected" </text> }>@user.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <hr />
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
                         <button class="btn btn-success" type="submit">
                             <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
                         </button>&emsp;
-                        <a class="btn btn-default btn-cancel"href="javascript:void(0)">
+                        <a class="btn btn-default btn-cancel" href="javascript:void(0)">
                             <span class="glyphicon glyphicon-remove"></span>&emsp;Cancel changes
                         </a>&emsp;
                         <a class="btn btn-danger btn-delete-file" href="javascript:void(0)">
@@ -114,3 +155,35 @@
 </div>
 
 @Scripts.Render("~/bundles/custom")
+
+<script type="text/javascript">
+    (function ($) {
+        var $browsingPermission = $('input[name=browsingPermission]');
+        var $anonymousAction = $('#anonymousAction');
+        var $allowedUsers = $('#allowedUsers');
+        var $checkbox = $('input:checkbox', $anonymousAction);
+        var $input = $('input:hidden', $anonymousAction);
+
+        $browsingPermission.on('change', function (event) {
+            event.preventDefault();            
+            var $radio = $(this);
+            var value = $radio.val();
+            if (value === 'AllUsers') {
+                $allowedUsers.addClass('display-none');
+                $anonymousAction.removeClass('display-none');
+            } else if (value === 'RegisteredUsers') {
+                $anonymousAction.addClass('display-none');
+                $allowedUsers.addClass('display-none');
+            } else if (value === 'SpecificUsers') {
+                $anonymousAction.addClass('display-none');
+                $allowedUsers.removeClass('display-none');
+            }
+        });
+
+        $checkbox.on('change', function(event) {
+            event.preventDefault();
+            var value = $checkbox.prop('checked');
+            $input.val(value);
+        });
+    })(jQuery);
+</script>

@@ -21,6 +21,23 @@
         </button>
     </div>
 }
+@if (Model.IsAuthenticated || Model.IsAllowedAnonymousAction)
+{
+    <form action="@Url.Action("AddCommentToFile")" method="POST" role="form" id="newCommentForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="fileId" value="@Model.FileId" />
+        <div class="form-group">
+            <label class="control-label" for="newCommentText">Add your comment:</label>
+            <textarea class="form-control" id="newCommentText" name="newCommentText" rows="5" data-val-required="A comment cannot be empty!" data-val="true"></textarea>
+            <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newCommentText"></span>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-success width-200" id="addCommentButton">
+                <span class="glyphicon glyphicon-plus"></span>&emsp;Add comment
+            </button>
+        </div>
+    </form>
+}
 @if (Model.Comments != null && Model.Comments.Any())
 {
     foreach (var comment in Model.Comments)
@@ -70,20 +87,6 @@ else
         <strong>There are no any comments yet!</strong>
     </div>
 }
-
-<form action="@Url.Action("AddCommentToFile")" method="POST" role="form" id="newCommentForm">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="fileId" value="@Model.FileId" />
-    <div class="form-group">
-        <label class="control-label" for="newCommentText">Add your comment:</label>
-        <textarea class="form-control" id="newCommentText" name="newCommentText" rows="5"></textarea>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-success width-200" id="addCommentButton">
-            <span class="glyphicon glyphicon-plus"></span>&emsp;Add comment
-        </button>
-    </div>
-</form>
 
 <script type="text/javascript">
     (function ($) {

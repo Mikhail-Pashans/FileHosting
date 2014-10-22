@@ -1,4 +1,5 @@
-﻿using FileHosting.Database.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using FileHosting.Database.Models;
 using System;
 using System.Collections.Generic;
 
@@ -8,8 +9,8 @@ namespace FileHosting.Domain.Models
     {        
         public int Id { get; set; }
         public string Name { get; set; }
-        public Section Section { get; set; }
-        public string Tags { get; set; }
+        public Section Section { get; set; }              
+        public string Tags { get; set; }        
         public string Description { get; set; }        
         
         private DateTime _uploaDate;
@@ -20,7 +21,6 @@ namespace FileHosting.Domain.Models
         }
 
         private long _size;
-
         public decimal Size
         {
             get { return decimal.Round((decimal) _size/1024, 2); }
@@ -29,7 +29,8 @@ namespace FileHosting.Domain.Models
         public string Path { get; set; }
         public User Owner { get; set; }
         public List<Download> Downloads { get; set; }
-        public bool IsAllowedAnonymousBrowsing { get; set; }
+        public bool IsAllowedAnonymousBrowsing { get; set; }        
         public bool IsAllowedAnonymousAction { get; set; }
+        public List<User> AllowedUsers { get; set; }
     }    
 }

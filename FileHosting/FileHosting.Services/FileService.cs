@@ -21,19 +21,55 @@ namespace FileHosting.Services
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
         }
 
-        public List<FileModel> GetFilesForSection(int sectionId)
+        public List<FileModel> GetFilesForSection(int sectionId, User user)
         {
-            return _context.FileRepository.Find(f => f.Section.Id == sectionId)
-                .Select(f => new FileModel
+            if (user == null)
+            {
+                return _context.FileRepository.Find(f => f.Section.Id == sectionId && f.IsAllowedAnonymousBrowsing)
+                    .Select(f => new FileModel
+                    {
+                        Id = f.Id,
+                        Section = f.Section,
+                        Name = f.Name,
+                        Size = f.Size,
+                        UploadDate = f.UploadDate,
+                        IsAllowedAnonymousAction = f.IsAllowedAnonymousAction
+                    })
+                    .OrderByDescending(f => f.Id)
+                    .ToList();
+            }
+
+            var files = _context.FileRepository.Find(f => f.Section.Id == sectionId);
+            var fileModels = new List<FileModel>();
+            
+            foreach (var file in files)
+            {
+                if (file.AllowedUsers.Any())
                 {
-                    Id = f.Id,
-                    Section = f.Section,
-                    Name = f.Name,
-                    Size = f.Size,
-                    UploadDate = f.UploadDate
-                })
-                .OrderByDescending(f => f.Id)
-                .ToList();
+                    if (file.AllowedUsers.Contains(user) || file.Owner == user)
+                        fileModels.Add(new FileModel
+                        {
+                            Id = file.Id,
+                            Section = file.Section,
+                            Name = file.Name,
+                            Size = file.Size,
+                            UploadDate = file.UploadDate
+                        });
+                }
+                else
+                {
+                    fileModels.Add(new FileModel
+                    {
+                        Id = file.Id,
+                        Section = file.Section,
+                        Name = file.Name,
+                        Size = file.Size,
+                        UploadDate = file.UploadDate
+                    });
+                }
+            }
+
+            return fileModels.OrderByDescending(f => f.Id).ToList();
         }
 
         public List<FileModel> GetFilesForUser(int userId)
@@ -93,13 +129,14 @@ namespace FileHosting.Services
                     Name = file.Name,
                     Section = file.Section,
                     Tags = file.Tags.Any() ? file.Tags.ToTagsString() : "",
-                    Description = string.IsNullOrWhiteSpace(file.Description) ? "" : file.Description,
+                    Description = !string.IsNullOrWhiteSpace(file.Description) ? file.Description : "",
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
                     Downloads = file.Downloads.ToList(),
                     IsAllowedAnonymousBrowsing = file.IsAllowedAnonymousBrowsing,
-                    IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
+                    IsAllowedAnonymousAction = file.IsAllowedAnonymousAction,
+                    AllowedUsers = file.AllowedUsers.ToList()
                 }
                 : new FileModel
                 {
@@ -111,8 +148,7 @@ namespace FileHosting.Services
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
-                    Owner = file.Owner,
-                    IsAllowedAnonymousBrowsing = file.IsAllowedAnonymousBrowsing,
+                    Owner = file.Owner,                    
                     IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
                 };
         }
@@ -161,7 +197,7 @@ namespace FileHosting.Services
                 System.IO.File.Delete(filePath);
         }
 
-        public void ChangeFile(File file, string fileTagsString, string fileDescription)
+        public void ChangeFile(File file, string fileTagsString, string fileDescription, bool allowAnonymousBrowsing, bool allowAnonymousAction, string[] allowedUsers)
         {
             _context.FileRepository.Attach(file);
 
@@ -196,20 +232,63 @@ namespace FileHosting.Services
                 file.Tags.Clear();
             }
 
+            if (allowedUsers != null)
+            {
+                var existingUsers = _context.UserRepository.GetAll().ToArray();
+
+                foreach (var existingUser in existingUsers)
+                {
+                    if (allowedUsers.Contains(existingUser.Name))
+                    {
+                        if (!file.AllowedUsers.Contains(existingUser))
+                            file.AllowedUsers.Add(existingUser);
+                    }
+                    else
+                    {
+                        if (file.AllowedUsers.Contains(existingUser))
+                            file.AllowedUsers.Remove(existingUser);
+                    }
+                }                
+            }
+            else
+            {
+                file.AllowedUsers.Clear();
+            }
+
             file.Description = fileDescription;
+            file.IsAllowedAnonymousBrowsing = allowAnonymousBrowsing;
+            file.IsAllowedAnonymousAction = allowAnonymousAction;
 
             _context.Commit();
         }
 
-        public List<CommentModel> GetCommentsForFile(int fileId, bool isForFileOwner)
+        public void ChangeSubscription(File file, User user, bool subscribe)
         {
-            var comments = isForFileOwner
-                ? _context.CommentRepository.Find(c => c.File.Id == fileId).ToArray()
-                : _context.CommentRepository.Find(c => c.File.Id == fileId && c.IsActive).ToArray();
-            
-            if (!comments.Any())
-                return null;
+            _context.FileRepository.Attach(file);
 
+            if (subscribe)
+            {
+                if (!file.SubscribedUsers.Contains(user))
+                    file.SubscribedUsers.Add(user);
+            }
+            else
+            {
+                if (file.SubscribedUsers.Contains(user))
+                    file.SubscribedUsers.Remove(user);
+            }            
+
+            _context.Commit();
+        }
+
+        public List<CommentModel> GetCommentsForFile(File file, bool isForFileOwner)
+        {
+            if (file == null || !file.Comments.Any())
+                return null;
+            
+            var comments = isForFileOwner
+                ? file.Comments.ToArray()
+                : file.Comments.Where(c => c.IsActive).ToArray();
+            
             var commentModelList = new List<CommentModel>(comments.Length);
             commentModelList.AddRange(comments.OrderBy(c => c.Id).Select((c, i) => new CommentModel
             {
@@ -279,6 +358,6 @@ namespace FileHosting.Services
             }
 
             return true;
-        }
+        }        
     }
 }

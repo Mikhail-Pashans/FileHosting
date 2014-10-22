@@ -1,11 +1,10 @@
-﻿using System;
-using System.Globalization;
-using FileHosting.Domain.Enums;
+﻿using FileHosting.Domain.Enums;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Security;
@@ -195,9 +194,9 @@ namespace FileHosting.MVC.Controllers
                 myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit", amountLimit.ToString(CultureInfo.InvariantCulture));
                 myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit", speedLimit.ToString(CultureInfo.InvariantCulture));
 
-                myConfiguration.Save();                                                                
+                myConfiguration.Save();                                               
             }
-            catch (NotSupportedException)
+            catch (ConfigurationErrorsException)
             {
                 result = false;
             }            

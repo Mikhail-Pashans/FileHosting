@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Web.Mvc;
 
 namespace FileHosting.Services
@@ -97,6 +99,38 @@ namespace FileHosting.Services
             }
             
             return true;
+        }
+
+        public void SendEmail(File file, string type)
+        {
+            if (!file.SubscribedUsers.Any())
+                return;
+            
+            const string email = "jolly.roger.1988@gmail.com";
+            const string password = "mike1988";
+
+            var loginInfo = new NetworkCredential(email, password);            
+            
+            var smtpClient = new SmtpClient("smtp.gmail.com", 587)
+            {
+                EnableSsl = true,
+                UseDefaultCredentials = false,
+                Credentials = loginInfo
+            };
+
+            foreach (var user in file.SubscribedUsers)
+            {
+                var msg = new MailMessage
+                {
+                    From = new MailAddress(email),
+                    Subject = "FileHosting notification",
+                    Body = type == "delete" ? string.Format("Dear, {0}, the file \"{1}\" was deleted by its owner.", user.Name, file.Name) : "",
+                    IsBodyHtml = true,                    
+                };
+                msg.To.Add(new MailAddress(user.Email));                
+
+                smtpClient.Send(msg);
+            }                                                
         }
     }
 }

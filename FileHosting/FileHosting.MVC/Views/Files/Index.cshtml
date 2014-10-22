@@ -48,7 +48,7 @@
                                         <input type="hidden" name="fileId" value="@file.Id" />
                                         <input type="hidden" name="section" value="@Model.SectionNumber" />
                                         <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
-                                        <button class="btn btn-success">
+                                        <button class="btn btn-success" @if (!Model.IsAuthenticated && !file.IsAllowedAnonymousAction) { <text>disabled="disabled"</text> }>
                                             <span class="glyphicon glyphicon-download"></span>&ensp;Download
                                         </button>
                                     </form>
