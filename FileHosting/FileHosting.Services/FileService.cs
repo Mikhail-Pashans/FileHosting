@@ -16,10 +16,16 @@ namespace FileHosting.Services
     {
         private readonly IUnitOfWork _context;
 
+        #region Constructor
+
         public FileService()
         {
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
         }
+
+        #endregion
+
+        #region Files
 
         public List<FileModel> GetFilesForSection(int sectionId, User user)
         {
@@ -41,7 +47,7 @@ namespace FileHosting.Services
 
             var files = _context.FileRepository.Find(f => f.Section.Id == sectionId);
             var fileModels = new List<FileModel>();
-            
+
             foreach (var file in files)
             {
                 if (file.AllowedUsers.Any())
@@ -87,37 +93,23 @@ namespace FileHosting.Services
                 .ToList();
         }
 
-        public File GetFileById(int fileId)
+        public File GetFileById(int fileId, User user)
         {
-            return _context.FileRepository.FirstOrDefault(f => f.Id == fileId);
-        }
+            var file = _context.FileRepository.GetById(fileId);
+            if (file == null)
+                return null;
 
-        public File GetFileToDownload(int fileId)
-        {
-            var file = GetFileById(fileId);
+            if (user == null)
+            {
+                return file.IsAllowedAnonymousBrowsing ? file : null;
+            }
+
+            if (file.AllowedUsers.Any())
+            {
+                return file.AllowedUsers.Contains(user) || file.Owner == user ? file : null;
+            }
 
             return file;
-        }
-
-        public bool WriteDownload(File file, User user)
-        {
-            _context.DownloadRepository.Add(new Download
-            {
-                Date = DateTime.UtcNow,
-                File = file,
-                User = user
-            });
-
-            try
-            {
-                _context.Commit();
-            }
-            catch (DataException)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         public FileModel GetModelForFile(File file, bool isAuthenticated)
@@ -148,7 +140,7 @@ namespace FileHosting.Services
                     UploadDate = file.UploadDate,
                     Size = file.Size,
                     Path = file.Path,
-                    Owner = file.Owner,                    
+                    Owner = file.Owner,
                     IsAllowedAnonymousAction = file.IsAllowedAnonymousAction
                 };
         }
@@ -197,12 +189,12 @@ namespace FileHosting.Services
                 System.IO.File.Delete(filePath);
         }
 
-        public void ChangeFile(File file, string fileTagsString, string fileDescription, bool allowAnonymousBrowsing, bool allowAnonymousAction, string[] allowedUsers)
+        public void ChangeFile(File file, string fileTagsString, string newFileDescription, bool allowAnonymousBrowsing, bool allowAnonymousAction, string[] allowedUsers)
         {
             _context.FileRepository.Attach(file);
 
             var newFileTags = fileTagsString.ToTagsArray();
-            
+
             if (newFileTags != null)
             {
                 var fileTags = new List<Tag>(newFileTags.Length);
@@ -218,9 +210,9 @@ namespace FileHosting.Services
                     else
                     {
                         var newTag = new Tag { Name = newFileTag, Files = new List<File>() };
-                        
+
                         _context.TagRepository.Add(newTag);
-                        
+
                         fileTags.Add(newTag);
                     }
                 }
@@ -248,18 +240,39 @@ namespace FileHosting.Services
                         if (file.AllowedUsers.Contains(existingUser))
                             file.AllowedUsers.Remove(existingUser);
                     }
-                }                
+                }
             }
             else
             {
                 file.AllowedUsers.Clear();
             }
 
-            file.Description = fileDescription;
+            file.Description = newFileDescription;
             file.IsAllowedAnonymousBrowsing = allowAnonymousBrowsing;
             file.IsAllowedAnonymousAction = allowAnonymousAction;
 
             _context.Commit();
+        }
+
+        public bool WriteDownload(File file, User user)
+        {
+            _context.DownloadRepository.Add(new Download
+            {
+                Date = DateTime.UtcNow,
+                File = file,
+                User = user
+            });
+
+            try
+            {
+                _context.Commit();
+            }
+            catch (DataException)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void ChangeSubscription(File file, User user, bool subscribe)
@@ -275,20 +288,24 @@ namespace FileHosting.Services
             {
                 if (file.SubscribedUsers.Contains(user))
                     file.SubscribedUsers.Remove(user);
-            }            
+            }
 
             _context.Commit();
         }
+
+        #endregion
+
+        #region Comments
 
         public List<CommentModel> GetCommentsForFile(File file, bool isForFileOwner)
         {
             if (file == null || !file.Comments.Any())
                 return null;
-            
+
             var comments = isForFileOwner
                 ? file.Comments.ToArray()
                 : file.Comments.Where(c => c.IsActive).ToArray();
-            
+
             var commentModelList = new List<CommentModel>(comments.Length);
             commentModelList.AddRange(comments.OrderBy(c => c.Id).Select((c, i) => new CommentModel
             {
@@ -358,6 +375,8 @@ namespace FileHosting.Services
             }
 
             return true;
-        }        
+        }
+
+        #endregion                                
     }
 }

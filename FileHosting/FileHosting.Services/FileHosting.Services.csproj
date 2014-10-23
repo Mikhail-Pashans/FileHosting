@@ -78,7 +78,6 @@
     <Compile Include="Extensions\ServicesExtensions.cs" />
     <Compile Include="FileService.cs" />
     <Compile Include="HomeService.cs" />
-    <Compile Include="NewsService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

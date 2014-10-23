@@ -32,7 +32,7 @@ namespace FileHosting.Database
         }
 
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
-        {
+        {            
             return _dbSet.Where(predicate);
         }
 

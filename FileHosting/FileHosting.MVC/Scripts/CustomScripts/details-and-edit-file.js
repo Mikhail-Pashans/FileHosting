@@ -1,21 +1,21 @@
 ﻿(function ($) {
-    var $fileId = $('#fileId');
-    var $tagsElement = $('#fileTags');
-    var $descriptionElement = $('#fileDescription');
+    var $fileId = $('input[name=fileId]');
+    var $fileTags = $('#fileTags');
+    var $fileDescription = $('#fileDescription');
     var $commentsPanel = $('#commentsPanel');
     var $cancelButton = $('.btn-cancel');
     var $deleteFileButton = $('.btn-delete-file');
     var $deleteFileForm = $('#deleteFileForm');     
 
 
-    var fileId = $fileId.text();
-    var tagsValue = $tagsElement.val();
-    var descriptionValue = $descriptionElement.val();
+    var fileId = $fileId.val();
+    var tagsValue = $fileTags.val();
+    var descriptionValue = $fileDescription.val();
 
     $cancelButton.on('click', function (event) {
         event.preventDefault();
-        $tagsElement.val(tagsValue);
-        $descriptionElement.val(descriptionValue);
+        $fileTags.val(tagsValue);
+        $fileDescription.val(descriptionValue);
     });
 
     $deleteFileButton.on('click', function (event) {

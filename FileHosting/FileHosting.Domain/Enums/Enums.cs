@@ -22,4 +22,11 @@
         Subscribe = 0,
         Unsubscribe = 1
     }
+
+    public enum EmailType
+    {
+        FileDeleted = 0,
+        FileChanged = 1,
+        UserPasswordChanged = 2
+    }
 }

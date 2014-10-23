@@ -1,4 +1,5 @@
-﻿using FileHosting.Domain.Enums;
+﻿using System.Threading.Tasks;
+using FileHosting.Domain.Enums;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
@@ -56,8 +57,7 @@ namespace FileHosting.MVC.Controllers
 
             var viewModel = new AdminIndexViewModel
             {
-                Users = usersPerPages,
-                PageInfo = pageInfo,
+                Users = usersPerPages,                
                 TotalDownloadAmountLimit = totalDownloadAmountLimit,
                 TotalDownloadSpeedLimit = totalDownloadSpeedLimit,
                 Message = messageType.HasValue
@@ -72,7 +72,8 @@ namespace FileHosting.MVC.Controllers
                                     ? "Warning! Total download amount limit must be a number."
                                     : "Warning! Total download speed limit must be a number."
                     }
-                    : null
+                    : null,
+                PageInfo = pageInfo
             };
 
             return View(viewModel);
@@ -90,8 +91,7 @@ namespace FileHosting.MVC.Controllers
             var viewModel = new EditUserViewModel
             {
                 UserModel = user,
-                Roles = Roles.Provider.GetAllRoles(),
-                PageNumber = pageNumber,
+                Roles = Roles.Provider.GetAllRoles(),                
                 Message = messageType.HasValue
                     ? new Message
                     {
@@ -106,7 +106,8 @@ namespace FileHosting.MVC.Controllers
                                         ? "Warning! Download amount limit must be a number."
                                         : "Warning! Download speed limit must be a number."
                     }
-                    : null
+                    : null,
+                PageNumber = pageNumber
             };
 
             return View(viewModel);           
@@ -116,6 +117,10 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword, string downloadAmountLimit, string downloadSpeedLimit)
         {
+            var user = _homeService.GetUserById(userId, true);
+            if (user == null)
+                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
+            
             if (userRoles == null)
                 return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.C });
 
@@ -152,7 +157,9 @@ namespace FileHosting.MVC.Controllers
             {
                 result = ((MyMembershipProvider)Membership.Provider).ChangeUserPassword(userEmail, newUserPassword);
                 if (!result)
-                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B }); 
+                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
+                
+                _homeService.SendEmail(EmailType.UserPasswordChanged, new[] { user });
             }
 
             result = _homeService.SaveUserChanges(userId, amountLimit, speedLimit);
@@ -186,15 +193,7 @@ namespace FileHosting.MVC.Controllers
             
             try
             {
-                var myConfiguration = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration("~");
-                
-                myConfiguration.AppSettings.Settings.Remove("TotalDownloadAmountLimit");
-                myConfiguration.AppSettings.Settings.Remove("TotalDownloadSpeedLimit");
-
-                myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit", amountLimit.ToString(CultureInfo.InvariantCulture));
-                myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit", speedLimit.ToString(CultureInfo.InvariantCulture));
-
-                myConfiguration.Save();                                               
+                SetConfigurationValues(amountLimit, speedLimit);
             }
             catch (ConfigurationErrorsException)
             {
@@ -204,6 +203,22 @@ namespace FileHosting.MVC.Controllers
             return RedirectToAction("Index", new { page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
         }
 
-        #endregion        
+        #endregion
+
+        private Task SetConfigurationValues(decimal amountLimit, decimal speedLimit)
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                var myConfiguration = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration("~");
+
+                myConfiguration.AppSettings.Settings.Remove("TotalDownloadAmountLimit");
+                myConfiguration.AppSettings.Settings.Remove("TotalDownloadSpeedLimit");
+
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit", amountLimit.ToString(CultureInfo.InvariantCulture));
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit", speedLimit.ToString(CultureInfo.InvariantCulture));
+
+                myConfiguration.Save();
+            });
+        }
     }
 }

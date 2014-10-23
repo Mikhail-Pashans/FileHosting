@@ -16,17 +16,57 @@
     </ul>
     <br />
     <div class="panel panel-primary no-margin">
-        <div class="panel-heading">
-            <h2 class="panel-title">News</h2>
-        </div>
         <div class="panel-body">
+            @if (Model.IsModerator)
+            {
+                <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new { page = Model.PageInfo.PageNumber })">
+                    <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
+                </a>
+                <br />
+                <br />
+            }
             @if (Model.News != null && Model.News.Any())
             {
+                <div class="panel-group no-margin" id="accordion">
+                    @for (var i = 0; i < Model.News.Count; i++)
+                    {
+                        <div class="panel panel-info no-margin">
+                            <div class="panel-heading">
+                                <div class="panel-title">
+                                    <strong>
+                                        @Model.News[i].PublishDate
+                                    </strong>
+                                    @if (Model.IsModerator)
+                                    {
+                                        <div class="pull-right">
+                                            <a class="close" href="@Url.Action("EditNews", new { newsId = Model.News[i].Id, page = Model.PageInfo.PageNumber })" data-toggle="tooltip" data-placement="top" title="Edit news">
+                                                <span class="glyphicon glyphicon-pencil"></span>
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                                <a data-toggle="collapse" data-parent="#accordion" href="#@Model.News[i].Id">
+                                    <h4>@Model.News[i].Name</h4>
+                                </a>
+                            </div>
+                            <div id="@Model.News[i].Id" class="panel-collapse collapse @if (i == 0){ <text>in</text> }">
+                                <div class="panel-body">
+                                    <img class="img-rounded thumbnail" src="@Model.News[i].Picture" alt="A picture to the news">
+                                    <div>@Model.News[i].Text</div>
+                                </div>
+                            </div>
+                        </div>
+                        if (i != Model.News.Count - 1)
+                        {
+                            <br />
+                        }
+                    }                    
+                </div>
             }
             else
             {
                 <div class="alert alert-danger no-margin text-center" role="alert">
-                    <strong>There are no any published news!</strong>                    
+                    <strong>There are no any published news!</strong>
                 </div>
             }
         </div>
@@ -40,3 +80,11 @@
         @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
     }
 </div>
+
+@*<script type="text/javascript">
+        (function ($) {
+            var $editButtons = $('.close');
+
+            $editButtons.tooltip();
+        })(jQuery);
+    </script>*@

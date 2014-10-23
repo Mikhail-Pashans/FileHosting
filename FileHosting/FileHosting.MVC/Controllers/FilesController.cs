@@ -38,7 +38,7 @@ namespace FileHosting.MVC.Controllers
         [AllowAnonymous]
         public ActionResult Index(int? section, int? page)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
             var fileSectionDictionary = _homeService.GetFileSectionsDictianary();
@@ -72,11 +72,11 @@ namespace FileHosting.MVC.Controllers
 
             var viewModel = new FilesIndexViewModel
             {
-                Files = filesPerPages,
-                PageInfo = pageInfo,
                 FileSectionDictionary = fileSectionDictionary,
-                SectionNumber = sectionNumber,
-                IsAuthenticated = user != null
+                Files = filesPerPages,
+                IsAuthenticated = user != null,
+                SectionNumber = sectionNumber,                
+                PageInfo = pageInfo
             };
 
             return View(viewModel);
@@ -85,9 +85,6 @@ namespace FileHosting.MVC.Controllers
         [HttpGet]
         public ActionResult UserFiles(int? page)
         {
-            if (!User.Identity.IsAuthenticated)
-                return RedirectToAction("Index", "Home");
-
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
@@ -115,9 +112,9 @@ namespace FileHosting.MVC.Controllers
 
             var viewModel = new UserFilesViewModel
             {
+                FileSectionsDictionary = fileSectionsDictionary,
                 Files = filesPerPages,
-                PageInfo = pageInfo,
-                FileSectionsDictionary = fileSectionsDictionary
+                PageInfo = pageInfo               
             };
 
             return View(viewModel);
@@ -126,7 +123,7 @@ namespace FileHosting.MVC.Controllers
         [HttpGet]
         public ActionResult UploadNewFiles(int? page)
         {
-            if (!User.Identity.IsAuthenticated && ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+            if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
 
             var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
@@ -146,11 +143,8 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult UploadNewFiles(FineUpload upload, string extraParam1, int? extraParam2)
         {
-            if (!User.Identity.IsAuthenticated)
-                return RedirectToAction("Index", "Home");
-
-            var owner = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            if (owner == null)
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            if (user == null)
                 return RedirectToAction("Index", "Home");
 
             var fileName = Path.GetFileNameWithoutExtension(upload.FileName);
@@ -162,11 +156,11 @@ namespace FileHosting.MVC.Controllers
 
             var fileSectionNumber = int.Parse(upload.FileSection);
 
-            var ipAdress = ConfigurationManager.AppSettings.Get("Server");
+            var ipAddress = ConfigurationManager.AppSettings.Get("Server");
 
             var filePath = string.Format(@"UploadedFiles\{0}\{1}", fileSectionNumber, fullName);
 
-            var pathToSave = Path.Combine(ipAdress, filePath);
+            var pathToSave = Path.Combine(ipAddress, filePath);
             if (System.IO.File.Exists(pathToSave))
                 return new FineUploaderResult(false, error: "The same file is already exists!");
 
@@ -178,7 +172,7 @@ namespace FileHosting.MVC.Controllers
 
             try
             {
-                _fileService.AddFile(fileName + fileExtension, fullName, fileSize, filePath, ipAdress, fileSection, owner);
+                _fileService.AddFile(fileName + fileExtension, fullName, fileSize, filePath, ipAddress, fileSection, user);
             }
             catch (DataException ex)
             {
@@ -193,10 +187,12 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DownloadFile(int fileId, int section, int page)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
-            var file = _fileService.GetFileToDownload(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
@@ -207,8 +203,7 @@ namespace FileHosting.MVC.Controllers
             var totalDownloadSpeedLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
             const decimal divider = 1048576; // 1024 * 1024
             decimal currentDownloadAmount;
-            
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
             if (user == null)
             {
                 if (totalDownloadAmountLimit != 0)
@@ -229,13 +224,13 @@ namespace FileHosting.MVC.Controllers
                         : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
                 }
 
-                _fileService.WriteDownload(file, null);                
-                
+                _fileService.WriteDownload(file, null);
+
                 return totalDownloadSpeedLimit != 0
                     ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
                     : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
-            }                                    
-            
+            }
+
             if (user.Downloads.Any())
             {
                 var downloadsSum = user.Downloads.Sum(d => d.File.Size);
@@ -246,7 +241,7 @@ namespace FileHosting.MVC.Controllers
                     if (currentDownloadAmount > user.DownloadAmountLimit)
                         return RedirectToAction("FileDetails", new { fileId, section, page, messageType = ViewModelsMessageType.D });
                 }
-                    
+
                 if (totalDownloadAmountLimit != 0)
                 {
                     if (currentDownloadAmount > totalDownloadAmountLimit)
@@ -254,7 +249,7 @@ namespace FileHosting.MVC.Controllers
                 }
 
                 _fileService.WriteDownload(file, user);
-                
+
                 return user.DownloadSpeedLimit != 0
                     ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
                     : totalDownloadSpeedLimit != 0
@@ -271,7 +266,7 @@ namespace FileHosting.MVC.Controllers
             }
 
             _fileService.WriteDownload(file, user);
-            
+
             return totalDownloadSpeedLimit != 0
                 ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, System.Net.Mime.MediaTypeNames.Application.Octet)
                 : File(pathToFile, System.Net.Mime.MediaTypeNames.Application.Octet, file.Name);
@@ -281,10 +276,12 @@ namespace FileHosting.MVC.Controllers
         [AllowAnonymous]
         public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
@@ -292,13 +289,9 @@ namespace FileHosting.MVC.Controllers
 
             var pageNumber = (page ?? 1);
 
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-
             var viewModel = new FileDetailsViewModel
             {
-                FileModel = _fileService.GetModelForFile(file, false),
-                SectionNumber = sectionNumber,
-                PageNumber = pageNumber,
+                FileModel = _fileService.GetModelForFile(file, false),                
                 IsAuthenticated = user != null,
                 IsSubscribed = user != null && file.SubscribedUsers.Contains(user),
                 IsOwner = user != null && file.Owner == user,
@@ -311,14 +304,16 @@ namespace FileHosting.MVC.Controllers
                             : messageType == ViewModelsMessageType.B
                                 ? "Error! Comment was not added."
                                 : messageType == ViewModelsMessageType.C
-                                    ? "Warning! Comment cannot be empty."                                    
+                                    ? "Warning! Comment cannot be empty."
                                     : messageType == ViewModelsMessageType.D
                                         ? "Warning! You have exceeded the download amount limit. File will not be downloaded."
                                         : messageType == ViewModelsMessageType.E
                                             ? "Success! You are subscribed to file changes."
                                             : "Succes! You are not subscribed to file changes."
                     }
-                    : null
+                    : null,
+                SectionNumber = sectionNumber,
+                PageNumber = pageNumber
             };
 
             return View(viewModel);
@@ -328,12 +323,13 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ChangeSubscription(int fileId, int page, SubscribeActionType subscription)
         {
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
-
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            if (!User.Identity.IsAuthenticated || user == null || user.Files.Contains(file))
+            
+            if (user == null || user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
             try
@@ -351,12 +347,13 @@ namespace FileHosting.MVC.Controllers
         [HttpGet]
         public ActionResult EditFile(int fileId, int? page, ViewModelsMessageType? messageType)
         {
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
+            if (user == null || !user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
             var pageNumber = (page ?? 1);
@@ -365,7 +362,6 @@ namespace FileHosting.MVC.Controllers
             {
                 FileModel = _fileService.GetModelForFile(file, true),
                 Users = _homeService.GetAllUsersList(),
-                PageNumber = pageNumber,
                 Message = messageType.HasValue
                     ? new Message
                     {
@@ -378,7 +374,8 @@ namespace FileHosting.MVC.Controllers
                                     ? "Error! File was not deleted."
                                     : "Warning! Tags and description cannot be empty."
                     }
-                    : null
+                    : null,
+                PageNumber = pageNumber
             };
 
             return View(viewModel);
@@ -388,16 +385,22 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult EditFile(int fileId, int page, string fileTags, string fileDescription, FileBrowsingPermission browsingPermission, bool allowAnonymousAction, string[] allowedUsers)
         {
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
+            if (user == null || !user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
             if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
                 return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.D });
+
+            var fileName = file.Name;            
+            var fileOwner = file.Owner.Name;
+            var fileSection = file.Section.Name;
+            var subscribedUsers = file.SubscribedUsers;
 
             try
             {
@@ -421,6 +424,9 @@ namespace FileHosting.MVC.Controllers
                 return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.B });
             }
 
+            if (subscribedUsers.Any())
+                _homeService.SendEmail(EmailType.FileChanged, subscribedUsers, fileName, fileOwner, fileSection);
+
             return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.A });
         }
 
@@ -428,25 +434,32 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteFile(int fileId, int page)
         {
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return HttpNotFound();
 
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            if (!User.Identity.IsAuthenticated || user == null || !user.Files.Contains(file))
+            if (user == null || !user.Files.Contains(file))
                 return RedirectToAction("Index", "Home");
 
             var ipAdress = ConfigurationManager.AppSettings.Get("Server");
+            var fileName = file.Name;
+            var fileOwner = file.Owner.Name;
+            var fileSection = file.Section.Name;
+            var subscribedUsers = file.SubscribedUsers;
 
             try
             {
-                _homeService.SendEmail(file, "delete");
                 _fileService.DeleteFile(file, ipAdress, false);
             }
             catch (DataException)
             {
                 return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.C });
             }            
+            
+            if (subscribedUsers.Any())
+                _homeService.SendEmail(EmailType.FileDeleted, subscribedUsers, fileName, fileOwner, fileSection);
             
             return RedirectToAction("UserFiles", new { page });
         }
@@ -455,15 +468,17 @@ namespace FileHosting.MVC.Controllers
         [AllowAnonymous]
         public ActionResult GetCommentsForFile(int fileId, int? page, ViewModelsMessageType? messageType)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            var isFileOwner = User.Identity.IsAuthenticated &&
-                user != null &&
-                user.Files.Select(f => f.Id).Contains(fileId);
 
-            var file = _fileService.GetFileById(fileId);
+            var file = _fileService.GetFileById(fileId, user);
+            if (file == null)
+                return HttpNotFound();
+
+            var isFileOwner = user != null && user.Files.Contains(file);
+
             var comments = _fileService.GetCommentsForFile(file, isFileOwner);
 
             var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("CommentsPageSize"));
@@ -481,20 +496,19 @@ namespace FileHosting.MVC.Controllers
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
 
-            var commentsPerPages = comments == null
-                ? null
-                : comments.Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var commentsPerPages = comments != null
+                ? comments.Skip((pageNumber - 1)*pageSize)
+                    .Take(pageSize)
+                    .ToList()
+                : null;
 
             var viewModel = new FileCommentsViewModel
             {
                 FileId = fileId,
                 Comments = commentsPerPages,
-                PageInfo = pageInfo,
                 IsFileOwner = isFileOwner,
                 IsAuthenticated = user != null,
-                IsAllowedAnonymousAction = file != null && file.IsAllowedAnonymousAction,
+                IsAllowedAnonymousAction = file.IsAllowedAnonymousAction,
                 Message = messageType.HasValue
                     ? new Message
                     {
@@ -509,7 +523,8 @@ namespace FileHosting.MVC.Controllers
                                         ? "Error! Comment was not deleted."
                                         : "Warning! Comment cannot be empty."
                     }
-                    : null
+                    : null,
+                PageInfo = pageInfo
             };
 
             return PartialView("_FileCommentsPartial", viewModel);
@@ -520,20 +535,18 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ViewModelsMessageType AddCommentToFile(int fileId, string newCommentText)
         {
-            if (User.Identity.IsAuthenticated && Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return ViewModelsMessageType.B;
 
-            var file = _fileService.GetFileById(fileId);
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+            
+            var file = _fileService.GetFileById(fileId, user);
             if (file == null)
                 return ViewModelsMessageType.B;
 
             if (string.IsNullOrWhiteSpace(newCommentText))
                 return ViewModelsMessageType.E;
 
-            var user = User.Identity.IsAuthenticated
-                ? ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name)
-                : null;
-            
             try
             {
                 _fileService.AddCommentToFile(newCommentText, file, user);
@@ -551,9 +564,8 @@ namespace FileHosting.MVC.Controllers
         public ViewModelsMessageType DeleteCommentFromFile(int fileId, int commentId)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            var isFileOwner = User.Identity.IsAuthenticated &&
-                user != null &&
-                user.Files.Select(f => f.Id).Contains(fileId);
+            
+            var isFileOwner = user != null && user.Files.Select(f => f.Id).Contains(fileId);
 
             return isFileOwner && _fileService.DeleteCommentFromFile(commentId)
                 ? ViewModelsMessageType.C
@@ -564,9 +576,8 @@ namespace FileHosting.MVC.Controllers
         public bool ChangeCommentState(int fileId, int commentId, bool isActive)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-            var isFileOwner = User.Identity.IsAuthenticated &&
-                user != null &&
-                user.Files.Select(f => f.Id).Contains(fileId);
+            
+            var isFileOwner = user != null && user.Files.Select(f => f.Id).Contains(fileId);
            
             return isFileOwner && _fileService.ChangeCommentState(commentId, isActive);
         }

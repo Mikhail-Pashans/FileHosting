@@ -154,9 +154,9 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\NewsController.cs" />
     <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Controllers\NewsController.cs" />
     <Compile Include="Extensions\MVCExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -170,6 +170,8 @@
     <Compile Include="Providers\MyMembershipProvider.cs" />
     <Compile Include="Providers\MyRoleProvider.cs" />
     <Compile Include="ViewModels\AdminIndexViewModel.cs" />
+    <Compile Include="ViewModels\AddNewsViewModel.cs" />
+    <Compile Include="ViewModels\EditNewsViewModel.cs" />
     <Compile Include="ViewModels\FileCommentsViewModel.cs" />
     <Compile Include="ViewModels\FileDetailsViewModel.cs" />
     <Compile Include="ViewModels\FilesIndexViewModel.cs" />
@@ -281,11 +283,12 @@
     <Content Include="Views\Files\UserFiles.cshtml" />
     <Content Include="Views\Files\_FileCommentsPartial.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
-    <Content Include="Views\News\Index.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Admin\Index.cshtml" />
     <Content Include="Views\Admin\EditUser.cshtml" />
     <Content Include="Views\Shared\_UnauthorizedAccessAttemp.cshtml" />
+    <Content Include="Views\Home\AddNews.cshtml" />
+    <Content Include="Views\Home\EditNews.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -84,6 +84,10 @@
     <Compile Include="Migrations\201410200955339_Change Users Table.Designer.cs">
       <DependentUpon>201410200955339_Change Users Table.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201410231411306_Add Name Field To News Table.cs" />
+    <Compile Include="Migrations\201410231411306_Add Name Field To News Table.Designer.cs">
+      <DependentUpon>201410231411306_Add Name Field To News Table.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Download.cs" />
@@ -112,6 +116,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201410200955339_Change Users Table.resx">
       <DependentUpon>201410200955339_Change Users Table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201410231411306_Add Name Field To News Table.resx">
+      <DependentUpon>201410231411306_Add Name Field To News Table.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

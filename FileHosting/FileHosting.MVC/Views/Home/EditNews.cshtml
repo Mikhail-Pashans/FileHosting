@@ -1,0 +1,107 @@
+﻿@using FileHosting.Domain.Enums
+@model FileHosting.MVC.ViewModels.EditNewsViewModel
+@{
+    ViewBag.Title = "Edit news";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model.PageNumber })">
+        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to news list
+    </a>
+    <br />
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            @if (Model.Message != null)
+            {
+                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                    ? "alert-success"
+                    : Model.Message.MessageType == ViewModelsMessageType.B
+                        ? "alert-danger"
+                        : "alert-warning";
+                <div class="alert @alertType alert-custom text-center" role="alert">
+                    <strong>@Model.Message.MessageText</strong>
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span aria-hidden="true">&times;</span>
+                        <span class="sr-only">Close</span>
+                    </button>
+                </div>
+            }
+            <form class="form-horizontal" action="@Url.Action("EditNews")" method="POST" enctype="multipart/form-data" role="form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="newsId" value="@Model.NewsModel.Id" />
+                <input type="hidden" name="page" value="@Model.PageNumber" />
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="newsId">#:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="newsId">@Model.NewsModel.Id</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="newsName">Name:</label>
+                    <div class="col-md-10">
+                        <input class="form-control" type="text" id="newsName" name="newsName" data-val-required="A name cannot be empty!" data-val="true" value="@Model.NewsModel.Name" />
+                        <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newsName"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="newsText">Text:</label>
+                    <div class="col-md-10">
+                        <textarea class="form-control" id="newsText" name="newsText" rows="10" data-val-required="A text cannot be empty!" data-val="true">@Model.NewsModel.Text</textarea>
+                        <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newsText"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="newsPicture">Picture:</label>
+                    <div class="col-md-10">
+                        <img class="img-thumbnail thumbnail" src="@Model.NewsModel.Picture" alt="A picture to the news" id="newsPicture" />
+                        <div class="clearfix"></div>
+                        <div class="checkbox-inline">
+                            <label>
+                                <input class="activator" type="checkbox">
+                                <strong>Change news picture?</strong>
+                            </label>
+                        </div>
+                        <div>
+                            <input class="form-control" type="file" id="newNewsPicture" name="newNewsPicture" data-val-required="A picture cannot be empty!" data-val="true" disabled="disabled" />
+                            <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newNewsPicture"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="newsPublishDate">Publish date:</label>
+                    <div class="col-md-10">
+                        <div class="form-control-static" id="newsPublishDate">@Model.NewsModel.PublishDate</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button type="submit" class="btn btn-success width-200">
+                            <span class="glyphicon glyphicon-save"></span>&emsp;Save news changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    (function ($) {
+        var $checkbox = $('.activator');
+
+        $checkbox.on('change', function (event) {
+            event.preventDefault();            
+            var $input = $checkbox.parent().parent().parent().find('.form-control');
+            var isChecked = $checkbox.prop('checked');
+            if (isChecked) {
+                $input.removeAttr('disabled');
+                $input.focus();
+            } else {
+                $input.val('');
+                $input.attr("disabled", "disabled");
+            }
+        });
+    })(jQuery);
+</script>

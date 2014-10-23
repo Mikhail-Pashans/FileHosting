@@ -122,3 +122,16 @@ hr {
 #allowedUsers {
     margin-top: 12px !important;
 }
+
+.image {
+    width: 786px !important;
+    height: 786px !important;
+}
+
+.thumbnail {
+    width: 140px !important;
+    height: 140px !important;
+    float: left !important;
+    margin-right: 15px !important;
+    margin-bottom: 15px !important;
+}

@@ -39,7 +39,7 @@
     </form>
 }
 @if (Model.Comments != null && Model.Comments.Any())
-{
+{    
     foreach (var comment in Model.Comments)
     {
         <div class="panel @if (comment.IsActive) { <text>panel-info</text> } else { <text>panel-danger</text> }">
