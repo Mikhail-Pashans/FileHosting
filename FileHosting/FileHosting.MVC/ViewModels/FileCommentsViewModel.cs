@@ -10,7 +10,7 @@ namespace FileHosting.MVC.ViewModels
         public bool IsFileOwner { get; set; }
         public bool IsAuthenticated { get; set; }
         public bool IsAllowedAnonymousAction { get; set; }
-        public PageInfo PageInfo { get; set; }        
         public Message Message { get; set; }
+        public PageInfo PageInfo { get; set; }
     }
 }

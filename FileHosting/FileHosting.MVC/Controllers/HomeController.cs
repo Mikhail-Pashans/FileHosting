@@ -1,12 +1,10 @@
-﻿using System.Data;
-using FileHosting.Domain.Enums;
-using FileHosting.MVC.Infrastructure;
+﻿using FileHosting.Domain.Enums;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.Configuration;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web;

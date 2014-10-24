@@ -5,10 +5,10 @@ namespace FileHosting.MVC.ViewModels
 {
     public class FilesIndexViewModel
     {
-        public List<FileModel> Files { get; set; }
-        public PageInfo PageInfo { get; set; }
         public Dictionary<int, string> FileSectionDictionary { get; set; }
-        public int SectionNumber { get; set; }
+        public List<FileModel> Files { get; set; }
         public bool IsAuthenticated { get; set; }
+        public int SectionNumber { get; set; }
+        public PageInfo PageInfo { get; set; }        
     }
 }

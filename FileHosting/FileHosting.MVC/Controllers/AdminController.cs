@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using FileHosting.Domain.Enums;
+﻿using FileHosting.Domain.Enums;
 using FileHosting.MVC.Providers;
 using FileHosting.MVC.ViewModels;
 using FileHosting.Services;
@@ -7,6 +6,7 @@ using System.Configuration;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Security;
 
@@ -14,15 +14,13 @@ namespace FileHosting.MVC.Controllers
 {
     [Authorize(Roles = "Administrator")]
     public class AdminController : Controller
-    {        
-        private readonly FileService _fileService;
+    {                
         private readonly HomeService _homeService;
 
         #region Constructor
 
         public AdminController()
-        {
-            _fileService = new FileService();
+        {            
             _homeService = new HomeService();
         }
 
@@ -212,6 +210,8 @@ namespace FileHosting.MVC.Controllers
 
         #endregion
 
+        #region Private methods
+
         private Task SetConfigurationValues(decimal amountLimit, decimal speedLimit)
         {
             return Task.Factory.StartNew(() =>
@@ -227,5 +227,7 @@ namespace FileHosting.MVC.Controllers
                 myConfiguration.Save();
             });
         }
+
+        #endregion        
     }
 }

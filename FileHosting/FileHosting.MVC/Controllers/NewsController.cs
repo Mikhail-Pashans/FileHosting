@@ -12,10 +12,16 @@ namespace FileHosting.MVC.Controllers
     {        
         private readonly IUnitOfWork _context;
 
+        #region Constructor
+
         public NewsController()
-        {            
+        {
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
         }
+
+        #endregion
+
+        #region Actions
 
         //public IEnumerable<NewsModelJson> GetNewsInJson()
         //{
@@ -50,5 +56,7 @@ namespace FileHosting.MVC.Controllers
 
             return JsonConvert.SerializeObject(news);
         }
+
+        #endregion                
     }
 }
