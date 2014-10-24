@@ -9,27 +9,5 @@
             <h3>You have attempted to access a page that you are not authorized to view.</h3>
             <h3>If you have any questions, please contact the site administrator.</h3>
         </div>
-        
-        <div>
-            <h2>All news</h2>
-            <ul id="news"></ul>
-        </div>                       
     </div>
 </div>
-
-<script type="text/javascript">
-    var uri = 'api/news';
-
-    $(document).ready(function () {
-        // Send an AJAX request
-        $.getJSON(uri)
-            .done(function (data) {
-                // On success, 'data' contains a list of products.
-                $.each(data, function (key, item) {
-                    // Add a list item for the product.
-                    $('<li>', { text: item.Name }).appendTo($('#news'));
-                });
-            });
-    });
-    
-</script>

@@ -48,6 +48,8 @@ namespace FileHosting.MVC.Controllers
             };
 
             var pageNumber = (page ?? 1);
+            if (pageNumber < 1)
+                pageNumber = 1;
             if (pageNumber > pageInfo.TotalPages)
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;

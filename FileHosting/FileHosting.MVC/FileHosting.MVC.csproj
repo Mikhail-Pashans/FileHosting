@@ -289,6 +289,7 @@
     <Content Include="Views\Shared\_UnauthorizedAccessAttemp.cshtml" />
     <Content Include="Views\Home\AddNews.cshtml" />
     <Content Include="Views\Home\EditNews.cshtml" />
+    <Content Include="Views\Admin\ViewRss.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

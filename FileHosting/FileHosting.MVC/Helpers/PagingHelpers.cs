@@ -18,7 +18,9 @@ namespace FileHosting.MVC.Helpers
             lastATag.AddCssClass("btn btn-default");
 
             firstATag.MergeAttribute("href", pageUrl(pageInfo.PageNumber - 1));
+            firstATag.MergeAttribute("role", "button");
             lastATag.MergeAttribute("href", pageUrl(pageInfo.PageNumber + 1));
+            lastATag.MergeAttribute("role", "button");
             
             if (pageInfo.PageNumber == 1)
             {
@@ -37,6 +39,7 @@ namespace FileHosting.MVC.Helpers
             {
                 var aTag = new TagBuilder("a") { InnerHtml = i.ToString(CultureInfo.InvariantCulture) };
                 aTag.MergeAttribute("href", pageUrl(i));
+                aTag.MergeAttribute("role", "button");
                 
                 if (i == pageInfo.PageNumber)
                 {

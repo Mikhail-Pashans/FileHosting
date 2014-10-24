@@ -80,18 +80,73 @@ namespace FileHosting.MVC.Controllers
             };
 
             return View(viewModel);
-        }
+        }        
 
         [HttpGet]
-        public ActionResult UserFiles(int? page)
+        public ActionResult UserFiles(string sortOrder, string currentFilter, string searchString, int? page)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
 
-            var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
+            var currentSort = sortOrder;
+            var idSortParm = sortOrder == "id" ? "id_desc" : "id";
+            var nameSortParm = sortOrder == "name" ? "name_desc" : "name";
+            var sectionSortParm = sortOrder == "section" ? "section_desc" : "section";
+            var sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
+            var dateSortParm = sortOrder == "date" ? "date_desc" : "date";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            currentFilter = searchString;
 
             var files = _fileService.GetFilesForUser(user.Id);
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                files = files.Where(f => f.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
+            }
+            switch (sortOrder)
+            {
+                case "id":
+                    files = files.OrderBy(f => f.Id).ToList();
+                    break;
+                case "id_desc":
+                    files = files.OrderByDescending(f => f.Id).ToList();
+                    break;
+                case "name":
+                    files = files.OrderBy(f => f.Name).ToList();
+                    break;                                
+                case "name_desc":
+                    files = files.OrderByDescending(f => f.Name).ToList();
+                    break;
+                case "section":
+                    files = files.OrderBy(f => f.Section).ToList();
+                    break;
+                case "section_desc":
+                    files = files.OrderByDescending(f => f.Section).ToList();
+                    break;
+                case "size":
+                    files = files.OrderBy(f => f.Size).ToList();
+                    break;
+                case "size_desc":
+                    files = files.OrderByDescending(f => f.Size).ToList();
+                    break;
+                case "date":
+                    files = files.OrderBy(f => f.UploadDate).ToList();
+                    break;
+                case "date_desc":
+                    files = files.OrderByDescending(f => f.UploadDate).ToList();
+                    break;                
+            }            
+
+            var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
 
             var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
 
@@ -114,7 +169,14 @@ namespace FileHosting.MVC.Controllers
             {
                 FileSectionsDictionary = fileSectionsDictionary,
                 Files = filesPerPages,
-                PageInfo = pageInfo               
+                IdSortParm = idSortParm,
+                NameSortParm = nameSortParm,
+                SectionSortParm = sectionSortParm,
+                SizeSortParm = sizeSortParm,
+                DateSortParm = dateSortParm,
+                CurrentSort = currentSort,
+                CurrentFilter = currentFilter,
+                PageInfo = pageInfo
             };
 
             return View(viewModel);
@@ -345,7 +407,7 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult EditFile(int fileId, int? page, ViewModelsMessageType? messageType)
+        public ActionResult EditFile(int fileId, string sortOrder, string currentFilter, int? page, ViewModelsMessageType? messageType)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             
@@ -375,6 +437,8 @@ namespace FileHosting.MVC.Controllers
                                     : "Warning! Tags and description cannot be empty."
                     }
                     : null,
+                CurrentSort = sortOrder,
+                CurrentFilter = currentFilter,
                 PageNumber = pageNumber
             };
 
@@ -383,7 +447,7 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditFile(int fileId, int page, string fileTags, string fileDescription, FileBrowsingPermission browsingPermission, bool allowAnonymousAction, string[] allowedUsers)
+        public ActionResult EditFile(int fileId, string sortOrder, string currentFilter, int page, string fileTags, string fileDescription, FileBrowsingPermission browsingPermission, bool allowAnonymousAction, string[] allowedUsers)
         {
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             
@@ -395,7 +459,7 @@ namespace FileHosting.MVC.Controllers
                 return RedirectToAction("Index", "Home");
 
             if (string.IsNullOrWhiteSpace(fileTags) || string.IsNullOrWhiteSpace(fileDescription))
-                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.D });
+                return RedirectToAction("EditFile", new { fileId, sortOrder, currentFilter, page, messageType = ViewModelsMessageType.D });
 
             var fileName = file.Name;            
             var fileOwner = file.Owner.Name;
@@ -421,13 +485,13 @@ namespace FileHosting.MVC.Controllers
             }
             catch (DataException)
             {
-                return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.B });
+                return RedirectToAction("EditFile", new { fileId, sortOrder, currentFilter, page, messageType = ViewModelsMessageType.B });
             }
 
             if (subscribedUsers.Any())
                 _homeService.SendEmail(EmailType.FileChanged, subscribedUsers, fileName, fileOwner, fileSection);
 
-            return RedirectToAction("EditFile", new { fileId, page, messageType = ViewModelsMessageType.A });
+            return RedirectToAction("EditFile", new { fileId, sortOrder, currentFilter, page, messageType = ViewModelsMessageType.A });
         }
 
         [HttpPost]

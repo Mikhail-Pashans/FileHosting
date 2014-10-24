@@ -203,6 +203,13 @@ namespace FileHosting.MVC.Controllers
             return RedirectToAction("Index", new { page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
         }
 
+        public ActionResult ViewRss(int? page)
+        {
+            var pageNumber = (page ?? 1);
+
+            return View(pageNumber);
+        }
+
         #endregion
 
         private Task SetConfigurationValues(decimal amountLimit, decimal speedLimit)

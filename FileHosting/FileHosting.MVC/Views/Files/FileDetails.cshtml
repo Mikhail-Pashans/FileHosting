@@ -6,10 +6,11 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary width-200" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber })">
-        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
-    </a>
-    <br />
+    <div>
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber })" role="button">
+            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+        </a>
+    </div>       
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
@@ -88,13 +89,13 @@
                         </button>&emsp;
                         @if (Model.IsAuthenticated && !Model.IsOwner && !Model.IsSubscribed)
                         {
-                            <a class="btn btn-danger btn-subscribe" href="javascript:void(0)">
+                            <a class="btn btn-danger btn-subscribe" href="javascript:void(0)" role="button">
                                 <span class="glyphicon glyphicon-ok"></span>&emsp;Subscribe to file changes
                             </a>
                         }
                         @if (Model.IsAuthenticated && !Model.IsOwner && Model.IsSubscribed)
                         {
-                            <a class="btn btn-primary btn-unsubscribe" href="javascript:void(0)">
+                            <a class="btn btn-primary btn-unsubscribe" href="javascript:void(0)" role="button">
                                 <span class="glyphicon glyphicon-remove"></span>&emsp;Unsubscribe of file changes
                             </a>
                         }

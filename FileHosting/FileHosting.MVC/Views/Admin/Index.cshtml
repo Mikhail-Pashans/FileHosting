@@ -3,10 +3,18 @@
 @model FileHosting.MVC.ViewModels.AdminIndexViewModel
 @{
     ViewBag.Title = "Administration";
+    var totalDownloadAmountLimit = Model.TotalDownloadAmountLimit;
+    var totalDownloadSpeedLimit = Model.TotalDownloadSpeedLimit;
 }
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
+    <div>
+        <a class="btn btn-primary width-200" href="@Url.Action("ViewRss", new { page = Model.PageInfo.PageNumber })" role="button">
+            <span class="glyphicon glyphicon-list-alt"></span>&emsp;View RSS
+        </a>
+    </div>
+    <br />
     <div class="panel panel-danger">
         <div class="panel-heading">
             Limits settings
@@ -28,10 +36,6 @@
                 </div>
             }
             <form class="form-inline" action="@Url.Action("SetLimits")" method="POST" role="form">                
-                @{
-                    var totalDownloadAmountLimit = Model.TotalDownloadAmountLimit;
-                    var totalDownloadSpeedLimit = Model.TotalDownloadSpeedLimit;
-                }
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
                 <div class="form-group">
@@ -94,7 +98,7 @@
                                 <td>@user.Email</td>
                                 <td>@user.CreationDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-warning" href="@Url.Action("EditUser", new { userId = user.Id, page = Model.PageInfo.PageNumber })">
+                                    <a class="btn btn-warning" href="@Url.Action("EditUser", new { userId = user.Id, page = Model.PageInfo.PageNumber })" role="button">
                                         <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
                                 </td>

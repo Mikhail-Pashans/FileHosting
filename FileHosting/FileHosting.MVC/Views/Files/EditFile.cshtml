@@ -11,10 +11,11 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { page = Model.PageNumber })">
-        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
-    </a>
-    <br />
+    <div>
+        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
+            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
+        </a>
+    </div>        
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
@@ -36,6 +37,8 @@
             <form class="form-horizontal" action="@Url.Action("EditFile")" method="POST" role="form">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+                <input type="hidden" name="sortOrder" value="@Model.CurrentSort" />
+                <input type="hidden" name="currentFilter" value="@Model.CurrentFilter" />
                 <input type="hidden" name="page" value="@Model.PageNumber" />
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="fileId">#:</label>
@@ -135,10 +138,10 @@
                         <button class="btn btn-success" type="submit">
                             <span class="glyphicon glyphicon-ok"></span>&emsp;Save changes
                         </button>&emsp;
-                        <a class="btn btn-default btn-cancel" href="javascript:void(0)">
+                        <a class="btn btn-default btn-cancel" href="javascript:void(0)" role="button">
                             <span class="glyphicon glyphicon-remove"></span>&emsp;Cancel changes
                         </a>&emsp;
-                        <a class="btn btn-danger btn-delete-file" href="javascript:void(0)">
+                        <a class="btn btn-danger btn-delete-file" href="javascript:void(0)" role="button">
                             <span class="glyphicon glyphicon-trash"></span>&emsp;Delete file
                         </a>
                     </div>

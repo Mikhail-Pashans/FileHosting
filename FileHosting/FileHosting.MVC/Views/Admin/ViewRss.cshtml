@@ -1,0 +1,154 @@
+﻿@model int
+@{
+    ViewBag.Title = "View Rss";
+}
+<h1 class="text-center">@ViewBag.Title</h1>
+<br />
+<div class="well well-custom">
+    <div>
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model })" role="button">
+            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to administration
+        </a>
+        <a class="btn btn-success width-200 pull-right" href="javascript:void(0)" id="showJsonLink" role="button" data-toggle="modal" data-target="#myModal">
+            <span class="glyphicon glyphicon-search"></span>&emsp;Show JSON
+        </a>
+    </div>
+    <br />
+    <div class="panel panel-primary no-margin">
+        <div class="panel-body">
+            <div class="panel-group no-margin" id="accordion"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">JSON</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Scripts.Render("~/bundles/bootstrap")
+
+<script type="text/javascript">
+    var uri = '/api/news';
+    var json;
+
+    (function ($) {
+        var $accordion = $('#accordion');
+        var $showJsonLink = $('#showJsonLink');
+        var $modal = $('#myModal');
+        var $modalBody = $('.modal-body', $modal);
+
+        $showJsonLink.on('click', function (event) {
+            event.preventDefault();
+            $modalBody.text(json);
+            $modal.modal('show');
+        });
+
+        $.get(uri)
+            .done(function (data) {
+                json = data;
+                data = JSON.parse(data);
+                $.each(data, function (key, item) {
+                    var $panel = $('<div>', { 'class': 'panel panel-success no-margin' });
+                    var $panelHeading = $('<div>', { 'class': 'panel-heading' });
+                    var $panelCollapse = key === 0
+                        ? $('<div>', { 'class': 'panel-collapse collapse in' })
+                        : $('<div>', { 'class': 'panel-collapse collapse' });
+                    var $panelTitle = $('<div>', { 'class': 'panel-title' });
+                    var $panelBody = $('<div>', { 'class': 'panel-body' });
+                    var $strong = $('<strong>', { text: item.PublishDate });
+                    var $a = $('<a>', {
+                        attr: {
+                            'data-toggle': 'collapse',
+                            'data-parent': '#accordion',
+                            'href': '#' + item.Id
+                        }
+                    });
+                    var $h4 = $('<h4>', { text: item.Name });
+                    var $img = $('<img>', {
+                        'class': 'img-rounded thumbnail',
+                        attr: {
+                            'src': '/' + item.Picture,
+                            'alt': 'A picture to the news'
+                        }
+                    });
+                    var $div = $('<div>', { text: item.Text });
+
+                    $strong.appendTo($panelTitle);
+                    $h4.appendTo($a);
+                    $panelTitle.appendTo($panelHeading);
+                    $a.appendTo($panelHeading);
+
+                    $img.appendTo($panelBody);
+                    $div.appendTo($panelBody);
+                    $panelBody.appendTo($panelCollapse);
+
+                    $panelHeading.appendTo($panel);
+                    $panelCollapse.appendTo($panel);
+
+                    $panel.appendTo($accordion);
+                    if (key !== data.length - 1) {
+                        $('<br />').appendTo($accordion);
+                    }
+                });
+            });
+
+        //$.getJSON(uri)
+        //    .done(function (data) {
+        //        alert(data);
+        //        $.each(data, function (key, item) {
+        //            var $panel = $('<div>', { 'class':  'panel panel-success no-margin' });
+        //            var $panelHeading = $('<div>', { 'class': 'panel-heading' });
+        //            //var $panelCollapse = key === 0
+        //            //    ? $('<div>', { 'class': 'panel-collapse collapse in' })
+        //            //    : $('<div>', { 'class': 'panel-collapse collapse' });
+        //            var $panelTitle = $('<div>', { 'class': 'panel-title' });
+        //            var $panelBody = $('<div>', { 'class': 'panel-body' });
+        //            var $strong = $('<strong>', { text: item.PublishDate });
+        //            var $a = $('<a>', {
+        //                attr: {
+        //                    'data-toggle': 'collapse',
+        //                    'data-parent': '#accordion',
+        //                    'href': '#' + item.Id
+        //                }
+        //            });
+        //            var $h4 = $('<h4>', { text: item.Name });
+        //            var $img = $('<img>', {
+        //                'class': 'img-rounded thumbnail',
+        //                attr: {
+        //                    'src': '/' + item.Picture,
+        //                    'alt': 'A picture to the news'
+        //                }
+        //            });
+        //            var $div = $('<div>', { text: item.Text });
+
+        //            $strong.appendTo($panelTitle);
+        //            $h4.appendTo($a);
+        //            $panelTitle.appendTo($panelHeading);
+        //            $a.appendTo($panelHeading);
+
+        //            $img.appendTo($panelBody);
+        //            $div.appendTo($panelBody);
+        //            $panelBody.appendTo($panelCollapse);
+
+        //            $panelHeading.appendTo($panel);
+        //            $panelCollapse.appendTo($panel);
+
+        //            $panel.appendTo($accordion);
+        //            if (key !== data.length - 1) {
+        //                $('<br />').appendTo($accordion);
+        //            }
+        //        });
+        //    });
+    })(jQuery);
+</script>

@@ -19,10 +19,11 @@
         <div class="panel-body">
             @if (Model.IsModerator)
             {
-                <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new { page = Model.PageInfo.PageNumber })">
-                    <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
-                </a>
-                <br />
+                <div>
+                    <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new { page = Model.PageInfo.PageNumber })" role="button">
+                        <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
+                    </a>
+                </div>                
                 <br />
             }
             @if (Model.News != null && Model.News.Any())
@@ -30,7 +31,7 @@
                 <div class="panel-group no-margin" id="accordion">
                     @for (var i = 0; i < Model.News.Count; i++)
                     {
-                        <div class="panel panel-info no-margin">
+                        <div class="panel panel-success no-margin">
                             <div class="panel-heading">
                                 <div class="panel-title">
                                     <strong>
@@ -49,7 +50,7 @@
                                     <h4>@Model.News[i].Name</h4>
                                 </a>
                             </div>
-                            <div id="@Model.News[i].Id" class="panel-collapse collapse @if (i == 0){ <text>in</text> }">
+                            <div class="panel-collapse collapse @if (i == 0){ <text>in</text> }" id="@Model.News[i].Id">
                                 <div class="panel-body">
                                     <img class="img-rounded thumbnail" src="@Model.News[i].Picture" alt="A picture to the news">
                                     <div>@Model.News[i].Text</div>
@@ -60,7 +61,7 @@
                         {
                             <br />
                         }
-                    }                    
+                    }
                 </div>
             }
             else
@@ -81,10 +82,12 @@
     }
 </div>
 
-@*<script type="text/javascript">
-        (function ($) {
-            var $editButtons = $('.close');
+@Scripts.Render("~/bundles/bootstrap")
 
-            $editButtons.tooltip();
-        })(jQuery);
-    </script>*@
+<script type="text/javascript">
+    (function ($) {
+        var $editButtons = $('.close');
+
+        $editButtons.tooltip();
+    })(jQuery);
+</script>

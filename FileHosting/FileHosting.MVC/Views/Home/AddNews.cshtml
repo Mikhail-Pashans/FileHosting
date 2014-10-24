@@ -6,10 +6,11 @@
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
-    <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model.PageNumber })">
-        <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to news list
-    </a>
-    <br />
+    <div>
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model.PageNumber })" role="button">
+            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to news list
+        </a>
+    </div>    
     <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">

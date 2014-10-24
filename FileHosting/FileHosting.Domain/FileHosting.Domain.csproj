@@ -49,6 +49,7 @@
     <Compile Include="Models\DownloadModel.cs" />
     <Compile Include="Models\FileModel.cs" />
     <Compile Include="Models\NewsModel.cs" />
+    <Compile Include="Models\NewsModelJson.cs" />
     <Compile Include="Models\RoleModel.cs" />
     <Compile Include="Models\SectionModel.cs" />
     <Compile Include="Models\TagModel.cs" />
