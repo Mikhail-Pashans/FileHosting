@@ -15,6 +15,20 @@
         }
     </ul>
     <br />
+    <form class="form-inline pull-right" action="@Url.Action("Index")" method="GET" role="form">
+        <div class="form-group">
+            <label class="control-label" for="searchString">Find by name:&nbsp;</label>
+            <input type="hidden" name="section" value="@Model.SectionNumber" />
+            <input class="form-control" type="text" id="searchString" name="searchString" value="@Model.CurrentFilter" />
+        </div>
+        <div class="form-group">
+            <button class="btn btn-danger" type="submit">
+                <span class="glyphicon glyphicon-search"></span>&ensp;Search
+            </button>
+        </div>
+    </form>
+    <br />
+    <br />
     <div class="panel panel-primary no-margin">
         <div class="panel-body">
             @if (Model.Files != null && Model.Files.Any())
@@ -22,11 +36,21 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Section</th>
-                            <th class="th-numbers">Size (KB)</th>
-                            <th class="th-numbers">Upload date</th>
+                            <th>
+                                @Html.ActionLink("#", "Index", new { section = Model.SectionNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter })
+                            </th>
+                            <th>
+                                @Html.ActionLink("Name", "Index", new { section = Model.SectionNumber, sortOrder = Model.NameSortParm, currentFilter = Model.CurrentFilter })
+                            </th>
+                            <th>
+                                @Html.ActionLink("Section", "Index", new { section = Model.SectionNumber, sortOrder = Model.SectionSortParm, currentFilter = Model.CurrentFilter })
+                            </th>
+                            <th class="th-numbers">
+                                @Html.ActionLink("Size (KB)", "Index", new { section = Model.SectionNumber, sortOrder = Model.SizeSortParm, currentFilter = Model.CurrentFilter })
+                            </th>
+                            <th class="th-numbers">
+                                @Html.ActionLink("Upload date", "Index", new { section = Model.SectionNumber, sortOrder = Model.DateSortParm, currentFilter = Model.CurrentFilter })
+                            </th>                            
                             <th class="th-control"></th>
                         </tr>
                     </thead>
@@ -40,7 +64,7 @@
                                 <td>@file.Size</td>
                                 <td>@file.UploadDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber })" role="button">
+                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
                                         <span class="glyphicon glyphicon-info-sign"></span>&ensp;Details
                                     </a>
                                     <form class="display-inline" action="@Url.Action("DownloadFile")" method="POST">
@@ -72,6 +96,6 @@
         <div>
             Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
         </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { section = Model.SectionNumber, page = x }))
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { section = Model.SectionNumber, page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter }))
     }
 </div>

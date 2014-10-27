@@ -46,13 +46,9 @@
   <ItemGroup>
     <Compile Include="Enums\Enums.cs" />
     <Compile Include="Models\CommentModel.cs" />
-    <Compile Include="Models\DownloadModel.cs" />
     <Compile Include="Models\FileModel.cs" />
     <Compile Include="Models\NewsModel.cs" />
     <Compile Include="Models\NewsModelJson.cs" />
-    <Compile Include="Models\RoleModel.cs" />
-    <Compile Include="Models\SectionModel.cs" />
-    <Compile Include="Models\TagModel.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

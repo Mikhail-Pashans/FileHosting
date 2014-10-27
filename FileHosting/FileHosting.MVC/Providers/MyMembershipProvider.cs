@@ -57,8 +57,9 @@ namespace FileHosting.MVC.Providers
         }
 
         public override MembershipUser CreateUser(string userName, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
-        {            
-            email = email.ToLowerInvariant();
+        {
+            userName = userName.Trim();
+            email = email.ToLowerInvariant().Trim();
             status = MembershipCreateStatus.Success;
 
             var args = new ValidatePasswordEventArgs(email, password, true);
@@ -90,7 +91,7 @@ namespace FileHosting.MVC.Providers
                 return null;
             }
 
-            var role = _context.RoleRepository.GetById(3);
+            var role = _context.RoleRepository.FirstOrDefault(r => r.Name == "RegisteredUser");
 
             _context.UserRepository.Add(new User
             {

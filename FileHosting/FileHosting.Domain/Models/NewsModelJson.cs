@@ -9,11 +9,11 @@ namespace FileHosting.Domain.Models
         public string Text { get; set; }
         public string Picture { get; set; }
 
-        public DateTime PublishDateDate;
+        public DateTime PublishDate;
 
-        public string PublishDate
+        public string PublishDateString
         {
-            get { return PublishDateDate.ToLocalTime().ToString("G"); }            
+            get { return PublishDate.ToLocalTime().ToString("G"); }            
         }        
     }
 }

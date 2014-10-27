@@ -72,21 +72,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\201410161332163_Create And Initial Database.cs" />
-    <Compile Include="Migrations\201410161332163_Create And Initial Database.Designer.cs">
-      <DependentUpon>201410161332163_Create And Initial Database.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201410171334062_Add New Fields To Users Table.cs" />
-    <Compile Include="Migrations\201410171334062_Add New Fields To Users Table.Designer.cs">
-      <DependentUpon>201410171334062_Add New Fields To Users Table.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201410200955339_Change Users Table.cs" />
-    <Compile Include="Migrations\201410200955339_Change Users Table.Designer.cs">
-      <DependentUpon>201410200955339_Change Users Table.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\201410231411306_Add Name Field To News Table.cs" />
-    <Compile Include="Migrations\201410231411306_Add Name Field To News Table.Designer.cs">
-      <DependentUpon>201410231411306_Add Name Field To News Table.cs</DependentUpon>
+    <Compile Include="Migrations\201410271551417_Create And Initial Database.cs" />
+    <Compile Include="Migrations\201410271551417_Create And Initial Database.Designer.cs">
+      <DependentUpon>201410271551417_Create And Initial Database.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Comment.cs" />
@@ -108,17 +96,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201410161332163_Create And Initial Database.resx">
-      <DependentUpon>201410161332163_Create And Initial Database.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201410171334062_Add New Fields To Users Table.resx">
-      <DependentUpon>201410171334062_Add New Fields To Users Table.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201410200955339_Change Users Table.resx">
-      <DependentUpon>201410200955339_Change Users Table.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\201410231411306_Add Name Field To News Table.resx">
-      <DependentUpon>201410231411306_Add Name Field To News Table.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201410271551417_Create And Initial Database.resx">
+      <DependentUpon>201410271551417_Create And Initial Database.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

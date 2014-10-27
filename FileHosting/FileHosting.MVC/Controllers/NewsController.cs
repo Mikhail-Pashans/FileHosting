@@ -49,7 +49,7 @@ namespace FileHosting.MVC.Controllers
                     Name = n.Name,
                     Text = n.Text,
                     Picture = n.Picture,
-                    PublishDateDate = n.PublishDate
+                    PublishDate = n.PublishDate
                 })
                 .OrderByDescending(n => n.PublishDate)
                 .ToList();

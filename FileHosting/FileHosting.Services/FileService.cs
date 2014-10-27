@@ -41,7 +41,7 @@ namespace FileHosting.Services
                         UploadDate = f.UploadDate,
                         IsAllowedAnonymousAction = f.IsAllowedAnonymousAction
                     })
-                    .OrderByDescending(f => f.Id)
+                    .OrderBy(f => f.Id)
                     .ToList();
             }
 
@@ -75,7 +75,7 @@ namespace FileHosting.Services
                 }
             }
 
-            return fileModels.OrderByDescending(f => f.Id).ToList();
+            return fileModels.OrderBy(f => f.Id).ToList();
         }
 
         public List<FileModel> GetFilesForUser(int userId)
@@ -89,7 +89,7 @@ namespace FileHosting.Services
                     Size = f.Size,
                     UploadDate = f.UploadDate
                 })
-                .OrderByDescending(f => f.Id)
+                .OrderBy(f => f.Id)
                 .ToList();
         }
 

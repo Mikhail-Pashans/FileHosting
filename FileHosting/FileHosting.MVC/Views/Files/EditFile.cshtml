@@ -12,7 +12,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter, page = Model.PageNumber })" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
         </a>
     </div>        
@@ -100,33 +100,33 @@
                     </div>
                 </div>
                 <hr />
-                <div class="form-group">                    
+                <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
                         <label>
                             <strong>File is allowed to browse:</strong>
                         </label>
                         <br />
                         <label class="radio-inline">
-                            <input type="radio" name="browsingPermission" id="browsingPermission1" value="@FileBrowsingPermission.AllUsers" @if (!allowedUsers.Any() && allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To all users
+                            <input type="radio" name="browsingPermission" id="browsingPermission1" value="@FileBrowsingPermission.AllUsers" @if (!allowedUsers.Any() && allowAnonymousBrowsing) { <text> checked="checked" </text>   } /> To all users
                         </label>
                         <label class="radio-inline">
-                            <input type="radio" name="browsingPermission" id="browsingPermission2" value="@FileBrowsingPermission.RegisteredUsers" @if (!allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To registered users
+                            <input type="radio" name="browsingPermission" id="browsingPermission2" value="@FileBrowsingPermission.RegisteredUsers" @if (!allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text>   } /> To registered users
                         </label>
                         <label class="radio-inline">
-                            <input type="radio" name="browsingPermission" id="browsingPermission3" value="@FileBrowsingPermission.SpecificUsers" @if (allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text> } /> To specific users
+                            <input type="radio" name="browsingPermission" id="browsingPermission3" value="@FileBrowsingPermission.SpecificUsers" @if (allowedUsers.Any() && !allowAnonymousBrowsing) { <text> checked="checked" </text>   } /> To specific users
                         </label>
                         <div class="checkbox-inline @if (!allowAnonymousBrowsing){ <text>display-none</text> }" id="anonymousAction">
                             <label>
-                                <input type="checkbox" @if (allowAnonymousAction) { <text> checked="checked" </text> } />
-                                <input type="hidden" name="allowAnonymousAction" @if (allowAnonymousAction) { <text> value="true" </text> } else { <text> value="false" </text> } />
+                                <input type="checkbox" @if (allowAnonymousAction) { <text> checked="checked" </text>   } />
+                                <input type="hidden" name="allowAnonymousAction" @if (allowAnonymousAction) { <text> value="true" </text>   } else { <text> value="false" </text>   } />
                                 <strong>Allow to anonymous users to download this file and write comments to it?</strong>
                             </label>
                         </div>
-                        <div class="row-fluid @if (!allowedUsers.Any()){ <text>display-none</text> }" id="allowedUsers">                            
+                        <div class="row-fluid @if (!allowedUsers.Any()){ <text>display-none</text> }" id="allowedUsers">
                             <select class="form-control selectpicker" multiple data-width="100%" title="No users selected" name="allowedUsers[]">
                                 @foreach (var user in users)
                                 {
-                                    <option value="@user.Name" @if (allowedUsers.Select(r => r.Name).Contains(user.Name)) { <text> selected="selected" </text> }>@user.Name</option>
+                                    <option value="@user.Name" @if (allowedUsers.Select(r => r.Name).Contains(user.Name)) { <text> selected="selected" </text>   }>@user.Name</option>
                                 }
                             </select>
                         </div>
@@ -157,7 +157,7 @@
     </div>
 </div>
 
-@Scripts.Render("~/bundles/custom")
+@Scripts.Render("~/bundles/custom", "~/bundles/bootstrap")
 
 <script type="text/javascript">
     (function ($) {
@@ -168,7 +168,7 @@
         var $input = $('input:hidden', $anonymousAction);
 
         $browsingPermission.on('change', function (event) {
-            event.preventDefault();            
+            event.preventDefault();
             var $radio = $(this);
             var value = $radio.val();
             if (value === 'AllUsers') {
@@ -183,10 +183,10 @@
             }
         });
 
-        $checkbox.on('change', function(event) {
+        $checkbox.on('change', function (event) {
             event.preventDefault();
             var value = $checkbox.prop('checked');
             $input.val(value);
-        });
+        });        
     })(jQuery);
 </script>

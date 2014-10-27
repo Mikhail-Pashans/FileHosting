@@ -41,10 +41,6 @@ namespace FileHosting.MVC
                 "~/Content/Bootstrap/bootstrap-select.min.css"));
 
             /*-----------------------------Jumbotron------------------------------------*/
-            bundles.Add(new ScriptBundle("~/bundles/jumbotron").Include(
-               "~/Scripts/Jumbotron/ie10-viewport-bug-workaround.js",
-               "~/Scripts/Jumbotron/ie-emulation-modes-warning.js"));
-
             bundles.Add(new StyleBundle("~/Content/Jumbotron/css").Include(
                 "~/Content/Jumbotron/jumbotron.css"));
 

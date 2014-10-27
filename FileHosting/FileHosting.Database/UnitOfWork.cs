@@ -211,7 +211,7 @@ namespace FileHosting.Database
             modelBuilder.Entity<News>()
                 .Property(n => n.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<News>().Property(n => n.Name).IsRequired().HasMaxLength(300);
+            modelBuilder.Entity<News>().Property(n => n.Name).IsRequired();
             modelBuilder.Entity<News>().Property(n => n.Text).IsRequired();
             modelBuilder.Entity<News>().Property(n => n.Picture).IsRequired().HasMaxLength(300);
             modelBuilder.Entity<News>().Property(n => n.PublishDate).IsRequired();

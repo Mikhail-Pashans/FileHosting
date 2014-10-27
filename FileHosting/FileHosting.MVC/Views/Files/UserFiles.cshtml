@@ -7,13 +7,13 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("UploadNewFiles", new { page = Model.PageInfo.PageNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter })" role="button">
             <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
         </a>
         <form class="form-inline pull-right" action="@Url.Action("UserFiles")" method="GET" role="form">
             <div class="form-group">
-                <label class="control-label" for="SearchString">Find by name:&nbsp;</label>
-                @Html.TextBox("SearchString", Model.CurrentFilter, new { @class = "form-control" })
+                <label class="control-label" for="searchString">Find by name:&nbsp;</label>
+                <input class="form-control" type="text" id="searchString" name="searchString" value="@Model.CurrentFilter" />                
             </div>
             <div class="form-group">
                 <button class="btn btn-danger" type="submit">
@@ -58,7 +58,7 @@
                                     <td>@file.Size</td>
                                     <td>@file.UploadDate</td>
                                     <td class="text-right">
-                                        <a class="btn btn-warning" href="@Url.Action("EditFile", new { fileId = file.Id, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter, page = Model.PageInfo.PageNumber })" role="button">
+                                        <a class="btn btn-warning" href="@Url.Action("EditFile", new { fileId = file.Id, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
                                             <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                         </a>
                                         <form class="display-inline" action="@Url.Action("DeleteFile")" method="POST">
@@ -89,6 +89,6 @@
             <div>
                 Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
             </div>
-            @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new { sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter, page = x }))
+            @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new { page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter }))
         }
 </div>

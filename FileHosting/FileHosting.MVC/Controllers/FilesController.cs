@@ -36,22 +36,77 @@ namespace FileHosting.MVC.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Index(int? section, int? page)
+        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? section, int? page)
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
-            var fileSectionDictionary = _homeService.GetFileSectionsDictianary();
+            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);            
 
+            var fileSectionDictionary = _homeService.GetFileSectionsDictianary();
+            
             var sectionNumber = (section ?? 1);
             if (sectionNumber < 1)
                 sectionNumber = 1;
             if (sectionNumber > fileSectionDictionary.Count)
                 sectionNumber = fileSectionDictionary.Count;
 
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
-
             var files = _fileService.GetFilesForSection(sectionNumber, user);
+
+            var currentSort = sortOrder;
+            var idSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
+            var nameSortParm = sortOrder == "name" ? "name_desc" : "name";
+            var sectionSortParm = sortOrder == "section" ? "section_desc" : "section";
+            var sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
+            var dateSortParm = sortOrder == "date" ? "date_desc" : "date";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+            currentFilter = searchString;                       
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                files = files.Where(f => f.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
+            }
+            switch (sortOrder)
+            {                
+                case "id_desc":
+                    files = files.OrderByDescending(f => f.Id).ToList();
+                    break;
+                case "name":
+                    files = files.OrderBy(f => f.Name).ToList();
+                    break;
+                case "name_desc":
+                    files = files.OrderByDescending(f => f.Name).ToList();
+                    break;
+                case "section":
+                    files = files.OrderBy(f => f.Section).ToList();
+                    break;
+                case "section_desc":
+                    files = files.OrderByDescending(f => f.Section).ToList();
+                    break;
+                case "size":
+                    files = files.OrderBy(f => f.Size).ToList();
+                    break;
+                case "size_desc":
+                    files = files.OrderByDescending(f => f.Size).ToList();
+                    break;
+                case "date":
+                    files = files.OrderBy(f => f.UploadDate).ToList();
+                    break;
+                case "date_desc":
+                    files = files.OrderByDescending(f => f.UploadDate).ToList();
+                    break;
+                default:
+                    files = files.OrderBy(f => f.Id).ToList();                    
+                    break;
+            }                                               
 
             var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
 
@@ -74,6 +129,13 @@ namespace FileHosting.MVC.Controllers
             {
                 FileSectionDictionary = fileSectionDictionary,
                 Files = filesPerPages,
+                IdSortParm = idSortParm,
+                NameSortParm = nameSortParm,
+                SectionSortParm = sectionSortParm,
+                SizeSortParm = sizeSortParm,
+                DateSortParm = dateSortParm,
+                CurrentSort = currentSort,
+                CurrentFilter = currentFilter,
                 IsAuthenticated = user != null,
                 SectionNumber = sectionNumber,                
                 PageInfo = pageInfo
@@ -90,7 +152,7 @@ namespace FileHosting.MVC.Controllers
                 return RedirectToAction("Index", "Home");
 
             var currentSort = sortOrder;
-            var idSortParm = sortOrder == "id" ? "id_desc" : "id";
+            var idSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
             var nameSortParm = sortOrder == "name" ? "name_desc" : "name";
             var sectionSortParm = sortOrder == "section" ? "section_desc" : "section";
             var sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
@@ -113,10 +175,7 @@ namespace FileHosting.MVC.Controllers
                 files = files.Where(f => f.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
             }
             switch (sortOrder)
-            {
-                case "id":
-                    files = files.OrderBy(f => f.Id).ToList();
-                    break;
+            {                
                 case "id_desc":
                     files = files.OrderByDescending(f => f.Id).ToList();
                     break;
@@ -143,7 +202,10 @@ namespace FileHosting.MVC.Controllers
                     break;
                 case "date_desc":
                     files = files.OrderByDescending(f => f.UploadDate).ToList();
-                    break;                
+                    break;
+                default:
+                    files = files.OrderBy(f => f.Id).ToList();
+                    break;
             }            
 
             var fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
@@ -183,7 +245,7 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult UploadNewFiles(int? page)
+        public ActionResult UploadNewFiles(string sortOrder, string currentFilter, int? page)
         {
             if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
@@ -195,6 +257,8 @@ namespace FileHosting.MVC.Controllers
             var viewModel = new UploadNewFilesViewModel
             {
                 FileSectionsDictionary = fileSectionsDictionary,
+                CurrentFilter = currentFilter,
+                CurrentSort = sortOrder,                
                 PageNumber = pageNumber
             };
 
@@ -220,7 +284,7 @@ namespace FileHosting.MVC.Controllers
 
             var ipAddress = ConfigurationManager.AppSettings.Get("Server");
 
-            var filePath = string.Format(@"UploadedFiles\{0}\{1}", fileSectionNumber, fullName);
+            var filePath = string.Format("UploadedFiles/{0}/{1}", fileSectionNumber, fullName);
 
             var pathToSave = Path.Combine(ipAddress, filePath);
             if (System.IO.File.Exists(pathToSave))
@@ -336,7 +400,7 @@ namespace FileHosting.MVC.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult FileDetails(int fileId, int? section, int? page, ViewModelsMessageType? messageType)
+        public ActionResult FileDetails(int fileId, string sortOrder, string currentFilter, int? section, int? page, ViewModelsMessageType? messageType)
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
@@ -374,6 +438,8 @@ namespace FileHosting.MVC.Controllers
                                             : "Succes! You are not subscribed to file changes."
                     }
                     : null,
+                CurrentSort = sortOrder,
+                CurrentFilter = currentFilter,
                 SectionNumber = sectionNumber,
                 PageNumber = pageNumber
             };

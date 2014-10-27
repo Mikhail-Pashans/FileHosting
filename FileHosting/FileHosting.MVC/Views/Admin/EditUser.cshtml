@@ -1,7 +1,7 @@
 ﻿@using FileHosting.Domain.Enums
 @model FileHosting.MVC.ViewModels.EditUserViewModel
 @{
-    ViewBag.Title = "Edit User";
+    ViewBag.Title = "Edit user";
     var downloadAmountLimit = Model.UserModel.DownloadAmountLimit;
     var downloadSpeedLimit = Model.UserModel.DownloadSpeedLimit;
 }
@@ -10,7 +10,7 @@
 <div class="well well-custom">
     <div>
         <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model.PageNumber })" role="button">
-            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to users list
+            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to administration
         </a>
     </div>    
     <br />

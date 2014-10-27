@@ -15,8 +15,6 @@ namespace FileHosting.Domain.Models
         {
             get { return _publishDate.ToLocalTime(); }
             set { _publishDate = value; }
-        }
-        
-        public bool IsActive { get; set; }
+        }        
     }
 }

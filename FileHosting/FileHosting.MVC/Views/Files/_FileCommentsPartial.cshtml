@@ -89,22 +89,12 @@ else
 }
 
 <script type="text/javascript">
-    (function ($) {
-        var $addCommentButton = $('#addCommentButton');
+    (function ($) {        
         var $newCommentText = $('#newCommentText');
         var $closeButtons = $('.close');
 
         $newCommentText.ckeditor();
-
-        //$addCommentButton.prop({ disabled: true });
-        $closeButtons.tooltip();
-
-        //$newCommentText.on('input propertychange', function () {
-        //    if ($(this).val() !== '') {
-        //        $addCommentButton.prop({ disabled: false });
-        //    } else {
-        //        $addCommentButton.prop({ disabled: true });
-        //    }
-        //});        
+        
+        $closeButtons.tooltip();        
     })(jQuery);
 </script>

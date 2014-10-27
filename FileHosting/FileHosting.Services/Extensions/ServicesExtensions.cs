@@ -1,8 +1,7 @@
-﻿using System;
-using FileHosting.Database.Models;
+﻿using FileHosting.Database.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace FileHosting.Services.Extensions
 {

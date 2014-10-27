@@ -1,12 +1,12 @@
 ﻿using System.Data;
 using FileHosting.Database;
+using FileHosting.Database.Models;
 using System;
 using System.Collections.Generic;
 using System.Configuration.Provider;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Security;
-using FileHosting.Database.Models;
 
 namespace FileHosting.MVC.Providers
 {
@@ -34,26 +34,23 @@ namespace FileHosting.MVC.Providers
 
         public override string[] GetRolesForUser(string email)
         {
-            string[] roles = { };
-
             var user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
 
-            if (user == null) return roles;
+            if (user == null) return new string[] { };
 
-            roles = user.Roles.Select(r => r.Name).ToArray();
+            var roles = user.Roles.Select(r => r.Name).ToArray();
 
             return roles.Any() ? roles : new string[] { };
         }
 
         public override void CreateRole(string roleName)
         {
-            var newRole = new Role
+            _context.RoleRepository.Add(new Role
             {
                 Name = roleName,
                 Users = new List<User>()
-            };
+            });
 
-            _context.RoleRepository.Add(newRole);
             _context.Commit();
         }
 
@@ -77,14 +74,12 @@ namespace FileHosting.MVC.Providers
 
         public override string[] GetAllRoles()
         {
-            string[] roleNames = { };
-
             var roles = _context.RoleRepository.GetAll().ToArray();
 
             if (!roles.Any())
-                return roleNames;
+                return new string[] { };
 
-            roleNames = roles.Select(r => r.Name).ToArray();
+            var roleNames = roles.Select(r => r.Name).ToArray();
 
             return roleNames.Any() ? roleNames : new string[] { };
         }

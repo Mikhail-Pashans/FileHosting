@@ -135,3 +135,10 @@ hr {
     margin-right: 15px !important;
     margin-bottom: 15px !important;
 }
+
+.news-wrapper {
+    white-space: normal !important;
+    text-align: justify !important;
+    /*word-break: break-all !important;
+    word-wrap: break-word !important;*/
+}

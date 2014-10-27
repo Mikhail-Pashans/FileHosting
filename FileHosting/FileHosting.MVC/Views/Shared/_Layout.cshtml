@@ -10,14 +10,7 @@
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css", "~/Content/Bootstrap/css", "~/Content/Jumbotron/css")
-    @Scripts.Render("~/bundles/jquery", "~/bundles/jqueryval", "~/bundles/modernizr", "~/bundles/bootstrap", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters", "~/bundles/jumbotron")
-    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
-    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    @Scripts.Render("~/bundles/jquery", "~/bundles/modernizr", "~/bundles/bootstrap")    
 </head>
 <body>
     <header>
@@ -70,7 +63,8 @@
         <div class="container">
             &copy;&ensp;iTechArt – @DateTime.Now.Year
         </div>
-    </footer>    
+    </footer>
+    @Scripts.Render("~/bundles/jqueryval", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters")
     @RenderSection("scripts", false)
 </body>
 </html>

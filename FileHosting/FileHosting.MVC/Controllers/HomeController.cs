@@ -71,6 +71,9 @@ namespace FileHosting.MVC.Controllers
         [Authorize(Roles = "Moderator")]
         public ActionResult AddNews(int? page, ViewModelsMessageType? messageType)
         {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+            
             if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
 
@@ -101,9 +104,13 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Moderator")]
+        [ValidateInput(false)]
         [ValidateAntiForgeryToken]
         public ActionResult AddNews(int page, string newsName, string newsText, HttpPostedFileBase newsPicture)
         {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+            
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
@@ -126,7 +133,7 @@ namespace FileHosting.MVC.Controllers
 
             var ipAdress = ConfigurationManager.AppSettings.Get("Server");
 
-            var picturePath = string.Format(@"NewsPictures\{0}", fullName);
+            var picturePath = string.Format("NewsPictures/{0}", fullName);
 
             var pathToSave = Path.Combine(ipAdress, picturePath);
             if (System.IO.File.Exists(pathToSave))
@@ -150,12 +157,13 @@ namespace FileHosting.MVC.Controllers
         [Authorize(Roles = "Moderator")]
         public ActionResult EditNews(int newsId, int? page, ViewModelsMessageType? messageType)
         {
-            if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
-                return RedirectToAction("Index", "Home");
-
-            var ipAddress = ConfigurationManager.AppSettings.Get("Server");
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
             
-            var newsModel = _homeService.GetModelForNews(newsId, ipAddress);
+            if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+                return RedirectToAction("Index", "Home");            
+            
+            var newsModel = _homeService.GetModelForNews(newsId);
             if (newsModel == null)
                 return HttpNotFound();
 
@@ -191,6 +199,9 @@ namespace FileHosting.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult EditNews(int newsId, int page, string newsName, string newsText, HttpPostedFileBase newNewsPicture)
         {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+            
             var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
@@ -220,7 +231,7 @@ namespace FileHosting.MVC.Controllers
                 if (System.IO.File.Exists(oldPicturePath))
                     System.IO.File.Delete(oldPicturePath);
 
-                var newPicturePath = string.Format(@"NewsPictures\{0}", fullName);
+                var newPicturePath = string.Format("NewsPictures/{0}", fullName);
 
                 var pathToSave = Path.Combine(ipAdress, newPicturePath);
                 if (System.IO.File.Exists(pathToSave))

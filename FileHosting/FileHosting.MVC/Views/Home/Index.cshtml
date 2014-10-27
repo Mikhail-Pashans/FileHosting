@@ -31,7 +31,7 @@
                 <div class="panel-group no-margin" id="accordion">
                     @for (var i = 0; i < Model.News.Count; i++)
                     {
-                        <div class="panel panel-success no-margin">
+                        <div class="panel panel-success no-margin news-wrapper">
                             <div class="panel-heading">
                                 <div class="panel-title">
                                     <strong>
@@ -47,13 +47,15 @@
                                     }
                                 </div>
                                 <a data-toggle="collapse" data-parent="#accordion" href="#@Model.News[i].Id">
-                                    @Html.Raw(Model.News[i].Name)
+                                    <h4>@Html.Raw(Model.News[i].Name)</h4>
                                 </a>
                             </div>
                             <div class="panel-collapse collapse @if (i == 0){ <text>in</text> }" id="@Model.News[i].Id">
                                 <div class="panel-body">
-                                    <img class="img-rounded thumbnail" src="@Model.News[i].Picture" alt="A picture to the news">
-                                    @Html.Raw(Model.News[i].Text)
+                                    <img class="img-rounded thumbnail" src="/@Model.News[i].Picture" alt="A picture to the news">
+                                    <div>
+                                        @Html.Raw(Model.News[i].Text)
+                                    </div>                                    
                                 </div>
                             </div>
                         </div>

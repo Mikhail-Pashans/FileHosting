@@ -7,7 +7,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
         </a>
     </div>       

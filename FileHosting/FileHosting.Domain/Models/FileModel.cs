@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using FileHosting.Database.Models;
+﻿using FileHosting.Database.Models;
 using System;
 using System.Collections.Generic;
 

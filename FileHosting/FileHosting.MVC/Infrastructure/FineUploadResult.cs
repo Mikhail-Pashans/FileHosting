@@ -2,10 +2,7 @@ using Newtonsoft.Json.Linq;
 using System.Web.Mvc;
 
 namespace FileHosting.MVC.Infrastructure
-{
-    /// <remarks>
-    /// Docs at https://github.com/valums/file-uploader/blob/master/server/readme.md
-    /// </remarks>
+{    
     public class FineUploaderResult : ActionResult
     {
         public const string ResponseContentType = "text/plain";

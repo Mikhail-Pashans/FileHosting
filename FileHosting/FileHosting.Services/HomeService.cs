@@ -5,7 +5,6 @@ using FileHosting.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -111,20 +110,18 @@ namespace FileHosting.Services
             return _context.NewsRepository.GetById(newsId);
         }
 
-        public NewsModel GetModelForNews(int newsId, string ipAddress)
+        public NewsModel GetModelForNews(int newsId)
         {
             var news = _context.NewsRepository.GetById(newsId);
             if (news == null)
-                return null;
-
-            var picturePath = Path.Combine(ipAddress, news.Picture);
+                return null;            
 
             return new NewsModel
             {
                 Id = news.Id,
                 Name = news.Name,
                 Text = news.Text,
-                Picture = picturePath,
+                Picture = news.Picture,
                 PublishDate = news.PublishDate
             };
         }

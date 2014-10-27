@@ -21,16 +21,6 @@ namespace FileHosting.Domain.Models
 
         public decimal DownloadSpeedLimit { get; set; }
 
-        public List<Role> Roles { get; set; }
-        
-        //public virtual ICollection<File> Files { get; set; }
-        
-        //public virtual ICollection<Comment> Comments { get; set; }
-
-        //public virtual ICollection<News> News { get; set; }
-
-        //public virtual ICollection<Download> Downloads { get; set; }
-
-        //public virtual ICollection<File> FilesWithPermissions { get; set; }
+        public List<Role> Roles { get; set; }        
     }
 }

@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "View Rss";
 }
+@Scripts.Render("~/bundles/bootstrap")
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
@@ -21,7 +22,7 @@
     </div>
 </div>
 
-<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal news-wrapper" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -35,8 +36,6 @@
         </div>
     </div>
 </div>
-
-@Scripts.Render("~/bundles/bootstrap")
 
 <script type="text/javascript">
     var uri = '/api/news';
@@ -59,7 +58,7 @@
                 json = data;
                 data = JSON.parse(data);
                 $.each(data, function (key, item) {
-                    var $panel = $('<div>', { 'class': 'panel panel-success no-margin' });
+                    var $panel = $('<div>', { 'class': 'panel panel-success no-margin news-wrapper' });
                     var $panelHeading = $('<div>', { 'class': 'panel-heading' });
                     //var $panelCollapse = key === 0
                     //    ? $('<div>', { 'class': 'panel-collapse collapse in' })
@@ -67,15 +66,15 @@
                     var $panelCollapse = $('<div>', { 'class': 'panel-collapse collapse in' });
                     var $panelTitle = $('<div>', { 'class': 'panel-title' });
                     var $panelBody = $('<div>', { 'class': 'panel-body' });
-                    var $strong = $('<strong>', { text: item.PublishDate });
-                    var $a = $('<a>', {
+                    var $strong = $('<strong>', { text: item.PublishDateString });
+                    var $a = $('<a>', {                        
                         attr: {
                             'data-toggle': 'collapse',
                             'data-parent': '#accordion',
                             'href': '#' + item.Id
                         }
-                    });                    
-                    var $h4 = $('<h4>', { html: item.Name });
+                    });
+                    var $h4 = $('<h4>', { html : item.Name });
                     var $img = $('<img>', {
                         'class': 'img-rounded thumbnail',
                         attr: {
@@ -83,13 +82,16 @@
                             'alt': 'A picture to the news'
                         }
                     });
-                    var $div = $('<div>', { html: item.Text });
+                    var $div = $('<div>', {
+                        'class': 'news-text-wrapper',
+                        html: item.Text
+                    });
 
-                    $strong.appendTo($panelTitle);
-                    $h4.appendTo($a);
+                    $strong.appendTo($panelTitle);                    
                     $panelTitle.appendTo($panelHeading);
+                    $h4.appendTo($a);
                     $a.appendTo($panelHeading);
-
+                    
                     $img.appendTo($panelBody);
                     $div.appendTo($panelBody);
                     $panelBody.appendTo($panelCollapse);
@@ -103,53 +105,5 @@
                     }
                 });
             });
-
-        //$.getJSON(uri)
-        //    .done(function (data) {
-        //        alert(data);
-        //        $.each(data, function (key, item) {
-        //            var $panel = $('<div>', { 'class':  'panel panel-success no-margin' });
-        //            var $panelHeading = $('<div>', { 'class': 'panel-heading' });
-        //            //var $panelCollapse = key === 0
-        //            //    ? $('<div>', { 'class': 'panel-collapse collapse in' })
-        //            //    : $('<div>', { 'class': 'panel-collapse collapse' });
-        //            var $panelTitle = $('<div>', { 'class': 'panel-title' });
-        //            var $panelBody = $('<div>', { 'class': 'panel-body' });
-        //            var $strong = $('<strong>', { text: item.PublishDate });
-        //            var $a = $('<a>', {
-        //                attr: {
-        //                    'data-toggle': 'collapse',
-        //                    'data-parent': '#accordion',
-        //                    'href': '#' + item.Id
-        //                }
-        //            });
-        //            var $h4 = $('<h4>', { text: item.Name });
-        //            var $img = $('<img>', {
-        //                'class': 'img-rounded thumbnail',
-        //                attr: {
-        //                    'src': '/' + item.Picture,
-        //                    'alt': 'A picture to the news'
-        //                }
-        //            });
-        //            var $div = $('<div>', { text: item.Text });
-
-        //            $strong.appendTo($panelTitle);
-        //            $h4.appendTo($a);
-        //            $panelTitle.appendTo($panelHeading);
-        //            $a.appendTo($panelHeading);
-
-        //            $img.appendTo($panelBody);
-        //            $div.appendTo($panelBody);
-        //            $panelBody.appendTo($panelCollapse);
-
-        //            $panelHeading.appendTo($panel);
-        //            $panelCollapse.appendTo($panel);
-
-        //            $panel.appendTo($accordion);
-        //            if (key !== data.length - 1) {
-        //                $('<br />').appendTo($accordion);
-        //            }
-        //        });
-        //    });
     })(jQuery);
 </script>

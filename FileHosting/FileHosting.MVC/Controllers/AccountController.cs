@@ -52,9 +52,10 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
-        {
+        {            
             FormsAuthentication.SignOut();
 
             return RedirectToAction("Login", "Account");
