@@ -187,6 +187,7 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Moderator")]
+        [ValidateInput(false)]
         [ValidateAntiForgeryToken]
         public ActionResult EditNews(int newsId, int page, string newsName, string newsText, HttpPostedFileBase newNewsPicture)
         {

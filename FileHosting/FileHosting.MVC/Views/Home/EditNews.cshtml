@@ -42,14 +42,14 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="newsName">Name:</label>
                     <div class="col-md-10">
-                        <input class="form-control" type="text" id="newsName" name="newsName" data-val-required="A name cannot be empty!" data-val="true" value="@Model.NewsModel.Name" />
+                        <textarea class="form-control ckeditor" id="newsName" name="newsName" rows="3" data-val-required="A name cannot be empty!" data-val="true">@Model.NewsModel.Name</textarea>
                         <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newsName"></span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-md-2 control-label" for="newsText">Text:</label>
                     <div class="col-md-10">
-                        <textarea class="form-control" id="newsText" name="newsText" rows="10" data-val-required="A text cannot be empty!" data-val="true">@Model.NewsModel.Text</textarea>
+                        <textarea class="form-control ckeditor" id="newsText" name="newsText" rows="5" data-val-required="A text cannot be empty!" data-val="true">@Model.NewsModel.Text</textarea>
                         <span class="field-validation-valid" data-valmsg-replace="true" data-valmsg-for="newsText"></span>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
                         </button>
                     </div>
                 </div>
-            </form>
+            </form>            
         </div>
     </div>
 </div>
@@ -103,6 +103,6 @@
                 $input.val('');
                 $input.attr("disabled", "disabled");
             }
-        });
+        });   
     })(jQuery);
 </script>

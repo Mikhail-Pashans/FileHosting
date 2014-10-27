@@ -596,6 +596,7 @@ namespace FileHosting.MVC.Controllers
 
         [HttpPost]
         [AllowAnonymous]
+        [ValidateInput(false)]
         [ValidateAntiForgeryToken]
         public ViewModelsMessageType AddCommentToFile(int fileId, string newCommentText)
         {

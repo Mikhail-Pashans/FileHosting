@@ -47,13 +47,13 @@
                                     }
                                 </div>
                                 <a data-toggle="collapse" data-parent="#accordion" href="#@Model.News[i].Id">
-                                    <h4>@Model.News[i].Name</h4>
+                                    @Html.Raw(Model.News[i].Name)
                                 </a>
                             </div>
                             <div class="panel-collapse collapse @if (i == 0){ <text>in</text> }" id="@Model.News[i].Id">
                                 <div class="panel-body">
                                     <img class="img-rounded thumbnail" src="@Model.News[i].Picture" alt="A picture to the news">
-                                    <div>@Model.News[i].Text</div>
+                                    @Html.Raw(Model.News[i].Text)
                                 </div>
                             </div>
                         </div>
@@ -81,8 +81,6 @@
         @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
     }
 </div>
-
-@Scripts.Render("~/bundles/bootstrap")
 
 <script type="text/javascript">
     (function ($) {

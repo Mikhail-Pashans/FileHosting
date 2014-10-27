@@ -41,12 +41,22 @@ namespace FileHosting.MVC
                 "~/Content/Bootstrap/bootstrap-select.min.css"));
 
             /*-----------------------------Jumbotron------------------------------------*/
-            bundles.Add(new ScriptBundle("~/bundles/jumbotorn").Include(
+            bundles.Add(new ScriptBundle("~/bundles/jumbotron").Include(
                "~/Scripts/Jumbotron/ie10-viewport-bug-workaround.js",
                "~/Scripts/Jumbotron/ie-emulation-modes-warning.js"));
 
             bundles.Add(new StyleBundle("~/Content/Jumbotron/css").Include(
-                "~/Content/Jumbotron/jumbotron.css"));            
+                "~/Content/Jumbotron/jumbotron.css"));
+
+            /*-----------------------------CKEditor-------------------------------------*/
+            bundles.Add(new ScriptBundle("~/bundles/ckeditor-js").Include(
+               "~/CKEditor/ckeditor.js"));
+
+            bundles.Add(new ScriptBundle("~/bundles/ckeditor-adapters").Include(
+                "~/CKEditor/adapters/jquery.js"));
+
+            bundles.Add(new StyleBundle("~/CKEditor/css").Include(
+                "~/CKEditor/contents.css"));
 
             /*-----------------------------Content--------------------------------------*/
             bundles.Add(new StyleBundle("~/Content/css").Include(
