@@ -1,4 +1,5 @@
-﻿@using FileHosting.MVC.Helpers
+﻿@using FileHosting.Domain.Models
+@using FileHosting.MVC.Helpers
 @model FileHosting.MVC.ViewModels.FilesIndexViewModel
 @{
     ViewBag.Title = "Files";
@@ -9,8 +10,11 @@
     <ul class="nav nav-pills nav-justified" role="tablist">
         @foreach (var item in Model.FileSectionDictionary)
         {
-            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key)) { <text> class="active" </text>  }>
-                <a href="@Url.Action("Index", new { section = item.Key })">@item.Value</a>
+            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key))
+                {
+                    <text> class="active" </text>
+                }>
+                <a href="@Url.Action("Index", new {section = item.Key})">@item.Value</a>
             </li>
         }
     </ul>
@@ -37,25 +41,25 @@
                     <thead>
                         <tr>
                             <th>
-                                @Html.ActionLink("#", "Index", new { section = Model.SectionNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter })
+                                @Html.ActionLink("#", "Index", new {section = Model.SectionNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter})
                             </th>
                             <th>
-                                @Html.ActionLink("Name", "Index", new { section = Model.SectionNumber, sortOrder = Model.NameSortParm, currentFilter = Model.CurrentFilter })
+                                @Html.ActionLink("Name", "Index", new {section = Model.SectionNumber, sortOrder = Model.NameSortParm, currentFilter = Model.CurrentFilter})
                             </th>
                             <th>
-                                @Html.ActionLink("Section", "Index", new { section = Model.SectionNumber, sortOrder = Model.SectionSortParm, currentFilter = Model.CurrentFilter })
+                                @Html.ActionLink("Section", "Index", new {section = Model.SectionNumber, sortOrder = Model.SectionSortParm, currentFilter = Model.CurrentFilter})
                             </th>
                             <th class="th-numbers">
-                                @Html.ActionLink("Size (KB)", "Index", new { section = Model.SectionNumber, sortOrder = Model.SizeSortParm, currentFilter = Model.CurrentFilter })
+                                @Html.ActionLink("Size (KB)", "Index", new {section = Model.SectionNumber, sortOrder = Model.SizeSortParm, currentFilter = Model.CurrentFilter})
                             </th>
                             <th class="th-numbers">
-                                @Html.ActionLink("Upload date", "Index", new { section = Model.SectionNumber, sortOrder = Model.DateSortParm, currentFilter = Model.CurrentFilter })
+                                @Html.ActionLink("Upload date", "Index", new {section = Model.SectionNumber, sortOrder = Model.DateSortParm, currentFilter = Model.CurrentFilter})
                             </th>                            
                             <th class="th-control"></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var file in Model.Files)
+                        @foreach (FileModel file in Model.Files)
                         {
                             <tr>
                                 <td>@file.Id</td>
@@ -64,7 +68,7 @@
                                 <td>@file.Size</td>
                                 <td>@file.UploadDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
+                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new {fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
                                         <span class="glyphicon glyphicon-info-sign"></span>&ensp;Details
                                     </a>
                                     <form class="display-inline" action="@Url.Action("DownloadFile")" method="POST">
@@ -72,7 +76,10 @@
                                         <input type="hidden" name="fileId" value="@file.Id" />
                                         <input type="hidden" name="section" value="@Model.SectionNumber" />
                                         <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
-                                        <button class="btn btn-success" @if (!Model.IsAuthenticated && !file.IsAllowedAnonymousAction) { <text>disabled="disabled"</text> }>
+                                        <button class="btn btn-success" @if (!Model.IsAuthenticated && !file.IsAllowedAnonymousAction)
+                                                                        {
+                                                                            <text>disabled="disabled"</text>
+                                                                        }>
                                             <span class="glyphicon glyphicon-download"></span>&ensp;Download
                                         </button>
                                     </form>
@@ -96,6 +103,6 @@
         <div>
             Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
         </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { section = Model.SectionNumber, page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter }))
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new {section = Model.SectionNumber, page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter}))
     }
 </div>

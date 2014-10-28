@@ -1,19 +1,20 @@
-﻿@using FileHosting.MVC.Providers
+﻿@using FileHosting.Database.Models
+@using FileHosting.MVC.Providers
 @model FileHosting.MVC.ViewModels.LoginViewModel
 @if (Request.IsAuthenticated)
 {
-    var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+    User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
     <div class="navbar-right">
         <p class="navbar-text">
             <span class="glyphicon glyphicon-user"></span>&ensp;
             Hello, @if (user != null)
-            {
-                @user.Name
-            }
-            else
-            {
-                <text>Guest</text>
-            }!
+                   {
+                       @user.Name
+                   }
+                   else
+                   {
+                       <text>Guest</text>
+                   }!
         </p>
         <form class="navbar-form form-custom display-inline-block" action="@Url.Action("LogOff", "Account")" method="POST" role="form">
             @Html.AntiForgeryToken()
@@ -28,10 +29,10 @@ else
     <form class="navbar-form navbar-right" action="@Url.Action("Login", "Account")" method="POST" role="form">
         @Html.AntiForgeryToken()
         <div class="form-group ">
-            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control input-sm", placeholder = "E-mail address" } })
+            @Html.EditorFor(model => model.Email, new {htmlAttributes = new {@class = "form-control input-sm", placeholder = "E-mail address"}})
         </div>
         <div class="form-group ">
-            @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control input-sm", placeholder = "Password" } })
+            @Html.EditorFor(model => model.Password, new {htmlAttributes = new {@class = "form-control input-sm", placeholder = "Password"}})
         </div>
         <div class="form-group">
             <div class="checkbox">

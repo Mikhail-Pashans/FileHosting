@@ -1,8 +1,8 @@
-﻿using FileHosting.MVC.ViewModels;
-using System;
+﻿using System;
 using System.Globalization;
 using System.Text;
 using System.Web.Mvc;
+using FileHosting.MVC.ViewModels;
 
 namespace FileHosting.MVC.Helpers
 {
@@ -10,18 +10,18 @@ namespace FileHosting.MVC.Helpers
     {
         public static MvcHtmlString PageLinks(this HtmlHelper html, PageInfo pageInfo, Func<int, string> pageUrl)
         {
-            var result = new StringBuilder();            
-           
-            var firstATag = new TagBuilder("a") { InnerHtml = "«" };
+            var result = new StringBuilder();
+
+            var firstATag = new TagBuilder("a") {InnerHtml = "«"};
             firstATag.AddCssClass("btn btn-default");
-            var lastATag = new TagBuilder("a") { InnerHtml = "»" };
+            var lastATag = new TagBuilder("a") {InnerHtml = "»"};
             lastATag.AddCssClass("btn btn-default");
 
             firstATag.MergeAttribute("href", pageUrl(pageInfo.PageNumber - 1));
             firstATag.MergeAttribute("role", "button");
             lastATag.MergeAttribute("href", pageUrl(pageInfo.PageNumber + 1));
             lastATag.MergeAttribute("role", "button");
-            
+
             if (pageInfo.PageNumber == 1)
             {
                 firstATag.MergeAttribute("href", "javascript:void(0)");
@@ -35,19 +35,19 @@ namespace FileHosting.MVC.Helpers
 
             result.Append(firstATag);
 
-            for (var i = 1; i <= pageInfo.TotalPages; i++)
+            for (int i = 1; i <= pageInfo.TotalPages; i++)
             {
-                var aTag = new TagBuilder("a") { InnerHtml = i.ToString(CultureInfo.InvariantCulture) };
+                var aTag = new TagBuilder("a") {InnerHtml = i.ToString(CultureInfo.InvariantCulture)};
                 aTag.MergeAttribute("href", pageUrl(i));
                 aTag.MergeAttribute("role", "button");
-                
+
                 if (i == pageInfo.PageNumber)
                 {
                     aTag.AddCssClass("active");
                     aTag.AddCssClass("btn btn-primary");
                 }
                 aTag.AddCssClass("btn btn-default");
-                
+
                 result.Append(aTag);
             }
 

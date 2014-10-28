@@ -1,26 +1,30 @@
-﻿using FileHosting.Domain.Enums;
-using FileHosting.MVC.Providers;
-using FileHosting.MVC.ViewModels;
-using FileHosting.Services;
+﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Configuration;
 using System.Web.Mvc;
 using System.Web.Security;
+using FileHosting.Database.Models;
+using FileHosting.Domain.Enums;
+using FileHosting.Domain.Models;
+using FileHosting.MVC.Providers;
+using FileHosting.MVC.ViewModels;
+using FileHosting.Services;
 
 namespace FileHosting.MVC.Controllers
 {
     [Authorize(Roles = "Administrator")]
     public class AdminController : Controller
-    {                
+    {
         private readonly HomeService _homeService;
 
         #region Constructor
 
         public AdminController()
-        {            
+        {
             _homeService = new HomeService();
         }
 
@@ -31,9 +35,9 @@ namespace FileHosting.MVC.Controllers
         [HttpGet]
         public ActionResult Index(int? page, ViewModelsMessageType? messageType)
         {
-            var users = _homeService.GetAllUsersList();
-            
-            const int pageSize = 10;
+            List<UserModel> users = _homeService.GetAllUsersList();
+
+            var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
 
             var pageInfo = new PageInfo
             {
@@ -41,21 +45,23 @@ namespace FileHosting.MVC.Controllers
                 TotalItems = users.Count
             };
 
-            var pageNumber = (page ?? 1);
+            int pageNumber = (page ?? 1);
             if (pageNumber < 1)
                 pageNumber = 1;
             if (pageNumber > pageInfo.TotalPages)
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
 
-            var usersPerPages = users.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            List<UserModel> usersPerPages = users.Skip((pageNumber - 1)*pageSize).Take(pageSize).ToList();
 
-            var totalDownloadAmountLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
-            var totalDownloadSpeedLimit = decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
+            decimal totalDownloadAmountLimit =
+                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
+            decimal totalDownloadSpeedLimit =
+                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
 
             var viewModel = new AdminIndexViewModel
             {
-                Users = usersPerPages,                
+                Users = usersPerPages,
                 TotalDownloadAmountLimit = totalDownloadAmountLimit,
                 TotalDownloadSpeedLimit = totalDownloadSpeedLimit,
                 Message = messageType.HasValue
@@ -80,16 +86,16 @@ namespace FileHosting.MVC.Controllers
         [HttpGet]
         public ActionResult EditUser(int userId, int? page, ViewModelsMessageType? messageType)
         {
-            var user = _homeService.GetUserById(userId);
+            UserModel user = _homeService.GetModelForUser(userId);
             if (user == null)
-                return HttpNotFound();            
+                return HttpNotFound();
 
-            var pageNumber = (page ?? 1);
+            int pageNumber = (page ?? 1);
 
             var viewModel = new EditUserViewModel
             {
                 UserModel = user,
-                Roles = Roles.Provider.GetAllRoles(),                
+                Roles = Roles.Provider.GetAllRoles(),
                 Message = messageType.HasValue
                     ? new Message
                     {
@@ -108,27 +114,28 @@ namespace FileHosting.MVC.Controllers
                 PageNumber = pageNumber
             };
 
-            return View(viewModel);           
+            return View(viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword, string downloadAmountLimit, string downloadSpeedLimit)
+        public ActionResult EditUser(int userId, string userEmail, int page, string[] userRoles, string newUserPassword,
+            string downloadAmountLimit, string downloadSpeedLimit)
         {
-            var user = _homeService.GetUserById(userId, true);
+            User user = _homeService.GetUserById(userId);
             if (user == null)
-                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
-            
+                return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.B});
+
             if (userRoles == null)
-                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.C });
+                return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.C});
 
             try
             {
-                Roles.Provider.AddUsersToRoles(new[] { userEmail }, userRoles);
+                Roles.Provider.AddUsersToRoles(new[] {userEmail}, userRoles);
             }
             catch (DataException)
             {
-                return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
+                return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.B});
             }
 
             decimal amountLimit = 0, speedLimit = 0;
@@ -137,32 +144,33 @@ namespace FileHosting.MVC.Controllers
             {
                 if (!decimal.TryParse(downloadAmountLimit, out amountLimit))
                 {
-                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.D });
+                    return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.D});
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(downloadSpeedLimit))
-            {                
+            {
                 if (!decimal.TryParse(downloadSpeedLimit, out speedLimit))
                 {
-                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.E });
+                    return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.E});
                 }
             }
 
             bool result;
-            
+
             if (!string.IsNullOrWhiteSpace(newUserPassword))
             {
-                result = ((MyMembershipProvider)Membership.Provider).ChangeUserPassword(userEmail, newUserPassword);
+                result = ((MyMembershipProvider) Membership.Provider).ChangeUserPassword(userEmail, newUserPassword);
                 if (!result)
-                    return RedirectToAction("EditUser", new { userId, page, messageType = ViewModelsMessageType.B });
-                
-                _homeService.SendEmail(EmailType.UserPasswordChanged, new[] { user });
+                    return RedirectToAction("EditUser", new {userId, page, messageType = ViewModelsMessageType.B});
+
+                _homeService.SendEmail(EmailType.UserPasswordChanged, new[] {user});
             }
 
             result = _homeService.SaveUserChanges(userId, amountLimit, speedLimit);
 
-            return RedirectToAction("EditUser", new { userId, page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
+            return RedirectToAction("EditUser",
+                new {userId, page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B});
         }
 
         [HttpPost]
@@ -175,7 +183,7 @@ namespace FileHosting.MVC.Controllers
             {
                 if (!decimal.TryParse(totalDownloadAmountLimit, out amountLimit))
                 {
-                    return RedirectToAction("Index", new { page, messageType = ViewModelsMessageType.C });
+                    return RedirectToAction("Index", new {page, messageType = ViewModelsMessageType.C});
                 }
             }
 
@@ -183,12 +191,12 @@ namespace FileHosting.MVC.Controllers
             {
                 if (!decimal.TryParse(totalDownloadSpeedLimit, out speedLimit))
                 {
-                    return RedirectToAction("Index", new { page, messageType = ViewModelsMessageType.D });
+                    return RedirectToAction("Index", new {page, messageType = ViewModelsMessageType.D});
                 }
             }
 
             var result = true;
-            
+
             try
             {
                 SetConfigurationValues(amountLimit, speedLimit);
@@ -196,14 +204,15 @@ namespace FileHosting.MVC.Controllers
             catch (ConfigurationErrorsException)
             {
                 result = false;
-            }            
+            }
 
-            return RedirectToAction("Index", new { page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B });
+            return RedirectToAction("Index",
+                new {page, messageType = result ? ViewModelsMessageType.A : ViewModelsMessageType.B});
         }
 
         public ActionResult ViewRss(int? page)
         {
-            var pageNumber = (page ?? 1);
+            int pageNumber = (page ?? 1);
 
             return View(pageNumber);
         }
@@ -215,19 +224,21 @@ namespace FileHosting.MVC.Controllers
         private Task SetConfigurationValues(decimal amountLimit, decimal speedLimit)
         {
             return Task.Factory.StartNew(() =>
-            {
-                var myConfiguration = System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration("~");
+            {                
+                Configuration myConfiguration = WebConfigurationManager.OpenWebConfiguration("~");
 
                 myConfiguration.AppSettings.Settings.Remove("TotalDownloadAmountLimit");
                 myConfiguration.AppSettings.Settings.Remove("TotalDownloadSpeedLimit");
 
-                myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit", amountLimit.ToString(CultureInfo.InvariantCulture));
-                myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit", speedLimit.ToString(CultureInfo.InvariantCulture));
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadAmountLimit",
+                    amountLimit.ToString(CultureInfo.InvariantCulture));
+                myConfiguration.AppSettings.Settings.Add("TotalDownloadSpeedLimit",
+                    speedLimit.ToString(CultureInfo.InvariantCulture));
 
                 myConfiguration.Save();
             });
         }
 
-        #endregion        
+        #endregion
     }
 }

@@ -1,70 +1,79 @@
 ﻿@using FileHosting.MVC.ViewModels
 <!DOCTYPE HTML>
 <html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="The description of my page" />
-    <meta name="author" content="Mikhail Pashans" />
-    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    <title>@ViewBag.Title</title>
-    @Styles.Render("~/Content/css", "~/Content/Bootstrap/css", "~/Content/Jumbotron/css")
-    @Scripts.Render("~/bundles/jquery", "~/bundles/modernizr", "~/bundles/bootstrap")    
-</head>
-<body>
-    <header>
-        <nav class="navbar navbar-collapse navbar-inverse collapse navbar-fixed-top" role="navigation">
-            <div class="container">
-                <div class="navbar-header">
-                    <a class="navbar-brand logo" href="/">
-                        <img class="logo-img" src="~/Content/themes/base/images/logo65.png" alt="FileHostingLogo" />
-                    </a>
-                </div>
-                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                    @if (!User.Identity.IsAuthenticated || !Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                    {
-                        <ul class="nav navbar-nav">
-                            <li @if (Request.RawUrl == "/") { <text> class="active" </text> }>
-                                <a href="/">
-                                    <span class="glyphicon glyphicon-home"></span>&ensp;Home
-                                </a>
-                            </li>
-                            @if (User.Identity.IsAuthenticated)
-                            {
-                                <li @if (Request.RawUrl.StartsWith("/Files/UserFiles")) { <text> class="active" </text> }>
-                                    <a href="@Url.Action("UserFiles", "Files")">
-                                        <span class="glyphicon glyphicon-list-alt"></span>&ensp;My files
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="The description of my page" />
+        <meta name="author" content="Mikhail Pashans" />
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <title>@ViewBag.Title</title>
+        @Styles.Render("~/Content/css", "~/Content/Bootstrap/css", "~/Content/Jumbotron/css")
+        @Scripts.Render("~/bundles/jquery", "~/bundles/modernizr", "~/bundles/bootstrap")    
+    </head>
+    <body>
+        <header>
+            <nav class="navbar navbar-collapse navbar-inverse collapse navbar-fixed-top" role="navigation">
+                <div class="container">
+                    <div class="navbar-header">
+                        <a class="navbar-brand logo" href="/">
+                            <img class="logo-img" src="~/Content/themes/base/images/logo65.png" alt="FileHostingLogo" />
+                        </a>
+                    </div>
+                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                        @if (!User.Identity.IsAuthenticated || !Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                        {
+                            <ul class="nav navbar-nav">
+                                <li @if (Request.RawUrl == "/")
+                                    {
+                                        <text> class="active" </text>
+                                    }>
+                                    <a href="/">
+                                        <span class="glyphicon glyphicon-home"></span>&ensp;Home
                                     </a>
                                 </li>
-                                if (Roles.Provider.IsUserInRole(User.Identity.Name, "Administrator"))
+                                @if (User.Identity.IsAuthenticated)
                                 {
-                                    <li @if (Request.RawUrl.StartsWith("/Admin")) { <text> class="active" </text> }>
-                                        <a href="@Url.Action("Index", "Admin")">
-                                            <span class="glyphicon glyphicon-cog"></span>&ensp;Administration
+                                    <li @if (Request.RawUrl.StartsWith("/Files/UserFiles"))
+                                        {
+                                            <text> class="active" </text>
+                                        }>
+                                        <a href="@Url.Action("UserFiles", "Files")">
+                                            <span class="glyphicon glyphicon-list-alt"></span>&ensp;My files
                                         </a>
                                     </li>
+                                    if (Roles.Provider.IsUserInRole(User.Identity.Name, "Administrator"))
+                                    {
+                                        <li @if (Request.RawUrl.StartsWith("/Admin"))
+                                            {
+                                                <text> class="active" </text>
+                                            }>
+                                            <a href="@Url.Action("Index", "Admin")">
+                                                <span class="glyphicon glyphicon-cog"></span>&ensp;Administration
+                                            </a>
+                                        </li>
+                                    }
                                 }
-                            }
-                        </ul>
-                    }
-                    @{
-                        Html.RenderPartial("_LoginPartial", new LoginViewModel());
-                    }
+                            </ul>
+                        }
+                        @{
+                            Html.RenderPartial("_LoginPartial", new LoginViewModel());
+                        }
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        @RenderBody()
-    </div>   ﻿
-    <hr />
-    <footer>
+            </nav>
+        </header>
         <div class="container">
-            &copy;&ensp;iTechArt – @DateTime.Now.Year
-        </div>
-    </footer>
-    @Scripts.Render("~/bundles/jqueryval", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters")
-    @RenderSection("scripts", false)
-</body>
+            @RenderBody()
+        </div>   ﻿
+        <hr />
+        <footer>
+            <div class="container">
+                &copy;&ensp;iTechArt – @DateTime.Now.Year
+            </div>
+        </footer>
+        @Scripts.Render("~/bundles/jqueryval", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters")
+        @RenderSection("scripts", false)
+    </body>
 </html>

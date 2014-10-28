@@ -1,12 +1,12 @@
-﻿using System.Data;
-using FileHosting.Database;
-using FileHosting.Database.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration.Provider;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.Security;
+using FileHosting.Database;
+using FileHosting.Database.Models;
 
 namespace FileHosting.MVC.Providers
 {
@@ -16,31 +16,32 @@ namespace FileHosting.MVC.Providers
 
         #region Implemented RoleProvider methods
 
-        public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
+        public override void Initialize(string name, NameValueCollection config)
         {
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
 
             if (_context == null)
-                throw new ProviderException("FileHosting Role Provider only works when used in combination with an IUnitOfWork. You should add this component to your container.");
+                throw new ProviderException(
+                    "FileHosting Role Provider only works when used in combination with an IUnitOfWork. You should add this component to your container.");
 
             if (config == null)
                 throw new ArgumentNullException("config");
 
             if (name == null || name.Length == 0)
-                name = typeof(MyRoleProvider).Name;
+                name = typeof (MyRoleProvider).Name;
 
             base.Initialize(name, config);
         }
 
         public override string[] GetRolesForUser(string email)
         {
-            var user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
+            User user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
 
-            if (user == null) return new string[] { };
+            if (user == null) return new string[] {};
 
-            var roles = user.Roles.Select(r => r.Name).ToArray();
+            string[] roles = user.Roles.Select(r => r.Name).ToArray();
 
-            return roles.Any() ? roles : new string[] { };
+            return roles.Any() ? roles : new string[] {};
         }
 
         public override void CreateRole(string roleName)
@@ -58,11 +59,11 @@ namespace FileHosting.MVC.Providers
         {
             var outputResult = false;
 
-            var user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
+            User user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
 
             if (user == null) return false;
 
-            var userRole = user.Roles.FirstOrDefault(r => r.Name == roleName);
+            Role userRole = user.Roles.FirstOrDefault(r => r.Name == roleName);
 
             if (userRole != null && userRole.Name == roleName)
             {
@@ -74,19 +75,22 @@ namespace FileHosting.MVC.Providers
 
         public override string[] GetAllRoles()
         {
-            var roles = _context.RoleRepository.GetAll().ToArray();
+            Role[] roles = _context.RoleRepository.GetAll().ToArray();
 
             if (!roles.Any())
-                return new string[] { };
+                return new string[] {};
 
-            var roleNames = roles.Select(r => r.Name).ToArray();
+            string[] roleNames = roles.Select(r => r.Name).ToArray();
 
-            return roleNames.Any() ? roleNames : new string[] { };
+            return roleNames.Any() ? roleNames : new string[] {};
         }
 
         public override void AddUsersToRoles(string[] userEmails, string[] roleNames)
         {
-            foreach (var user in userEmails.Select(email => _context.UserRepository.FirstOrDefault(u => u.Email == email)).Where(user => user != null))
+            foreach (
+                User user in
+                    userEmails.Select(email => _context.UserRepository.FirstOrDefault(u => u.Email == email))
+                        .Where(user => user != null))
             {
                 _context.UserRepository.Attach(user);
 

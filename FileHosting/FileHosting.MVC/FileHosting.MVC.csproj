@@ -302,6 +302,18 @@
     <Content Include="CKEditor\CHANGES.md" />
     <Content Include="CKEditor\LICENSE.md" />
     <Content Include="CKEditor\README.md" />
+    <Content Include="Scripts\jQueryValidate\jquery.validate.unobtrusive.min.js.map">
+      <DependentUpon>jquery.validate.unobtrusive.min.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\jQueryValidate\jquery.validate.min.js.map">
+      <DependentUpon>jquery.validate.min.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\jQueryUnobtrusive\jquery.unobtrusive-ajax.min.js.map">
+      <DependentUpon>jquery.unobtrusive-ajax.min.js</DependentUpon>
+    </Content>
+    <Content Include="Scripts\Bootstrap\bootstrap.min.js.map">
+      <DependentUpon>bootstrap.min.js</DependentUpon>
+    </Content>
     <None Include="Scripts\jQuery\jquery-2.1.1.intellisense.js" />
     <Content Include="Infrastructure\readme.txt" />
     <Content Include="Scripts\Bootstrap\bootstrap-select.min.js" />
@@ -352,6 +364,9 @@
     <Content Include="Views\Home\AddNews.cshtml" />
     <Content Include="Views\Home\EditNews.cshtml" />
     <Content Include="Views\Admin\ViewRss.cshtml" />
+    <Content Include="Scripts\jQuery\jquery-2.1.1.min.js.map">
+      <DependentUpon>jquery-2.1.1.min.js</DependentUpon>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,9 +1,8 @@
-﻿using FileHosting.Database.Models;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
 using System.Data.Entity.Validation;
+using FileHosting.Database.Models;
 
 namespace FileHosting.Database
 {
@@ -37,7 +36,7 @@ namespace FileHosting.Database
 
         #region Constructor
 
-        public UnitOfWork(): base("FileHosting")
+        public UnitOfWork() : base("FileHosting")
         {
         }
 
@@ -83,7 +82,7 @@ namespace FileHosting.Database
         public IGenericRepository<User> UserRepository
         {
             get { return _userRepo ?? (_userRepo = new GenericRepository<User>(Users)); }
-        }                
+        }
 
         #endregion
 
@@ -240,14 +239,14 @@ namespace FileHosting.Database
             modelBuilder.Entity<Tag>()
                 .Property(t => t.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<Tag>().Property(t => t.Name).IsRequired().HasMaxLength(50);            
+            modelBuilder.Entity<Tag>().Property(t => t.Name).IsRequired().HasMaxLength(50);
 
             // Users Table
             modelBuilder.Entity<User>().HasKey(u => u.Id);
             modelBuilder.Entity<User>()
                 .Property(u => u.Id)
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<User>().Property(u => u.Name).IsRequired().HasMaxLength(50);            
+            modelBuilder.Entity<User>().Property(u => u.Name).IsRequired().HasMaxLength(50);
             modelBuilder.Entity<User>().Property(u => u.Email).IsRequired().HasMaxLength(50);
             modelBuilder.Entity<User>().Property(u => u.Password).IsRequired().HasMaxLength(70);
             modelBuilder.Entity<User>().Property(u => u.CreationDate).IsRequired();
@@ -257,7 +256,7 @@ namespace FileHosting.Database
             // Users&Roles Table
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
-                .WithMany(r => r.Users)                
+                .WithMany(r => r.Users)
                 .Map(ur => ur.ToTable("Users&Roles")
                     .MapLeftKey("UserId")
                     .MapRightKey("RoleId"));

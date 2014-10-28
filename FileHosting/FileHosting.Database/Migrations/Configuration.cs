@@ -1,20 +1,15 @@
-using FileHosting.Database.Models;
-using System;
-using System.Collections.Generic;
-using System.Web.Helpers;
+using System.Data.Entity.Migrations;
 
 namespace FileHosting.Database.Migrations
 {
-    using System.Data.Entity.Migrations;
-
-    internal sealed class Configuration : DbMigrationsConfiguration<FileHosting.Database.UnitOfWork>
+    internal sealed class Configuration : DbMigrationsConfiguration<UnitOfWork>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
-        protected override void Seed(FileHosting.Database.UnitOfWork context)
+        protected override void Seed(UnitOfWork context)
         {
             //var sections = new List<Section>
             //{

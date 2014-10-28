@@ -1,16 +1,17 @@
 ﻿@using FileHosting.Domain.Enums
+@using FileHosting.Domain.Models
 @using FileHosting.MVC.Helpers
 @model FileHosting.MVC.ViewModels.AdminIndexViewModel
 @{
     ViewBag.Title = "Administration";
-    var totalDownloadAmountLimit = Model.TotalDownloadAmountLimit;
-    var totalDownloadSpeedLimit = Model.TotalDownloadSpeedLimit;
+    decimal totalDownloadAmountLimit = Model.TotalDownloadAmountLimit;
+    decimal totalDownloadSpeedLimit = Model.TotalDownloadSpeedLimit;
 }
 <h1 class="text-center">@ViewBag.Title</h1>
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("ViewRss", new { page = Model.PageInfo.PageNumber })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("ViewRss", new {page = Model.PageInfo.PageNumber})" role="button">
             <span class="glyphicon glyphicon-list-alt"></span>&emsp;View RSS
         </a>
     </div>
@@ -22,7 +23,7 @@
         <div class="panel-body">
             @if (Model.Message != null)
             {
-                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                string alertType = Model.Message.MessageType == ViewModelsMessageType.A
                     ? "alert-success"
                     : Model.Message.MessageType == ViewModelsMessageType.B
                         ? "alert-danger"
@@ -42,11 +43,20 @@
                     <div class="width-300">
                         <div class="checkbox-inline">
                             <label>
-                                <input class="activator" type="checkbox" @if (totalDownloadAmountLimit != 0) { <text> checked="checked" </text>  }><strong>Set total download amount limit?</strong>
+                                <input class="activator" type="checkbox" @if (totalDownloadAmountLimit != 0)
+                                                                         {
+                                                                             <text> checked="checked" </text>
+                                                                         }><strong>Set total download amount limit?</strong>
                             </label>
                         </div>
                         <div>
-                            <input class="form-control width-200 display-inline" type="text" name="totalDownloadAmountLimit" @if (totalDownloadAmountLimit != 0) { <text> value="@totalDownloadAmountLimit" </text>  } placeholder="Download amount limit" @if (totalDownloadAmountLimit == 0) { <text> disabled="disabled" </text>  }>
+                            <input class="form-control width-200 display-inline" type="text" name="totalDownloadAmountLimit" @if (totalDownloadAmountLimit != 0)
+                                                                                                                             {
+                                                                                                                                 <text> value="@totalDownloadAmountLimit" </text>
+                                                                                                                             } placeholder="Download amount limit" @if (totalDownloadAmountLimit == 0)
+                                                                                                                                                                   {
+                                                                                                                                                                       <text> disabled="disabled" </text>
+                                                                                                                                                                   }>
                             <strong class="display-inline">Mb</strong>
                         </div>
                     </div>
@@ -55,11 +65,20 @@
                     <div class="width-300">
                         <div class="checkbox-inline">
                             <label>
-                                <input class="activator" type="checkbox" @if (totalDownloadSpeedLimit != 0) { <text> checked="checked" </text>  }><strong>Set total download speed limit?</strong>
+                                <input class="activator" type="checkbox" @if (totalDownloadSpeedLimit != 0)
+                                                                         {
+                                                                             <text> checked="checked" </text>
+                                                                         }><strong>Set total download speed limit?</strong>
                             </label>
                         </div>
                         <div>
-                            <input class="form-control width-200 display-inline" type="text" name="totalDownloadSpeedLimit" @if (totalDownloadSpeedLimit != 0) { <text> value="@totalDownloadSpeedLimit" </text>  } placeholder="Download speed limit" @if (totalDownloadSpeedLimit == 0) { <text> disabled="disabled" </text>  }>
+                            <input class="form-control width-200 display-inline" type="text" name="totalDownloadSpeedLimit" @if (totalDownloadSpeedLimit != 0)
+                                                                                                                            {
+                                                                                                                                <text> value="@totalDownloadSpeedLimit" </text>
+                                                                                                                            } placeholder="Download speed limit" @if (totalDownloadSpeedLimit == 0)
+                                                                                                                                                                 {
+                                                                                                                                                                     <text> disabled="disabled" </text>
+                                                                                                                                                                 }>
                             <strong class="display-inline">Kb/s</strong>
                         </div>
                     </div>
@@ -90,7 +109,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var user in Model.Users)
+                        @foreach (UserModel user in Model.Users)
                         {
                             <tr>
                                 <td>@user.Id</td>
@@ -98,7 +117,7 @@
                                 <td>@user.Email</td>
                                 <td>@user.CreationDate</td>
                                 <td class="text-right">
-                                    <a class="btn btn-warning" href="@Url.Action("EditUser", new { userId = user.Id, page = Model.PageInfo.PageNumber })" role="button">
+                                    <a class="btn btn-warning" href="@Url.Action("EditUser", new {userId = user.Id, page = Model.PageInfo.PageNumber})" role="button">
                                         <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
                                 </td>
@@ -121,15 +140,15 @@
         <div>
             Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
         </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new {page = x}))
     }
 </div>
 
 <script type="text/javascript">
-    (function ($) {
+    (function($) {
         var $form = $('form');
 
-        $form.on('change', '.activator', function () {
+        $form.on('change', '.activator', function() {
             var $checkbox = $(this);
             var $input = $checkbox.parent().parent().parent().find('.form-control');
             var isChecked = $checkbox.prop('checked');

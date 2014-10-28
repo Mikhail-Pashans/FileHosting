@@ -7,7 +7,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new { page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new {page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
         </a>
     </div>        
@@ -74,10 +74,10 @@
 </script>
 
 <script type="text/javascript">
-    (function ($) {
+    (function($) {
         $('#jquery-wrapped-fine-uploader').fineUploader({
             maxConnections: 1,
-            validation: {                
+            validation: {
                 sizeLimit: 10737418240 // 10 GB = 10 * 1024 * 1024 * 1024 bytes
             },
             failedUploadTextDisplay: {

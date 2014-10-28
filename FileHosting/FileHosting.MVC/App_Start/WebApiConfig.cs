@@ -9,8 +9,8 @@ namespace FileHosting.MVC
             config.Routes.MapHttpRoute(
                 "DefaultApi",
                 "api/{controller}/{id}",
-                new { id = RouteParameter.Optional }
-            );
+                new {id = RouteParameter.Optional}
+                );
         }
     }
 }

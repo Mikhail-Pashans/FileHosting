@@ -1,8 +1,8 @@
-﻿using FileHosting.Database;
+﻿using System.Web.Mvc;
+using System.Web.Security;
+using FileHosting.Database;
 using FileHosting.Domain.Enums;
 using FileHosting.MVC.ViewModels;
-using System.Web.Mvc;
-using System.Web.Security;
 
 namespace FileHosting.MVC.Controllers
 {
@@ -10,7 +10,7 @@ namespace FileHosting.MVC.Controllers
     public class AccountController : Controller
     {
         private readonly IUnitOfWork _context;
-        
+
         #region Constructor            
 
         public AccountController(IUnitOfWork context)
@@ -55,7 +55,7 @@ namespace FileHosting.MVC.Controllers
         [Authorize]
         [ValidateAntiForgeryToken]
         public ActionResult LogOff()
-        {            
+        {
             FormsAuthentication.SignOut();
 
             return RedirectToAction("Login", "Account");
@@ -76,7 +76,8 @@ namespace FileHosting.MVC.Controllers
             if (!ModelState.IsValid) return View(viewModel);
 
             MembershipCreateStatus createStatus;
-            Membership.CreateUser(viewModel.UserName, viewModel.Password, viewModel.Email, passwordQuestion: null, passwordAnswer: null, isApproved: true, providerUserKey: null, status: out createStatus);
+            Membership.CreateUser(viewModel.UserName, viewModel.Password, viewModel.Email, null, null, true, null,
+                out createStatus);
 
             if (createStatus == MembershipCreateStatus.Success)
             {

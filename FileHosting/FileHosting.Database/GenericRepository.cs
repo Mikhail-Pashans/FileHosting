@@ -8,7 +8,7 @@ namespace FileHosting.Database
 {
     public sealed class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        private readonly DbSet<T> _dbSet;        
+        private readonly DbSet<T> _dbSet;
 
         #region Constructor
 
@@ -17,12 +17,12 @@ namespace FileHosting.Database
             _dbSet = dbSet;
         }
 
-        #endregion        
+        #endregion
 
         #region GenericRepository<T> implementation
 
         public IQueryable<T> AsQueryable()
-        {            
+        {
             return _dbSet.AsQueryable();
         }
 
@@ -32,13 +32,13 @@ namespace FileHosting.Database
         }
 
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
-        {            
+        {
             return _dbSet.Where(predicate);
         }
 
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate, IEnumerable<string> includes)
         {
-            foreach (var include in includes)
+            foreach (string include in includes)
             {
                 _dbSet.Include(include);
             }
@@ -75,7 +75,7 @@ namespace FileHosting.Database
         {
             if (entity == null)
                 throw new ArgumentNullException("entity");
-            
+
             _dbSet.Add(entity);
         }
 

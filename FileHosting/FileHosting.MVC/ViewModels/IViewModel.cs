@@ -1,5 +1,5 @@
-﻿using FileHosting.Domain.Enums;
-using System;
+﻿using System;
+using FileHosting.Domain.Enums;
 
 namespace FileHosting.MVC.ViewModels
 {
@@ -25,7 +25,7 @@ namespace FileHosting.MVC.ViewModels
 
         public int TotalPages
         {
-            get { return (int)Math.Ceiling((decimal)TotalItems / PageSize); }
+            get { return (int) Math.Ceiling((decimal) TotalItems/PageSize); }
         }
     }
 }

@@ -6,7 +6,7 @@ namespace FileHosting.MVC.ViewModels
     {
         public UserModel UserModel { get; set; }
         public string[] Roles { get; set; }
-        public Message Message { get; set; }
         public int PageNumber { get; set; }
+        public Message Message { get; set; }
     }
 }

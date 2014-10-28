@@ -1,52 +1,46 @@
-﻿.container {
-    width: 920px !important;    
-}
+﻿.container { width: 920px !important; }
 
 
 /* Styles for validation helpers
 ---------------------------------------------------------------------------------*/
+
 .field-validation-error {
+    color: #f00;
     font-weight: bold;
-    color: #f00;    
 }
 
-.field-validation-valid {
-    display: none;
-}
+.field-validation-valid { display: none; }
 
 .input-validation-error {
+    background-color: #fee;
     border: 1px solid #f00;
-    background-color: #fee;    
 }
 
 .validation-summary-errors {
-    font-weight: bold;
     color: #f00;
+    font-weight: bold;
 }
 
-.validation-summary-valid {
-    display: none;
-}
+.validation-summary-valid { display: none; }
 
 
 /*-------------------------------------------------------------------------------*/
+
 .logo {
-    position: relative;
     display: block;
+    margin-right: 50px;
     padding-left: 80px;
     padding-right: 25px;
-    margin-right: 50px;
+    position: relative;
 }
 
 .logo .logo-img {
-    position: absolute;
     left: 0;
+    position: absolute;
     top: -7px;
 }
 
-#img-supercaptcha {
-    height: 100px !important;
-}
+#img-supercaptcha { height: 100px !important; }
 
 /*hr {
     border-color: rgb(56, 97, 187) !important;
@@ -54,91 +48,59 @@
 
 hr {
     background-image: url(../Content/themes/base/images/gauze.png) !important;
-    height: .75em !important;
     border: none !important;
+    height: .75em !important;
     margin: .75em 0 !important;
 }
 
-.display-inline {
-    display: inline !important;
-}
+.display-inline { display: inline !important; }
 
-.display-inline-block {
-    display: inline-block !important;
-}
+.display-inline-block { display: inline-block !important; }
 
-.display-none {
-    display: none !important;
-}
+.display-none { display: none !important; }
 
-.margin-left {
-    margin-left: 20px !important;
-}
+.margin-left { margin-left: 20px !important; }
 
-.form-custom {
-    padding: 0 !important;
-}
+.form-custom { padding: 0 !important; }
 
-.well-custom {
-    margin: 0 auto !important;
-}
+.well-custom { margin: 0 auto !important; }
 
-.no-margin {
-    margin: 0 !important;
-}
+.no-margin { margin: 0 !important; }
 
-.border-bottom {
-    border-bottom: 1px solid !important;
-}
+.border-bottom { border-bottom: 1px solid !important; }
 
-.th-control {
-    width: 220px !important;
-}
+.th-control { width: 220px !important; }
 
-.th-user-control {
-    width: 180px !important;
-}
+.th-user-control { width: 180px !important; }
 
-.th-numbers {
-    width: 100px !important;
-}
+.th-numbers { width: 100px !important; }
 
-.width-200 {
-    width: 200px !important;
-}
+.width-200 { width: 200px !important; }
 
-.width-300 {
-    width: 300px !important;
-}
+.width-300 { width: 300px !important; }
 
-.width-600 {
-    width: 600px !important;
-}
+.width-600 { width: 600px !important; }
 
-.width-800 {
-    width: 800px !important;
-}
+.width-800 { width: 800px !important; }
 
-#allowedUsers {
-    margin-top: 12px !important;
-}
+#allowedUsers { margin-top: 12px !important; }
 
 .image {
-    width: 786px !important;
     height: 786px !important;
+    width: 786px !important;
 }
 
 .thumbnail {
-    width: 140px !important;
-    height: 140px !important;
     float: left !important;
-    margin-right: 15px !important;
+    height: 140px !important;
     margin-bottom: 15px !important;
+    margin-right: 15px !important;
+    width: 140px !important;
 }
 
 .news-wrapper {
-    white-space: normal !important;
     text-align: justify !important;
+    white-space: normal !important;
     /*word-break: break-all !important;
     word-wrap: break-word !important;*/
 }

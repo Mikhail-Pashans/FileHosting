@@ -1,7 +1,4 @@
-﻿using FileHosting.Database;
-using FileHosting.Database.Models;
-using FileHosting.MVC.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration.Provider;
@@ -10,6 +7,9 @@ using System.Linq;
 using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.Security;
+using FileHosting.Database;
+using FileHosting.Database.Models;
+using FileHosting.MVC.Extensions;
 
 namespace FileHosting.MVC.Providers
 {
@@ -24,13 +24,14 @@ namespace FileHosting.MVC.Providers
             _context = DependencyResolver.Current.GetService<IUnitOfWork>();
 
             if (_context == null)
-                throw new ProviderException("FileHosting Membership Provider only works when used in combination with an IUnitOfWork. You should add this component to your container.");
+                throw new ProviderException(
+                    "FileHosting Membership Provider only works when used in combination with an IUnitOfWork. You should add this component to your container.");
 
             if (config == null)
                 throw new ArgumentNullException("config");
 
             if (string.IsNullOrWhiteSpace(name))
-                name = typeof(MyMembershipProvider).Name;
+                name = typeof (MyMembershipProvider).Name;
 
             if (String.IsNullOrEmpty(config["description"]))
             {
@@ -46,7 +47,7 @@ namespace FileHosting.MVC.Providers
             var isValid = false;
             email = email.ToLowerInvariant();
 
-            var user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
+            User user = _context.UserRepository.FirstOrDefault(u => u.Email == email);
 
             if (user != null && Crypto.VerifyHashedPassword(user.Password, password))
             {
@@ -56,7 +57,9 @@ namespace FileHosting.MVC.Providers
             return isValid;
         }
 
-        public override MembershipUser CreateUser(string userName, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
+        public override MembershipUser CreateUser(string userName, string password, string email,
+            string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey,
+            out MembershipCreateStatus status)
         {
             userName = userName.Trim();
             email = email.ToLowerInvariant().Trim();
@@ -78,7 +81,7 @@ namespace FileHosting.MVC.Providers
                 return null;
             }
 
-            var membershipUser = GetUser(userName, email);
+            MembershipUser membershipUser = GetUser(userName, email);
 
             if (membershipUser != null)
             {
@@ -91,7 +94,7 @@ namespace FileHosting.MVC.Providers
                 return null;
             }
 
-            var role = _context.RoleRepository.FirstOrDefault(r => r.Name == "RegisteredUser");
+            Role role = _context.RoleRepository.FirstOrDefault(r => r.Name == "RegisteredUser");
 
             _context.UserRepository.Add(new User
             {
@@ -107,8 +110,8 @@ namespace FileHosting.MVC.Providers
                 FilesWithPermission = new List<File>(),
                 FilesWithSubscription = new List<File>(),
                 News = new List<News>(),
-                Roles = role == null ? new List<Role>() : new List<Role>{ role },
-            });            
+                Roles = role == null ? new List<Role>() : new List<Role> {role},
+            });
 
             try
             {
@@ -127,31 +130,33 @@ namespace FileHosting.MVC.Providers
 
         private MembershipUser GetUser(string userName, string email)
         {
-            var users = _context.UserRepository.Find(u => u.Name == userName || u.Email == email).ToArray();
+            User[] users = _context.UserRepository.Find(u => u.Name == userName || u.Email == email).ToArray();
 
             if (!users.Any()) return null;
 
-            var user = users.First();
+            User user = users.First();
 
-            var memberUser = new MembershipUser("MyMembershipProvider", user.Name, Guid.NewGuid(), user.Email, null, null, true, false, user.CreationDate, DateTime.UtcNow, DateTime.UtcNow, user.CreationDate, DateTime.MinValue);
+            var memberUser = new MembershipUser("MyMembershipProvider", user.Name, Guid.NewGuid(), user.Email, null,
+                null, true, false, user.CreationDate, DateTime.UtcNow, DateTime.UtcNow, user.CreationDate,
+                DateTime.MinValue);
 
             return memberUser;
         }
 
         public User GetUserByEmail(string email)
         {
-            var users = _context.UserRepository.Find(u => u.Email == email).ToArray();
+            User[] users = _context.UserRepository.Find(u => u.Email == email).ToArray();
 
             if (!users.Any()) return null;
 
-            var user = users.First();
+            User user = users.First();
 
             return user;
         }
 
         public bool ChangeUserPassword(string userEmail, string newUserPassword)
-        {                        
-            var user = _context.UserRepository.FirstOrDefault(u => u.Email == userEmail);
+        {
+            User user = _context.UserRepository.FirstOrDefault(u => u.Email == userEmail);
             if (user == null)
                 return false;
 
@@ -161,7 +166,7 @@ namespace FileHosting.MVC.Providers
 
             if (args.Cancel)
                 return false;
-            
+
             _context.UserRepository.Attach(user);
 
             user.Password = Crypto.HashPassword(newUserPassword);
@@ -173,7 +178,7 @@ namespace FileHosting.MVC.Providers
             catch (DataException)
             {
                 return false;
-            }                
+            }
 
             return true;
         }

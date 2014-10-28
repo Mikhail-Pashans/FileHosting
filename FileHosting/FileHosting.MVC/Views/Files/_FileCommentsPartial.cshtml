@@ -1,4 +1,5 @@
 ﻿@using FileHosting.Domain.Enums
+@using FileHosting.Domain.Models
 @using FileHosting.MVC.Helpers
 @model FileHosting.MVC.ViewModels.FileCommentsViewModel
 @{
@@ -8,7 +9,7 @@
 <h2 class="text-center">Comments</h2>
 @if (Model.Message != null)
 {
-    var alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.C
+    string alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.C
         ? "alert-success"
         : Model.Message.MessageType == ViewModelsMessageType.B || Model.Message.MessageType == ViewModelsMessageType.D
             ? "alert-danger"
@@ -40,9 +41,16 @@
 }
 @if (Model.Comments != null && Model.Comments.Any())
 {
-    foreach (var comment in Model.Comments)
+    foreach (CommentModel comment in Model.Comments)
     {
-        <div class="panel @if (comment.IsActive) { <text>panel-info</text> } else { <text>panel-danger</text> }">
+        <div class="panel @if (comment.IsActive)
+                          {
+                              <text>panel-info</text>
+                          }
+                          else
+                          {
+                              <text>panel-danger</text>
+                          }">
             <div class="panel-heading">
                 <strong>
                     #@comment.Number
@@ -57,7 +65,10 @@
                 {
                     <div class="pull-right">
                         <div class="checkbox-inline">
-                            <input class="activate-comment-checkbox" type="checkbox" @if (comment.IsActive) { <text> checked="checked" </text>  } value="@comment.Id" />
+                            <input class="activate-comment-checkbox" type="checkbox" @if (comment.IsActive)
+                                                                                     {
+                                                                                         <text> checked="checked" </text>
+                                                                                     } value="@comment.Id" />
                             <strong>Is Active</strong>
                         </div>
                         <form class="display-inline margin-left delete-comment-form" action="@Url.Action("DeleteCommentFromFile")" method="POST">
@@ -79,7 +90,7 @@
     <div>
         Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
     </div>
-    @Html.PageLinks(Model.PageInfo, x => Url.Action("GetCommentsForFile", new { page = x }))
+    @Html.PageLinks(Model.PageInfo, x => Url.Action("GetCommentsForFile", new {page = x}))
 }
 else
 {
@@ -89,12 +100,12 @@ else
 }
 
 <script type="text/javascript">
-    (function ($) {        
+    (function($) {
         var $newCommentText = $('#newCommentText');
         var $closeButtons = $('.close');
 
         $newCommentText.ckeditor();
-        
-        $closeButtons.tooltip();        
+
+        $closeButtons.tooltip();
     })(jQuery);
 </script>

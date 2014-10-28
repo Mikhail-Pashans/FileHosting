@@ -17,7 +17,7 @@ namespace FileHosting.Database.Models
 
         public int SectionId { get; set; }
         public virtual Section Section { get; set; }
-        
+
         public int OwnerId { get; set; }
         public virtual User Owner { get; set; }
 
@@ -28,7 +28,7 @@ namespace FileHosting.Database.Models
         public virtual ICollection<Download> Downloads { get; set; }
 
         public virtual ICollection<User> SubscribedUsers { get; set; }
-        
-        public virtual ICollection<Tag> Tags { get; set; }                        
+
+        public virtual ICollection<Tag> Tags { get; set; }
     }
 }

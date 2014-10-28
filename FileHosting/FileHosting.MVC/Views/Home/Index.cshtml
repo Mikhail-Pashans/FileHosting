@@ -10,7 +10,7 @@
         @foreach (var item in Model.FileSections)
         {
             <li>
-                <a href="@Url.Action("Index", "Files", new { section = item.Key })">@item.Value</a>
+                <a href="@Url.Action("Index", "Files", new {section = item.Key})">@item.Value</a>
             </li>
         }
     </ul>
@@ -20,16 +20,16 @@
             @if (Model.IsModerator)
             {
                 <div>
-                    <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new { page = Model.PageInfo.PageNumber })" role="button">
+                    <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new {page = Model.PageInfo.PageNumber})" role="button">
                         <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
                     </a>
-                </div>                
+                </div>
                 <br />
             }
             @if (Model.News != null && Model.News.Any())
             {
                 <div class="panel-group no-margin" id="accordion">
-                    @for (var i = 0; i < Model.News.Count; i++)
+                    @for (int i = 0; i < Model.News.Count; i++)
                     {
                         <div class="panel panel-success no-margin news-wrapper">
                             <div class="panel-heading">
@@ -40,7 +40,7 @@
                                     @if (Model.IsModerator)
                                     {
                                         <div class="pull-right">
-                                            <a class="close" href="@Url.Action("EditNews", new { newsId = Model.News[i].Id, page = Model.PageInfo.PageNumber })" data-toggle="tooltip" data-placement="top" title="Edit news">
+                                            <a class="close" href="@Url.Action("EditNews", new {newsId = Model.News[i].Id, page = Model.PageInfo.PageNumber})" data-toggle="tooltip" data-placement="top" title="Edit news">
                                                 <span class="glyphicon glyphicon-pencil"></span>
                                             </a>
                                         </div>
@@ -50,7 +50,10 @@
                                     <h4>@Html.Raw(Model.News[i].Name)</h4>
                                 </a>
                             </div>
-                            <div class="panel-collapse collapse @if (i == 0){ <text>in</text> }" id="@Model.News[i].Id">
+                            <div class="panel-collapse collapse @if (i == 0)
+                                                                {
+                                                                    <text>in</text>
+                                                                }" id="@Model.News[i].Id">
                                 <div class="panel-body">
                                     <img class="img-rounded thumbnail" src="/@Model.News[i].Picture" alt="A picture to the news">
                                     <div>
@@ -80,12 +83,12 @@
         <div>
             Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
         </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
+        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new {page = x}))
     }
 </div>
 
 <script type="text/javascript">
-    (function ($) {
+    (function($) {
         var $editButtons = $('.close');
 
         $editButtons.tooltip();

@@ -1,5 +1,5 @@
-﻿using FileHosting.Domain.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using FileHosting.Domain.Models;
 
 namespace FileHosting.MVC.ViewModels
 {
@@ -16,6 +16,6 @@ namespace FileHosting.MVC.ViewModels
         public string CurrentFilter { get; set; }
         public bool IsAuthenticated { get; set; }
         public int SectionNumber { get; set; }
-        public PageInfo PageInfo { get; set; }        
+        public PageInfo PageInfo { get; set; }
     }
 }

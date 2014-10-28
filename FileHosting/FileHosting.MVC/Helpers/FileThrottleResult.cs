@@ -9,26 +9,26 @@ namespace FileHosting.MVC.Helpers
 {
     public class FileThrottleResult : FilePathResult
     {
-        readonly string _pathToFile;
-        readonly string _fileName;        
-        readonly decimal _rate;
-        readonly string _contentType;
+        private readonly string _contentType;
+        private readonly string _fileName;
+        private readonly string _pathToFile;
+        private readonly decimal _rate;
 
         public FileThrottleResult(string pathToFile, string fileName, decimal rate, string contentType)
             : base(pathToFile, contentType)
         {
             _pathToFile = pathToFile;
-            _fileName = fileName;            
+            _fileName = fileName;
             _rate = rate;
             _contentType = contentType;
         }
 
         protected override void WriteFile(HttpResponseBase response)
         {
-            var bufferSize = (int)Math.Truncate(1024 * _rate);
+            var bufferSize = (int) Math.Truncate(1024*_rate);
             var buffer = new byte[bufferSize];
 
-            var outputStream = response.OutputStream;
+            Stream outputStream = response.OutputStream;
 
             using (var stream = new FileStream(_pathToFile, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize))
             {
@@ -43,7 +43,7 @@ namespace FileHosting.MVC.Helpers
                     if (!response.IsClientConnected)
                         break;
 
-                    var bytesRead = stream.Read(buffer, 0, bufferSize);
+                    int bytesRead = stream.Read(buffer, 0, bufferSize);
 
                     if (bytesRead == 0)
                         break;

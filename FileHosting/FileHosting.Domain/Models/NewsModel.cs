@@ -10,11 +10,10 @@ namespace FileHosting.Domain.Models
         public string Picture { get; set; }
 
         private DateTime _publishDate;
-
         public DateTime PublishDate
         {
             get { return _publishDate.ToLocalTime(); }
             set { _publishDate = value; }
-        }        
+        }
     }
 }

@@ -1,5 +1,5 @@
-﻿using FileHosting.Domain.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using FileHosting.Domain.Models;
 
 namespace FileHosting.MVC.ViewModels
 {
@@ -7,8 +7,8 @@ namespace FileHosting.MVC.ViewModels
     {
         public List<UserModel> Users { get; set; }
         public decimal TotalDownloadAmountLimit { get; set; }
-        public decimal TotalDownloadSpeedLimit { get; set; }        
-        public Message Message { get; set; }
+        public decimal TotalDownloadSpeedLimit { get; set; }
         public PageInfo PageInfo { get; set; }
+        public Message Message { get; set; }
     }
 }

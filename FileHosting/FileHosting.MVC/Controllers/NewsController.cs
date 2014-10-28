@@ -1,15 +1,15 @@
-﻿using FileHosting.Database;
-using FileHosting.Domain.Models;
-using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
 using System.Web.Mvc;
+using FileHosting.Database;
+using FileHosting.Domain.Models;
+using Newtonsoft.Json;
 
 namespace FileHosting.MVC.Controllers
 {
     public class NewsController : ApiController
-    {        
+    {
         private readonly IUnitOfWork _context;
 
         #region Constructor
@@ -42,7 +42,7 @@ namespace FileHosting.MVC.Controllers
 
         public string GetNewsInJson()
         {
-            var news = _context.NewsRepository.Find(n => n.IsActive)
+            List<NewsModelJson> news = _context.NewsRepository.Find(n => n.IsActive)
                 .Select(n => new NewsModelJson
                 {
                     Id = n.Id,
@@ -57,6 +57,6 @@ namespace FileHosting.MVC.Controllers
             return JsonConvert.SerializeObject(news);
         }
 
-        #endregion                
+        #endregion
     }
 }

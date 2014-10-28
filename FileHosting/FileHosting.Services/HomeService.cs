@@ -1,14 +1,14 @@
-﻿using FileHosting.Database;
-using FileHosting.Database.Models;
-using FileHosting.Domain.Enums;
-using FileHosting.Domain.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using FileHosting.Database;
+using FileHosting.Database.Models;
+using FileHosting.Domain.Enums;
+using FileHosting.Domain.Models;
 
 namespace FileHosting.Services
 {
@@ -29,7 +29,7 @@ namespace FileHosting.Services
 
         public List<UserModel> GetAllUsersList()
         {
-            var usersList = _context.UserRepository.GetAll()
+            List<UserModel> usersList = _context.UserRepository.GetAll()
                 .Select(u => new UserModel
                 {
                     Id = u.Id,
@@ -42,7 +42,7 @@ namespace FileHosting.Services
             return usersList;
         }
 
-        public UserModel GetUserById(int userId)
+        public UserModel GetModelForUser(int userId)
         {
             return _context.UserRepository.Find(u => u.Id == userId)
                 .Select(u => new UserModel
@@ -58,14 +58,14 @@ namespace FileHosting.Services
                 .FirstOrDefault();
         }
 
-        public User GetUserById(int userId, bool isDatabase)
+        public User GetUserById(int userId)
         {
             return _context.UserRepository.GetById(userId);
         }
 
         public bool SaveUserChanges(int userId, decimal downloadAmountLimit, decimal downloadSpeedLimit)
         {
-            var user = _context.UserRepository.GetById(userId);
+            User user = _context.UserRepository.GetById(userId);
             if (user == null)
                 return false;
 
@@ -103,7 +103,7 @@ namespace FileHosting.Services
                 })
                 .OrderByDescending(n => n.PublishDate)
                 .ToList();
-        }        
+        }
 
         public News GetNewsById(int newsId)
         {
@@ -112,9 +112,9 @@ namespace FileHosting.Services
 
         public NewsModel GetModelForNews(int newsId)
         {
-            var news = _context.NewsRepository.GetById(newsId);
+            News news = _context.NewsRepository.GetById(newsId);
             if (news == null)
-                return null;            
+                return null;
 
             return new NewsModel
             {
@@ -143,11 +143,11 @@ namespace FileHosting.Services
 
         public void ChangeNews(News news, string newsName, string newsText, string newPicturePath)
         {
-            _context.NewsRepository.Attach(news);            
+            _context.NewsRepository.Attach(news);
 
             news.Name = newsName;
             news.Text = newsText;
-            
+
             if (newPicturePath != null)
                 news.Picture = newPicturePath;
 
@@ -170,22 +170,38 @@ namespace FileHosting.Services
             return _context.SectionRepository.GetById(sectionId);
         }
 
-        public Task SendEmail(EmailType emailType, IEnumerable<User> recipients, string fileName = null, string fileOwner = null, string fileSection = null)
+        public Task SendEmail(EmailType emailType, IEnumerable<User> recipients, string fileName = null,
+            string fileOwner = null, string fileSection = null)
         {
             return Task.Factory.StartNew(() =>
             {
                 var smtpClient = new SmtpClient();
+                var body = string.Empty;
 
-                foreach (var recipient in recipients)
+                foreach (User recipient in recipients)
                 {
-                    var msg = new MailMessage
+                    if (emailType == EmailType.FileDeleted)
                     {
+                        body = string.Format(
+                            "<p>Dear <strong>{0}</strong>!</p><p>The user <strong>{1}</strong> has deleted the file <strong>{2}</strong> in the <strong>{3}</strong> section.</p>",
+                            recipient.Name, fileOwner, fileName, fileSection);
+                    }
+                    if (emailType == EmailType.FileDeleted)
+                    {
+                        body = string.Format(
+                            "<p>Dear <strong>{0}</strong>!</p><p>The user <strong>{1}</strong> has deleted the file <strong>{2}</strong> in the <strong>{3}</strong> section.</p>",
+                            recipient.Name, fileOwner, fileName, fileSection);
+                    }
+                    if (emailType == EmailType.UserPasswordChanged)
+                    {
+                        body = string.Format(
+                            "<p>Dear <strong>{0}</strong>!</p><p>Your password was changed by the site administrator.</p><p>If you have any questions, please contact the site administrator.</p>",
+                            recipient.Name);
+                    }
+                    var msg = new MailMessage
+                    {                    
                         Subject = "FileHosting notification",
-                        Body = emailType == EmailType.FileDeleted
-                            ? string.Format("<p>Dear <strong>{0}</strong>!</p><p>The user <strong>{1}</strong> has deleted the file <strong>{2}</strong> in the <strong>{3}</strong> section.</p>", recipient.Name, fileOwner, fileName, fileSection)
-                            : emailType == EmailType.FileChanged
-                                ? string.Format("<p>Dear <strong>{0}</strong>!</p><p>The user <strong>{1}</strong> has changed the file <strong>{2}</strong> in the <strong>{3}</strong> section.</p>", recipient.Name, fileOwner, fileName, fileSection)
-                                : string.Format("<p>Dear <strong>{0}</strong>!</p><p>Your password was changed by the site administrator.</p><p>If you have any questions, please contact the site administrator.</p>", recipient.Name),
+                        Body = body,
                         IsBodyHtml = true,
                     };
                     msg.To.Add(new MailAddress(recipient.Email));

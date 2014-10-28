@@ -1,8 +1,5 @@
-﻿using FileHosting.Domain.Enums;
-using FileHosting.MVC.Providers;
-using FileHosting.MVC.ViewModels;
-using FileHosting.Services;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.IO;
@@ -10,18 +7,24 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using FileHosting.Database.Models;
+using FileHosting.Domain.Enums;
+using FileHosting.Domain.Models;
+using FileHosting.MVC.Providers;
+using FileHosting.MVC.ViewModels;
+using FileHosting.Services;
 
 namespace FileHosting.MVC.Controllers
 {
     [AllowAnonymous]
     public class HomeController : Controller
-    {        
+    {
         private readonly HomeService _homeService;
 
         #region Constructor
 
         public HomeController()
-        {            
+        {
             _homeService = new HomeService();
         }
 
@@ -29,15 +32,15 @@ namespace FileHosting.MVC.Controllers
 
         #region Actions
 
-        [HttpGet]        
+        [HttpGet]
         public ActionResult Index(int? page)
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return View("_UnauthorizedAccessAttemp");            
+                return View("_UnauthorizedAccessAttemp");
 
-            var news = _homeService.GetActiveNews();
+            List<NewsModel> news = _homeService.GetActiveNews();
 
-            var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("NewsPageSize"));
+            int pageSize = int.Parse(ConfigurationManager.AppSettings.Get("NewsPageSize"));
 
             var pageInfo = new PageInfo
             {
@@ -45,16 +48,16 @@ namespace FileHosting.MVC.Controllers
                 TotalItems = news.Count
             };
 
-            var pageNumber = (page ?? 1);
+            int pageNumber = (page ?? 1);
             if (pageNumber < 1)
                 pageNumber = 1;
             if (pageNumber > pageInfo.TotalPages)
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
 
-            var newPerPages = news.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+            List<NewsModel> newPerPages = news.Skip((pageNumber - 1)*pageSize).Take(pageSize).ToList();
 
-            var fileSections = _homeService.GetFileSectionsDictianary();
+            Dictionary<int, string> fileSections = _homeService.GetFileSectionsDictianary();
 
             var viewModel = new HomeIndexViewModel
             {
@@ -73,11 +76,11 @@ namespace FileHosting.MVC.Controllers
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
-            
-            if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+
+            if (((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
 
-            var pageNumber = (page ?? 1);
+            int pageNumber = (page ?? 1);
 
             return View(new AddNewsViewModel
             {
@@ -94,8 +97,8 @@ namespace FileHosting.MVC.Controllers
                                     : messageType == ViewModelsMessageType.D
                                         ? "Warning! News text cannot be empty."
                                         : messageType == ViewModelsMessageType.E
-                                        ? "Warning! News picture cannot be empty."
-                                        : "Warning! News picture is not a picture."
+                                            ? "Warning! News picture cannot be empty."
+                                            : "Warning! News picture is not a picture."
                     }
                     : null,
                 PageNumber = pageNumber
@@ -110,32 +113,33 @@ namespace FileHosting.MVC.Controllers
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
-            
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
 
             if (string.IsNullOrWhiteSpace(newsName))
-                return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.C });
+                return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.C});
 
             if (string.IsNullOrWhiteSpace(newsText))
-                return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.D });
+                return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.D});
 
             if (newsPicture == null || newsPicture.ContentLength == 0)
-                return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.E });
+                return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.E});
 
-            var pictureName = Path.GetFileNameWithoutExtension(newsPicture.FileName);
-            var pictureExtension = Path.GetExtension(newsPicture.FileName);
-            if (pictureExtension != ".jpg" && pictureExtension != ".jpeg" && pictureExtension != ".png" && pictureExtension != ".gif")
-                return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.F });
+            string pictureName = Path.GetFileNameWithoutExtension(newsPicture.FileName);
+            string pictureExtension = Path.GetExtension(newsPicture.FileName);
+            if (pictureExtension != ".jpg" && pictureExtension != ".jpeg" && pictureExtension != ".png" &&
+                pictureExtension != ".gif")
+                return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.F});
 
-            var fullName = pictureName + Guid.NewGuid().ToString().Replace("-", "") + pictureExtension;
+            string fullName = pictureName + Guid.NewGuid().ToString().Replace("-", "") + pictureExtension;
 
-            var ipAdress = ConfigurationManager.AppSettings.Get("Server");
+            string ipAdress = ConfigurationManager.AppSettings.Get("Server");
 
-            var picturePath = string.Format("NewsPictures/{0}", fullName);
+            string picturePath = string.Format("NewsPictures/{0}", fullName);
 
-            var pathToSave = Path.Combine(ipAdress, picturePath);
+            string pathToSave = Path.Combine(ipAdress, picturePath);
             if (System.IO.File.Exists(pathToSave))
                 System.IO.File.Delete(pathToSave);
 
@@ -147,27 +151,27 @@ namespace FileHosting.MVC.Controllers
             }
             catch (DataException)
             {
-                return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.B });
+                return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.B});
             }
 
-            return RedirectToAction("AddNews", new { page, messageType = ViewModelsMessageType.A });
+            return RedirectToAction("AddNews", new {page, messageType = ViewModelsMessageType.A});
         }
-        
+
         [HttpGet]
         [Authorize(Roles = "Moderator")]
         public ActionResult EditNews(int newsId, int? page, ViewModelsMessageType? messageType)
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
-            
-            if (((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
-                return RedirectToAction("Index", "Home");            
-            
-            var newsModel = _homeService.GetModelForNews(newsId);
+
+            if (((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
+                return RedirectToAction("Index", "Home");
+
+            NewsModel newsModel = _homeService.GetModelForNews(newsId);
             if (newsModel == null)
                 return HttpNotFound();
 
-            var pageNumber = (page ?? 1);            
+            int pageNumber = (page ?? 1);
 
             return View(new EditNewsViewModel
             {
@@ -185,8 +189,8 @@ namespace FileHosting.MVC.Controllers
                                     : messageType == ViewModelsMessageType.D
                                         ? "Warning! News text cannot be empty."
                                         : messageType == ViewModelsMessageType.E
-                                        ? "Warning! News picture cannot be empty."
-                                        : "Warning! News picture is not a picture."
+                                            ? "Warning! News picture cannot be empty."
+                                            : "Warning! News picture is not a picture."
                     }
                     : null,
                 PageNumber = pageNumber
@@ -197,59 +201,61 @@ namespace FileHosting.MVC.Controllers
         [Authorize(Roles = "Moderator")]
         [ValidateInput(false)]
         [ValidateAntiForgeryToken]
-        public ActionResult EditNews(int newsId, int page, string newsName, string newsText, HttpPostedFileBase newNewsPicture)
+        public ActionResult EditNews(int newsId, int page, string newsName, string newsText,
+            HttpPostedFileBase newNewsPicture)
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
-            
-            var user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
 
-            var news = _homeService.GetNewsById(newsId);
+            News news = _homeService.GetNewsById(newsId);
             if (news == null)
-                return HttpNotFound();            
+                return HttpNotFound();
 
             if (string.IsNullOrWhiteSpace(newsName))
-                return RedirectToAction("EditNews", new { newsId, page, messageType = ViewModelsMessageType.C });
+                return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.C});
 
             if (string.IsNullOrWhiteSpace(newsText))
-                return RedirectToAction("EditNews", new { newsId, page, messageType = ViewModelsMessageType.D });
+                return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.D});
 
             if (newNewsPicture != null && newNewsPicture.ContentLength > 0)
             {
-                var pictureName = Path.GetFileNameWithoutExtension(newNewsPicture.FileName);
-                var pictureExtension = Path.GetExtension(newNewsPicture.FileName);
-                if (pictureExtension != ".jpg" && pictureExtension != ".jpeg" && pictureExtension != ".png" && pictureExtension != ".gif")
-                    return RedirectToAction("EditNews", new { newsId, page, messageType = ViewModelsMessageType.F });
+                string pictureName = Path.GetFileNameWithoutExtension(newNewsPicture.FileName);
+                string pictureExtension = Path.GetExtension(newNewsPicture.FileName);
+                if (pictureExtension != ".jpg" && pictureExtension != ".jpeg" && pictureExtension != ".png" &&
+                    pictureExtension != ".gif")
+                    return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.F});
 
-                var fullName = pictureName + Guid.NewGuid().ToString().Replace("-", "") + pictureExtension;
+                string fullName = pictureName + Guid.NewGuid().ToString().Replace("-", "") + pictureExtension;
 
-                var ipAdress = ConfigurationManager.AppSettings.Get("Server");
+                string ipAdress = ConfigurationManager.AppSettings.Get("Server");
 
-                var oldPicturePath = Path.Combine(ipAdress, news.Picture);
+                string oldPicturePath = Path.Combine(ipAdress, news.Picture);
                 if (System.IO.File.Exists(oldPicturePath))
                     System.IO.File.Delete(oldPicturePath);
 
-                var newPicturePath = string.Format("NewsPictures/{0}", fullName);
+                string newPicturePath = string.Format("NewsPictures/{0}", fullName);
 
-                var pathToSave = Path.Combine(ipAdress, newPicturePath);
+                string pathToSave = Path.Combine(ipAdress, newPicturePath);
                 if (System.IO.File.Exists(pathToSave))
                     System.IO.File.Delete(pathToSave);
 
                 newNewsPicture.SaveAs(pathToSave);
-            }                       
+            }
 
             try
             {
-                _homeService.ChangeNews(news, newsName, newsText, newPicturePath: null);
+                _homeService.ChangeNews(news, newsName, newsText, null);
             }
             catch (DataException)
             {
-                return RedirectToAction("EditNews", new { newsId, page, messageType = ViewModelsMessageType.B });
+                return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.B});
             }
 
-            return RedirectToAction("EditNews", new { newsId, page, messageType = ViewModelsMessageType.A });
+            return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.A});
         }
 
         #endregion

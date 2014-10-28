@@ -1,5 +1,5 @@
-﻿using FileHosting.Domain.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using FileHosting.Domain.Models;
 
 namespace FileHosting.MVC.ViewModels
 {
@@ -14,6 +14,6 @@ namespace FileHosting.MVC.ViewModels
         public string DateSortParm { get; set; }
         public string CurrentSort { get; set; }
         public string CurrentFilter { get; set; }
-        public PageInfo PageInfo { get; set; }                
+        public PageInfo PageInfo { get; set; }
     }
 }

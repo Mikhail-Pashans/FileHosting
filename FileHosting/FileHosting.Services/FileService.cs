@@ -1,13 +1,13 @@
-﻿using FileHosting.Database;
-using FileHosting.Database.Models;
-using FileHosting.Domain.Models;
-using FileHosting.Services.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+using FileHosting.Database;
+using FileHosting.Database.Models;
+using FileHosting.Domain.Models;
+using FileHosting.Services.Extensions;
 using File = FileHosting.Database.Models.File;
 
 namespace FileHosting.Services
@@ -45,10 +45,10 @@ namespace FileHosting.Services
                     .ToList();
             }
 
-            var files = _context.FileRepository.Find(f => f.Section.Id == sectionId);
+            IEnumerable<File> files = _context.FileRepository.Find(f => f.Section.Id == sectionId);
             var fileModels = new List<FileModel>();
 
-            foreach (var file in files)
+            foreach (File file in files)
             {
                 if (file.AllowedUsers.Any())
                 {
@@ -95,7 +95,7 @@ namespace FileHosting.Services
 
         public File GetFileById(int fileId, User user)
         {
-            var file = _context.FileRepository.GetById(fileId);
+            File file = _context.FileRepository.GetById(fileId);
             if (file == null)
                 return null;
 
@@ -145,12 +145,13 @@ namespace FileHosting.Services
                 };
         }
 
-        public void AddFile(string fileName, string fullName, long fileSize, string filePath, string ipAddress, Section fileSection, User owner)
+        public void AddFile(string fileName, string fullName, long fileSize, string filePath, string ipAddress,
+            Section fileSection, User owner)
         {
-            var files = _context.FileRepository.Find(f => f.FullName == fullName).ToArray();
+            File[] files = _context.FileRepository.Find(f => f.FullName == fullName).ToArray();
             if (files.Any())
             {
-                foreach (var file in files)
+                foreach (File file in files)
                 {
                     DeleteFile(file, ipAddress);
                 }
@@ -183,33 +184,34 @@ namespace FileHosting.Services
             if (!multiple)
                 _context.Commit();
 
-            var filePath = Path.Combine(ipAddress, file.Path);
+            string filePath = Path.Combine(ipAddress, file.Path);
 
             if (System.IO.File.Exists(filePath))
                 System.IO.File.Delete(filePath);
         }
 
-        public void ChangeFile(File file, string fileTagsString, string newFileDescription, bool allowAnonymousBrowsing, bool allowAnonymousAction, string[] allowedUsers)
+        public void ChangeFile(File file, string fileTagsString, string newFileDescription, bool allowAnonymousBrowsing,
+            bool allowAnonymousAction, string[] allowedUsers)
         {
             _context.FileRepository.Attach(file);
 
-            var newFileTags = fileTagsString.ToTagsArray();
+            string[] newFileTags = fileTagsString.ToTagsArray();
 
             if (newFileTags != null)
             {
                 var fileTags = new List<Tag>(newFileTags.Length);
-                var existingTags = _context.TagRepository.GetAll().Select(t => t.Name).ToArray();
+                string[] existingTags = _context.TagRepository.GetAll().Select(t => t.Name).ToArray();
 
-                foreach (var newFileTag in newFileTags)
+                foreach (string newFileTag in newFileTags)
                 {
                     if (existingTags.Contains(newFileTag))
                     {
-                        var tag = newFileTag;
+                        string tag = newFileTag;
                         fileTags.Add(_context.TagRepository.First(t => t.Name == tag));
                     }
                     else
                     {
-                        var newTag = new Tag { Name = newFileTag, Files = new List<File>() };
+                        var newTag = new Tag {Name = newFileTag, Files = new List<File>()};
 
                         _context.TagRepository.Add(newTag);
 
@@ -226,9 +228,9 @@ namespace FileHosting.Services
 
             if (allowedUsers != null)
             {
-                var existingUsers = _context.UserRepository.GetAll().ToArray();
+                User[] existingUsers = _context.UserRepository.GetAll().ToArray();
 
-                foreach (var existingUser in existingUsers)
+                foreach (User existingUser in existingUsers)
                 {
                     if (allowedUsers.Contains(existingUser.Name))
                     {
@@ -302,11 +304,11 @@ namespace FileHosting.Services
             if (file == null || !file.Comments.Any())
                 return null;
 
-            var comments = isForFileOwner
+            Comment[] comments = isForFileOwner
                 ? file.Comments.ToArray()
                 : file.Comments.Where(c => c.IsActive).ToArray();
 
-            var commentModelList = new List<CommentModel>(comments.Length);
+            var commentModelList = new List<CommentModel>(comments.Length);            
             commentModelList.AddRange(comments.OrderBy(c => c.Id).Select((c, i) => new CommentModel
             {
                 Id = c.Id,
@@ -337,7 +339,7 @@ namespace FileHosting.Services
 
         public bool DeleteCommentFromFile(int commentId)
         {
-            var comment = _context.CommentRepository.GetById(commentId);
+            Comment comment = _context.CommentRepository.GetById(commentId);
             if (comment == null)
                 return false;
 
@@ -357,7 +359,7 @@ namespace FileHosting.Services
 
         public bool ChangeCommentState(int commentId, bool isActive)
         {
-            var comment = _context.CommentRepository.GetById(commentId);
+            Comment comment = _context.CommentRepository.GetById(commentId);
             if (comment == null)
                 return false;
 
@@ -377,6 +379,6 @@ namespace FileHosting.Services
             return true;
         }
 
-        #endregion                                
+        #endregion
     }
 }

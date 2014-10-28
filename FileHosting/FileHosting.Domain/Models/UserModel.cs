@@ -1,12 +1,12 @@
-﻿using FileHosting.Database.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using FileHosting.Database.Models;
 
 namespace FileHosting.Domain.Models
 {
     public class UserModel
     {
-        public int Id { get; set; }        
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
 
@@ -21,6 +21,6 @@ namespace FileHosting.Domain.Models
 
         public decimal DownloadSpeedLimit { get; set; }
 
-        public List<Role> Roles { get; set; }        
+        public List<Role> Roles { get; set; }
     }
 }

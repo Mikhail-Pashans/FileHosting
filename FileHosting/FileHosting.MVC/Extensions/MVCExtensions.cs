@@ -2,11 +2,12 @@
 
 namespace FileHosting.MVC.Extensions
 {
-    public static class MVCExtensions
+    public static class MvcExtensions
     {
         public static bool IsValidEmail(this string email)
         {
-            const string expresion = @"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
+            const string expresion =
+                @"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?";
 
             if (Regex.IsMatch(email, expresion))
             {

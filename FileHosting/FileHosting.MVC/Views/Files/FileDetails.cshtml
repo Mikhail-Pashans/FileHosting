@@ -7,7 +7,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { section = Model.SectionNumber, page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new {section = Model.SectionNumber, page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
         </a>
     </div>       
@@ -16,7 +16,7 @@
         <div class="panel-body">
             @if (Model.Message != null)
             {
-                var alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.E || Model.Message.MessageType == ViewModelsMessageType.F
+                string alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.E || Model.Message.MessageType == ViewModelsMessageType.F
                     ? "alert-success" :
                     Model.Message.MessageType == ViewModelsMessageType.B
                         ? "alert-danger"
@@ -84,7 +84,10 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-warning width-200" @if (!Model.IsAuthenticated && !Model.FileModel.IsAllowedAnonymousAction) { <text> disabled="disabled" </text>  }>
+                        <button type="submit" class="btn btn-warning width-200" @if (!Model.IsAuthenticated && !Model.FileModel.IsAllowedAnonymousAction)
+                                                                                {
+                                                                                    <text> disabled="disabled" </text>
+                                                                                }>
                             <span class="glyphicon glyphicon-download"></span>&emsp;Download file
                         </button>&emsp;
                         @if (Model.IsAuthenticated && !Model.IsOwner && !Model.IsSubscribed)
@@ -116,19 +119,19 @@
 @Scripts.Render("~/bundles/custom")
 
 <script type="text/javascript">
-    (function ($) {
+    (function($) {
         var $subscribeButon = $('.btn-subscribe');
         var $unsubscribeButon = $('.btn-unsubscribe');
         var $subscribeForm = $('#subscribeForm');
         var $subscription = $('input[name=subscription]', $subscribeForm);
 
-        $subscribeButon.on('click', function (event) {
+        $subscribeButon.on('click', function(event) {
             event.preventDefault();
             $subscription.val('Subscribe');
-            $subscribeForm.submit();            
+            $subscribeForm.submit();
         });
 
-        $unsubscribeButon.on('click', function (event) {
+        $unsubscribeButon.on('click', function(event) {
             event.preventDefault();
             $subscription.val('Unsubscribe');
             $subscribeForm.submit();

@@ -1,5 +1,5 @@
-﻿using FileHosting.Database.Models;
-using System;
+﻿using System;
+using FileHosting.Database.Models;
 
 namespace FileHosting.Database
 {

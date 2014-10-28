@@ -14,16 +14,16 @@
         }
         <fieldset>
             <div class="form-group ">
-                @Html.LabelFor(model => model.Email, new { @class = "col-md-4 control-label" })
+                @Html.LabelFor(model => model.Email, new {@class = "col-md-4 control-label"})
                 <div class="col-md-8">
-                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", placeholder = "E-mail address" } })
+                    @Html.EditorFor(model => model.Email, new {htmlAttributes = new {@class = "form-control", placeholder = "E-mail address"}})
                     @Html.ValidationMessageFor(model => model.Email)
                 </div>
             </div>
             <div class="form-group ">
-                @Html.LabelFor(model => model.Password, new { @class = "col-md-4 control-label" })
+                @Html.LabelFor(model => model.Password, new {@class = "col-md-4 control-label"})
                 <div class="col-md-8">
-                    @Html.EditorFor(model => model.Password, new { htmlAttributes = new { @class = "form-control", placeholder = "Password" } })
+                    @Html.EditorFor(model => model.Password, new {htmlAttributes = new {@class = "form-control", placeholder = "Password"}})
                     @Html.ValidationMessageFor(model => model.Password)
                 </div>
             </div>

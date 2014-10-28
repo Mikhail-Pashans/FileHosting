@@ -7,7 +7,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new {page = Model})" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to administration
         </a>
         <a class="btn btn-success width-200 pull-right" href="javascript:void(0)" id="showJsonLink" role="button" data-toggle="modal" data-target="#myModal">
@@ -41,23 +41,23 @@
     var uri = '/api/news';
     var json;
 
-    (function ($) {
+    (function($) {
         var $accordion = $('#accordion');
         var $showJsonLink = $('#showJsonLink');
         var $modal = $('#myModal');
         var $modalBody = $('.modal-body', $modal);
 
-        $showJsonLink.on('click', function (event) {            
+        $showJsonLink.on('click', function(event) {
             event.preventDefault();
             $modalBody.text(json);
             $modal.modal('show');
-        });        
+        });
 
         $.get(uri)
-            .done(function (data) {
+            .done(function(data) {
                 json = data;
                 data = JSON.parse(data);
-                $.each(data, function (key, item) {
+                $.each(data, function(key, item) {
                     var $panel = $('<div>', { 'class': 'panel panel-success no-margin news-wrapper' });
                     var $panelHeading = $('<div>', { 'class': 'panel-heading' });
                     //var $panelCollapse = key === 0
@@ -67,14 +67,14 @@
                     var $panelTitle = $('<div>', { 'class': 'panel-title' });
                     var $panelBody = $('<div>', { 'class': 'panel-body' });
                     var $strong = $('<strong>', { text: item.PublishDateString });
-                    var $a = $('<a>', {                        
+                    var $a = $('<a>', {
                         attr: {
                             'data-toggle': 'collapse',
                             'data-parent': '#accordion',
                             'href': '#' + item.Id
                         }
                     });
-                    var $h4 = $('<h4>', { html : item.Name });
+                    var $h4 = $('<h4>', { html: item.Name });
                     var $img = $('<img>', {
                         'class': 'img-rounded thumbnail',
                         attr: {
@@ -87,11 +87,11 @@
                         html: item.Text
                     });
 
-                    $strong.appendTo($panelTitle);                    
+                    $strong.appendTo($panelTitle);
                     $panelTitle.appendTo($panelHeading);
                     $h4.appendTo($a);
                     $a.appendTo($panelHeading);
-                    
+
                     $img.appendTo($panelBody);
                     $div.appendTo($panelBody);
                     $panelBody.appendTo($panelCollapse);

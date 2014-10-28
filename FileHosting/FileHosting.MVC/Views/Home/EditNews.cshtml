@@ -7,7 +7,7 @@
 <br />
 <div class="well well-custom">
     <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("Index", new { page = Model.PageNumber })" role="button">
+        <a class="btn btn-primary width-200" href="@Url.Action("Index", new {page = Model.PageNumber})" role="button">
             <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to news list
         </a>
     </div>    
@@ -16,7 +16,7 @@
         <div class="panel-body">
             @if (Model.Message != null)
             {
-                var alertType = Model.Message.MessageType == ViewModelsMessageType.A
+                string alertType = Model.Message.MessageType == ViewModelsMessageType.A
                     ? "alert-success"
                     : Model.Message.MessageType == ViewModelsMessageType.B
                         ? "alert-danger"
@@ -89,10 +89,10 @@
 </div>
 
 <script type="text/javascript">
-    (function ($) {
+    (function($) {
         var $checkbox = $('.activator');
 
-        $checkbox.on('change', function (event) {
+        $checkbox.on('change', function(event) {
             event.preventDefault();
             var $input = $checkbox.parent().parent().parent().find('.form-control');
             var isChecked = $checkbox.prop('checked');
@@ -103,6 +103,6 @@
                 $input.val('');
                 $input.attr("disabled", "disabled");
             }
-        });   
+        });
     })(jQuery);
 </script>

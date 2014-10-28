@@ -3,7 +3,7 @@
 namespace FileHosting.MVC
 {
     public class BundleConfig
-    {        
+    {
         public static void RegisterBundles(BundleCollection bundles)
         {
             /*-----------------------------jQuery---------------------------------------*/
@@ -20,7 +20,7 @@ namespace FileHosting.MVC
                 "~/Scripts/jQueryUnobtrusive/jquery.unobtrusive*",
                 "~/Scripts/jQueryValidate/jquery.validate*"));
 
-            /*-----------------------------Modernizr------------------------------------*/            
+            /*-----------------------------Modernizr------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/modernizr").Include(
                 "~/Scripts/Modernizr/modernizr-*"));
 
@@ -32,7 +32,7 @@ namespace FileHosting.MVC
                 "~/Content/FineUploader/fineuploader-5.0.2.min.css"));
 
             /*-----------------------------Bootstrap------------------------------------*/
-            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(                
+            bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
                 "~/Scripts/Bootstrap/bootstrap.min.js",
                 "~/Scripts/Bootstrap/bootstrap-select.min.js"));
 
@@ -46,7 +46,7 @@ namespace FileHosting.MVC
 
             /*-----------------------------CKEditor-------------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/ckeditor-js").Include(
-               "~/CKEditor/ckeditor.js"));
+                "~/CKEditor/ckeditor.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/ckeditor-adapters").Include(
                 "~/CKEditor/adapters/jquery.js"));
@@ -74,7 +74,7 @@ namespace FileHosting.MVC
 
             /*-----------------------------CustomScripts--------------------------------*/
             bundles.Add(new ScriptBundle("~/bundles/custom").IncludeDirectory(
-               "~/Scripts/CustomScripts", "*.js"));
+                "~/Scripts/CustomScripts", "*.js"));
         }
     }
 }
