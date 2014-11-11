@@ -57,11 +57,8 @@ namespace FileHosting.MVC.Controllers
 
             List<NewsModel> newPerPages = news.Skip((pageNumber - 1)*pageSize).Take(pageSize).ToList();
 
-            Dictionary<int, string> fileSections = _homeService.GetFileSectionsDictianary();
-
             var viewModel = new HomeIndexViewModel
             {
-                FileSections = fileSections,
                 News = newPerPages,
                 IsModerator = Roles.Provider.IsUserInRole(User.Identity.Name, "Moderator"),
                 PageInfo = pageInfo
@@ -256,7 +253,7 @@ namespace FileHosting.MVC.Controllers
             }
 
             return RedirectToAction("EditNews", new {newsId, page, messageType = ViewModelsMessageType.A});
-        }
+        }        
 
         #endregion
     }

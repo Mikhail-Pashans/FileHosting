@@ -107,8 +107,8 @@ namespace FileHosting.MVC.Providers
                 Comments = new List<Comment>(),
                 Downloads = new List<Download>(),
                 Files = new List<File>(),
-                FilesWithPermission = new List<File>(),
-                FilesWithSubscription = new List<File>(),
+                AllowedFiles = new List<File>(),
+                SubscribedFiles = new List<File>(),
                 News = new List<News>(),
                 Roles = role == null ? new List<Role>() : new List<Role> {role},
             });

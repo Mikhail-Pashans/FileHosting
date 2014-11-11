@@ -1,4 +1,4 @@
-﻿.container { width: 920px !important; }
+﻿/*.container { width: 920px !important; }*/
 
 
 /* Styles for validation helpers
@@ -42,16 +42,16 @@
 
 #img-supercaptcha { height: 100px !important; }
 
-/*hr {
-    border-color: rgb(56, 97, 187) !important;
-}*/
-
 hr {
+    border-color: rgb(56, 97, 187) !important;
+}
+
+/*hr {
     background-image: url(../Content/themes/base/images/gauze.png) !important;
     border: none !important;
     height: .75em !important;
     margin: .75em 0 !important;
-}
+}*/
 
 .display-inline { display: inline !important; }
 
@@ -69,7 +69,7 @@ hr {
 
 .border-bottom { border-bottom: 1px solid !important; }
 
-.th-control { width: 220px !important; }
+.th-control { width: 130px !important; }
 
 .th-user-control { width: 180px !important; }
 
@@ -77,13 +77,20 @@ hr {
 
 .width-200 { width: 200px !important; }
 
-.width-300 { width: 300px !important; }
+.width-246 { width: 246px !important; }
+
+.width-250 { width: 250px !important; }
 
 .width-600 { width: 600px !important; }
 
 .width-800 { width: 800px !important; }
 
 #allowedUsers { margin-top: 12px !important; }
+
+.tag {
+    padding: 5px !important;
+    margin-bottom: 5px !important;
+}
 
 .image {
     height: 786px !important;

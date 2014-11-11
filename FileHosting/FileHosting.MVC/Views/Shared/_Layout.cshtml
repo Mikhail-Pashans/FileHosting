@@ -12,68 +12,67 @@
         @Styles.Render("~/Content/css", "~/Content/Bootstrap/css", "~/Content/Jumbotron/css")
         @Scripts.Render("~/bundles/jquery", "~/bundles/modernizr", "~/bundles/bootstrap")    
     </head>
-    <body>
-        <header>
-            <nav class="navbar navbar-collapse navbar-inverse collapse navbar-fixed-top" role="navigation">
-                <div class="container">
-                    <div class="navbar-header">
-                        <a class="navbar-brand logo" href="/">
-                            <img class="logo-img" src="~/Content/themes/base/images/logo65.png" alt="FileHostingLogo" />
-                        </a>
-                    </div>
-                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-                        @if (!User.Identity.IsAuthenticated || !Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                        {
-                            <ul class="nav navbar-nav">
-                                <li @if (Request.RawUrl == "/")
-                                    {
-                                        <text> class="active" </text>
-                                    }>
-                                    <a href="/">
-                                        <span class="glyphicon glyphicon-home"></span>&ensp;Home
+<body>
+    <header>
+        <nav class="navbar navbar-collapse navbar-inverse collapse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand logo" href="/">
+                        <img class="logo-img" src="/Content/themes/base/images/logo65.png" alt="FileHostingLogo" />
+                    </a>
+                </div>
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    @if (!User.Identity.IsAuthenticated || !Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                    {
+                        <ul class="nav navbar-nav">
+                            <li @if (Request.RawUrl == "/") { <text> class="active" </text>  }>
+                                <a href="/">
+                                    <span class="glyphicon glyphicon-home"></span>&ensp;Home
+                                </a>
+                            </li>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li @if (Request.RawUrl.StartsWith("/Files/UserFiles")) { <text> class="active" </text>  }>
+                                    <a href="@Url.Action("UserFiles", "Files")">
+                                        <span class="glyphicon glyphicon-list-alt"></span>&ensp;My files
                                     </a>
                                 </li>
-                                @if (User.Identity.IsAuthenticated)
+                                if (Roles.Provider.IsUserInRole(User.Identity.Name, "Administrator"))
                                 {
-                                    <li @if (Request.RawUrl.StartsWith("/Files/UserFiles"))
-                                        {
-                                            <text> class="active" </text>
-                                        }>
-                                        <a href="@Url.Action("UserFiles", "Files")">
-                                            <span class="glyphicon glyphicon-list-alt"></span>&ensp;My files
+                                    <li @if (Request.RawUrl.StartsWith("/Admin")) { <text> class="active" </text>  }>
+                                        <a href="@Url.Action("Index", "Admin")">
+                                            <span class="glyphicon glyphicon-cog"></span>&ensp;Administration
                                         </a>
                                     </li>
-                                    if (Roles.Provider.IsUserInRole(User.Identity.Name, "Administrator"))
-                                    {
-                                        <li @if (Request.RawUrl.StartsWith("/Admin"))
-                                            {
-                                                <text> class="active" </text>
-                                            }>
-                                            <a href="@Url.Action("Index", "Admin")">
-                                                <span class="glyphicon glyphicon-cog"></span>&ensp;Administration
-                                            </a>
-                                        </li>
-                                    }
                                 }
-                            </ul>
-                        }
-                        @{
-                            Html.RenderPartial("_LoginPartial", new LoginViewModel());
-                        }
-                    </div>
+                            }
+                        </ul>
+                    }
+                    @Html.Partial("_LoginPartial", new LoginViewModel())
                 </div>
-            </nav>
-        </header>
-        <div class="container">
-            @RenderBody()
-        </div>   ﻿
-        <hr />
-        <footer>
-            <div class="container">
-                &copy;&ensp;iTechArt – @DateTime.Now.Year
             </div>
-        </footer>
-        @Scripts.Render("~/bundles/jqueryval", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters")
-        @RenderSection("scripts", false)
-    </body>
+        </nav>
+    </header>
+    <div class="container well well-custom">
+        <div class="row">
+            <div class="col-md-4">
+                @RenderSection("search", false)
+                @RenderSection("categories", false)
+                @RenderSection("tags", false)
+            </div>
+            <div class="col-md-8">
+                @RenderBody()
+            </div>
+        </div>
+    </div>   ﻿
+    <hr />
+    <footer>
+        <div class="container">
+            &copy;&ensp;iTechArt – @DateTime.Now.Year
+        </div>
+    </footer>
+    @Scripts.Render("~/bundles/jqueryval", "~/bundles/ckeditor-js", "~/bundles/ckeditor-adapters")
+    @RenderSection("scripts", false)
+</body>
+
 </html>

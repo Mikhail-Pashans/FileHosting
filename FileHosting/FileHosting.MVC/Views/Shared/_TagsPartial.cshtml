@@ -1,0 +1,11 @@
+﻿@{
+    Layout = null;
+}
+<div id="tagsPanel"></div>
+<script type="text/javascript">
+    (function ($) {
+        var $tagsPanel = $('#tagsPanel');
+
+        $tagsPanel.load('/Files/GetTags');
+    })(jQuery);
+</script>

@@ -4,92 +4,94 @@
 @{
     ViewBag.Title = "My files";
 }
-<h1 class="text-center">@ViewBag.Title</h1>
-<br />
-<div class="well well-custom">
-    <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("UploadNewFiles", new {page = Model.PageInfo.PageNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter})" role="button">
-            <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
-        </a>
-        <form class="form-inline pull-right" action="@Url.Action("UserFiles")" method="GET" role="form">
-            <div class="form-group">
-                <label class="control-label" for="searchString">Find by name:&nbsp;</label>
-                <input class="form-control" type="text" id="searchString" name="searchString" value="@Model.CurrentFilter" />                
-            </div>
-            <div class="form-group">
-                <button class="btn btn-danger" type="submit">
-                    <span class="glyphicon glyphicon-search"></span>&ensp;Search
-                </button>
-            </div>
-        </form>
-    </div>                
-    <br />
-    <div class="panel panel-primary no-margin">
-        <div class="panel-body">
-            @if (Model.Files != null && Model.Files.Any())
-            {
-                <table class="table table-striped">
-                    <thead>
+@section search {
+    @Html.Partial("_SearchPartial")
+}
+@section categories {
+    @Html.Partial("_CategoriesPartial")
+}
+@section tags {
+    @Html.Partial("_TagsPartial")
+}
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">@ViewBag.Title</h3>
+        <hr />
+        <div>
+            <a class="btn btn-primary width-200" href="@Url.Action("UploadNewFiles", new {page = Model.PageInfo.PageNumber, sortOrder = Model.IdSortParm})" role="button">
+                <span class="glyphicon glyphicon-upload"></span>&emsp;Upload new file(s)
+            </a>
+        </div>
+        <br />
+        @if (Model.Files != null && Model.Files.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.ActionLink("#", "UserFiles", new { sortOrder = Model.IdSortParm })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Name", "UserFiles", new { sortOrder = Model.NameSortParm })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Category", "UserFiles", new { sortOrder = Model.CategorySortParm })
+                        </th>
+                        <th class="th-numbers">
+                            @Html.ActionLink("Size (KB)", "UserFiles", new { sortOrder = Model.SizeSortParm })
+                        </th>
+                        <th class="th-numbers">
+                            @Html.ActionLink("Upload date", "UserFiles", new { sortOrder = Model.DateSortParm })
+                        </th>
+                        <th class="th-control"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (FileModel file in Model.Files)
+                    {
                         <tr>
-                            <th>
-                                @Html.ActionLink("#", "UserFiles", new {sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th>
-                                @Html.ActionLink("Name", "UserFiles", new {sortOrder = Model.NameSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th>
-                                @Html.ActionLink("Section", "UserFiles", new {sortOrder = Model.SectionSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th class="th-numbers">
-                                @Html.ActionLink("Size (KB)", "UserFiles", new {sortOrder = Model.SizeSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th class="th-numbers">
-                                @Html.ActionLink("Upload date", "UserFiles", new {sortOrder = Model.DateSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th class="th-user-control"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (FileModel file in Model.Files)
-                        {
-                            <tr>
-                                <td>@file.Id</td>
-                                <td>@file.Name</td>
-                                <td>@file.Section.Name</td>
-                                <td>@file.Size</td>
-                                <td>@file.UploadDate</td>
-                                <td class="text-right">
-                                    <a class="btn btn-warning" href="@Url.Action("EditFile", new {fileId = file.Id, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
+                            <td>@file.Id</td>
+                            <td>@file.Name</td>
+                            <td>@file.Category.Name</td>
+                            <td>@file.Size</td>
+                            <td>@file.UploadDate</td>
+                            <td class="text-right">
+                                <div class="btn-group-vertical">
+                                    <a class="btn btn-warning" href="@Url.Action("EditFile", new {fileId = file.Id, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort})" role="button">
                                         <span class="glyphicon glyphicon-pencil"></span>&ensp;Edit
                                     </a>
-                                    <form class="display-inline" action="@Url.Action("DeleteFile")" method="POST">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="fileId" value="@file.Id" />
-                                        <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
-                                        <button class="btn btn-danger" type="submit">
-                                            <span class="glyphicon glyphicon-trash"></span>&ensp;Delete
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="alert alert-danger no-margin text-center" role="alert">
-                    <strong>You have no any uploaded files!</strong>
-                </div>
-            }
-        </div>
+                                    <a class="btn btn-danger btn-delete" href="javascript:void(0)" role="button">
+                                        <span class="glyphicon glyphicon-trash"></span>&ensp;Delete
+                                    </a>
+                                </div>
+                                <form class="display-inline" action="@Url.Action("DeleteFile")" method="POST">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="fileId" value="@file.Id" />
+                                    <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div>
+                Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+            </div>
+            @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new { page = x, sortOrder = Model.CurrentSort }))
+        }
+        else
+        {
+            <div class="alert alert-danger no-margin text-center" role="alert">
+                <strong>You have no any uploaded files!</strong>
+            </div>
+        }
     </div>
-    @if (Model.Files != null && Model.Files.Any())
-    {
-        <br />
-        <div>
-            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
-        </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("UserFiles", new {page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter}))
-    }
 </div>
+
+@section scripts {
+    <script type="text/javascript">
+        (function ($) {
+
+        })(jQuery);
+    </script>
+}

@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Specialized;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace FileHosting.MVC.Extensions
 {
@@ -15,6 +17,16 @@ namespace FileHosting.MVC.Extensions
             }
 
             return false;
+        }
+
+        public static NameValueCollection ToEditable(this NameValueCollection nameValueCollection)
+        {
+            PropertyInfo isReadOnly = typeof (NameValueCollection).GetProperty("IsReadOnly",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            
+            isReadOnly.SetValue(nameValueCollection, false, null);
+
+            return nameValueCollection;
         }
     }
 }

@@ -72,9 +72,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Migrations\201410271551417_Create And Initial Database.cs" />
-    <Compile Include="Migrations\201410271551417_Create And Initial Database.Designer.cs">
-      <DependentUpon>201410271551417_Create And Initial Database.cs</DependentUpon>
+    <Compile Include="Migrations\201410290952100_Create And Initial Database.cs" />
+    <Compile Include="Migrations\201410290952100_Create And Initial Database.Designer.cs">
+      <DependentUpon>201410290952100_Create And Initial Database.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Comment.cs" />
@@ -82,7 +82,7 @@
     <Compile Include="Models\File.cs" />
     <Compile Include="Models\News.cs" />
     <Compile Include="Models\Role.cs" />
-    <Compile Include="Models\Section.cs" />
+    <Compile Include="Models\Category.cs" />
     <Compile Include="Models\Tag.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="UnitOfWork.cs" />
@@ -96,8 +96,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201410271551417_Create And Initial Database.resx">
-      <DependentUpon>201410271551417_Create And Initial Database.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201410290952100_Create And Initial Database.resx">
+      <DependentUpon>201410290952100_Create And Initial Database.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

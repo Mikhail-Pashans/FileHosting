@@ -7,12 +7,12 @@ namespace FileHosting.Database
     {
         #region Repository Interfaces (add one per entity)
 
+        IGenericRepository<Category> CategoryRepository { get; }
         IGenericRepository<Comment> CommentRepository { get; }
         IGenericRepository<Download> DownloadRepository { get; }
         IGenericRepository<File> FileRepository { get; }
         IGenericRepository<News> NewsRepository { get; }
         IGenericRepository<Role> RoleRepository { get; }
-        IGenericRepository<Section> SectionRepository { get; }
         IGenericRepository<Tag> TagRepository { get; }
         IGenericRepository<User> UserRepository { get; }
 

@@ -3,96 +3,98 @@
     ViewBag.Title = "Upload new file(s)";
 }
 @Styles.Render("~/Content/FineUploader/css")
-<h1 class="text-center">@ViewBag.Title</h1>
+
 <br />
-<div class="well well-custom">
-    <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new {page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
-            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
-        </a>
-    </div>        
-    <br />
-    <div class="panel panel-primary no-margin">
-        <div class="panel-body">
-            <form action="@Url.Action("UploadNewFiles")" id="qq-form" role="form">
-                @Html.AntiForgeryToken()
-                <div class="form-group">
-                    <label class="control-label" for="fileSection">Select a file(s) section:</label>                    
-                    <div class="row-fluid">
-                        <select class="form-control width-200 selectpicker show-tick" data-style="btn-danger" name="fileSection">
-                            @foreach (var item in Model.FileSectionsDictionary)
-                            {
-                                <option value="@item.Key">@item.Value</option>
-                            }
-                        </select>
-                    </div>                    
-                </div>
-                <div class="form-group">
-                    <div id="jquery-wrapped-fine-uploader"></div>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-warning width-200">
-                        <span class="glyphicon glyphicon-upload"></span>&emsp;Start file(s) upload
-                    </button>
-                </div>
-            </form>
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">@ViewBag.Title</h3>
+        <hr />
+        <div>
+            <a class="btn btn-primary width-200" href="@Url.Action("UserFiles", new {page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
+                <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to my files list
+            </a>
         </div>
+        <br />
+        <form action="@Url.Action("UploadNewFiles")" id="qq-form" role="form">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="control-label" for="fileCategory">Select a file(s) section:</label>
+                <div class="row-fluid">
+                    <select class="form-control width-200 selectpicker show-tick" data-style="btn-danger" name="fileCategory">
+                        @foreach (var item in Model.CategoriesDictionary)
+                        {
+                            <option value="@item.Value">@item.Value</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div id="jquery-wrapped-fine-uploader"></div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-warning width-200">
+                    <span class="glyphicon glyphicon-upload"></span>&emsp;Start file(s) upload
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-@Scripts.Render("~/bundles/fineuploader")
-
-<script type="text/template" id="qq-template">
-    <div class="qq-uploader-selector qq-uploader">
-        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
-            <span>Drop files here to upload</span>
+@section scripts {
+    <script type="text/template" id="qq-template">
+        <div class="qq-uploader-selector qq-uploader">
+            <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                <span>Drop files here to upload</span>
+            </div>
+            <div class="qq-upload-button-selector btn btn-info width-200">
+                <span class="glyphicon glyphicon-folder-open"></span>&emsp;Select file(s) to upload
+            </div>
+            <span class="qq-drop-processing-selector qq-drop-processing">
+                <span>Processing dropped files...</span>
+                <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+            </span>
+            <ul class="qq-upload-list-selector list-group">
+                <li class="list-group-item list-group-item-success">
+                    <div class="qq-progress-bar-container-selector">
+                        <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                    </div>
+                    <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                    <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                    <span class="qq-upload-file-selector qq-upload-file"></span>
+                    <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                    <span class="qq-upload-size-selector qq-upload-size"></span>
+                    <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancel</a>
+                    <a class="qq-upload-retry-selector qq-upload-retry" href="#">Retry</a>
+                    <a class="qq-upload-delete-selector qq-upload-delete" href="#">Delete</a>
+                    <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+                </li>
+            </ul>
         </div>
-        <div class="qq-upload-button-selector btn btn-info width-200">
-            <span class="glyphicon glyphicon-folder-open"></span>&emsp;Select file(s) to upload
-        </div>
-        <span class="qq-drop-processing-selector qq-drop-processing">
-            <span>Processing dropped files...</span>
-            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
-        </span>
-        <ul class="qq-upload-list-selector list-group">
-            <li class="list-group-item list-group-item-success">
-                <div class="qq-progress-bar-container-selector">
-                    <div class="qq-progress-bar-selector qq-progress-bar"></div>
-                </div>
-                <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
-                <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
-                <span class="qq-upload-file-selector qq-upload-file"></span>
-                <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
-                <span class="qq-upload-size-selector qq-upload-size"></span>
-                <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">Cancel</a>
-                <a class="qq-upload-retry-selector qq-upload-retry" href="#">Retry</a>
-                <a class="qq-upload-delete-selector qq-upload-delete" href="#">Delete</a>
-                <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
-            </li>
-        </ul>
-    </div>
-</script>
+    </script>
 
-<script type="text/javascript">
-    (function($) {
-        $('#jquery-wrapped-fine-uploader').fineUploader({
-            maxConnections: 1,
-            validation: {
-                sizeLimit: 10737418240 // 10 GB = 10 * 1024 * 1024 * 1024 bytes
-            },
-            failedUploadTextDisplay: {
-                mode: 'custom',
-                maxChars: 300,
-                responseProperty: 'error',
-                enableTooltip: true
-            },
-            text: {
-                defaultResponseError: 'Upload failed! An unknown upload error occurred.'
-            },
-            classes: {
-                success: 'alert alert-success',
-                fail: 'alert alert-error'
-            }
-        });
-    })(jQuery);
-</script>
+    @Scripts.Render("~/bundles/fineuploader")
+
+    <script type="text/javascript">
+        (function ($) {
+            $('#jquery-wrapped-fine-uploader').fineUploader({
+                maxConnections: 1,
+                validation: {
+                    sizeLimit: 10737418240 // 10 GB = 10 * 1024 * 1024 * 1024 bytes
+                },
+                failedUploadTextDisplay: {
+                    mode: 'custom',
+                    maxChars: 300,
+                    responseProperty: 'error',
+                    enableTooltip: true
+                },
+                text: {
+                    defaultResponseError: 'Upload failed! An unknown upload error occurred.'
+                },
+                classes: {
+                    success: 'alert alert-success',
+                    fail: 'alert alert-error'
+                }
+            });
+        })(jQuery);
+    </script>
+}

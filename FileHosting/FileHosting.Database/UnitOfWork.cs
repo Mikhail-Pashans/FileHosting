@@ -10,12 +10,12 @@ namespace FileHosting.Database
     {
         #region Private Repos (add one per entity)
 
+        private GenericRepository<Category> _categoryRepo;
         private GenericRepository<Comment> _commentRepo;
         private GenericRepository<Download> _downloadRepo;
         private GenericRepository<File> _fileRepo;
         private GenericRepository<News> _newsRepo;
         private GenericRepository<Role> _roleRepo;
-        private GenericRepository<Section> _sectionRepo;
         private GenericRepository<Tag> _tagRepo;
         private GenericRepository<User> _userRepo;
 
@@ -23,12 +23,12 @@ namespace FileHosting.Database
 
         #region Public DbSets (add one per entity)
 
+        public DbSet<Category> Categories { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Download> Downloads { get; set; }
         public DbSet<File> Files { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<Role> Roles { get; set; }
-        public DbSet<Section> Sections { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<User> Users { get; set; }
 
@@ -44,6 +44,11 @@ namespace FileHosting.Database
 
         #region IUnitOfWork Implementation (add one per entity)
 
+        public IGenericRepository<Category> CategoryRepository
+        {
+            get { return _categoryRepo ?? (_categoryRepo = new GenericRepository<Category>(Categories)); }
+        }
+        
         public IGenericRepository<Comment> CommentRepository
         {
             get { return _commentRepo ?? (_commentRepo = new GenericRepository<Comment>(Comments)); }
@@ -67,12 +72,7 @@ namespace FileHosting.Database
         public IGenericRepository<Role> RoleRepository
         {
             get { return _roleRepo ?? (_roleRepo = new GenericRepository<Role>(Roles)); }
-        }
-
-        public IGenericRepository<Section> SectionRepository
-        {
-            get { return _sectionRepo ?? (_sectionRepo = new GenericRepository<Section>(Sections)); }
-        }
+        }        
 
         public IGenericRepository<Tag> TagRepository
         {
@@ -127,6 +127,13 @@ namespace FileHosting.Database
             //modelBuilder.Conventions.Remove<ManyToManyCascadeDeleteConvention>();
             //modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
+            // Categories Table
+            modelBuilder.Entity<Category>().HasKey(c => c.Id);
+            modelBuilder.Entity<Category>()
+                .Property(c => c.Id)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+            modelBuilder.Entity<Category>().Property(c => c.Name).IsRequired().HasMaxLength(50);            
+            
             // Comments Table
             modelBuilder.Entity<Comment>().HasKey(c => c.Id);
             modelBuilder.Entity<Comment>()
@@ -172,36 +179,36 @@ namespace FileHosting.Database
             modelBuilder.Entity<File>().Property(f => f.Path).IsRequired().HasMaxLength(300);
             modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousBrowsing).IsRequired();
             modelBuilder.Entity<File>().Property(f => f.IsAllowedAnonymousAction).IsRequired();
-            modelBuilder.Entity<File>().HasRequired(f => f.Section)
-                .WithMany(s => s.Files)
-                .HasForeignKey(f => f.SectionId)
+            modelBuilder.Entity<File>().HasRequired(f => f.Category)
+                .WithMany(c => c.Files)
+                .HasForeignKey(f => f.CategoryId)
                 .WillCascadeOnDelete(true);
             modelBuilder.Entity<File>().HasRequired(f => f.Owner)
                 .WithMany(u => u.Files)
                 .HasForeignKey(f => f.OwnerId)
                 .WillCascadeOnDelete(false);
 
-            // Files&Tags Table
+            // FilesAndTags Table
             modelBuilder.Entity<File>()
                 .HasMany(f => f.Tags)
                 .WithMany(t => t.Files)
-                .Map(ft => ft.ToTable("Files&Tags")
+                .Map(ft => ft.ToTable("FilesAndTags")
                     .MapLeftKey("FileId")
                     .MapRightKey("TagId"));
 
-            // Files&PermittedUsers Table
+            // FilesAndAllowedUsers Table
             modelBuilder.Entity<File>()
                 .HasMany(f => f.AllowedUsers)
-                .WithMany(u => u.FilesWithPermission)
-                .Map(fu => fu.ToTable("Files&PermittedUsers")
+                .WithMany(u => u.AllowedFiles)
+                .Map(fu => fu.ToTable("FilesAndAllowedUsers")
                     .MapLeftKey("FileId")
                     .MapRightKey("UserId"));
 
-            // Files&SubscribedUsers Table
+            // FilesAndSubscribedUsers Table
             modelBuilder.Entity<File>()
                 .HasMany(f => f.SubscribedUsers)
-                .WithMany(u => u.FilesWithSubscription)
-                .Map(fu => fu.ToTable("Files&SubscribedUsers")
+                .WithMany(u => u.SubscribedFiles)
+                .Map(fu => fu.ToTable("FilesAndSubscribedUsers")
                     .MapLeftKey("FileId")
                     .MapRightKey("UserId"));
 
@@ -227,13 +234,6 @@ namespace FileHosting.Database
                 .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
             modelBuilder.Entity<Role>().Property(r => r.Name).IsRequired().HasMaxLength(50);
 
-            // Sections Table
-            modelBuilder.Entity<Section>().HasKey(s => s.Id);
-            modelBuilder.Entity<Section>()
-                .Property(s => s.Id)
-                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
-            modelBuilder.Entity<Section>().Property(s => s.Name).IsRequired().HasMaxLength(50);
-
             // Tags Table
             modelBuilder.Entity<Tag>().HasKey(t => t.Id);
             modelBuilder.Entity<Tag>()
@@ -253,11 +253,11 @@ namespace FileHosting.Database
             modelBuilder.Entity<User>().Property(u => u.DownloadAmountLimit).IsRequired().HasPrecision(10, 2);
             modelBuilder.Entity<User>().Property(u => u.DownloadSpeedLimit).IsRequired().HasPrecision(10, 2);
 
-            // Users&Roles Table
+            // UsersAndRoles Table
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Roles)
                 .WithMany(r => r.Users)
-                .Map(ur => ur.ToTable("Users&Roles")
+                .Map(ur => ur.ToTable("UsersAndRoles")
                     .MapLeftKey("UserId")
                     .MapRightKey("RoleId"));
 

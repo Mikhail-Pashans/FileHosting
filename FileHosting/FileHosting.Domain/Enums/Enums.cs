@@ -29,4 +29,11 @@
         FileChanged = 1,
         UserPasswordChanged = 2
     }
+
+    public enum SearchFilesType
+    {
+        ByName = 0,
+        ByCategory = 1,
+        ByTag = 2
+    }
 }

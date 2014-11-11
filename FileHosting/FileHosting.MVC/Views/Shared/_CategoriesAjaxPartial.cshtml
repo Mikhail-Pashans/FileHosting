@@ -1,0 +1,36 @@
+﻿@using FileHosting.Domain.Enums
+@model Dictionary<int, string>
+@{
+    Layout = null;
+}
+<br />
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">Categories</h3>
+        <hr />
+        <ul class="nav nav-pills nav-stacked" role="tablist">
+            @foreach (var item in Model)
+            {
+                <li id="category_@item.Key">
+                    <a href="@Url.Action("Index", "Files", new { searchType = SearchFilesType.ByCategory, searchParam = item.Key })">@item.Value</a>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var getParameterByName = function (url, name) {
+        var match = new RegExp('[?&]' + name + '=([^&]*)').exec(url);
+        return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    };
+    var search = window.location.search;
+    var searchType = getParameterByName(search, 'searchType');
+    var categoryNumber = getParameterByName(search, 'searchParam');
+
+    if (searchType === 'ByCategory') {
+        var activeCategory = document.getElementById('category_' + categoryNumber);
+        if (activeCategory != null) {
+            activeCategory.setAttribute('class', 'active');
+        }
+    }        
+</script>

@@ -3,138 +3,141 @@
 @{
     ViewBag.Title = "File details";
 }
-<h1 class="text-center">@ViewBag.Title</h1>
-<br />
-<div class="well well-custom">
-    <div>
-        <a class="btn btn-primary width-200" href="@Url.Action("Index", new {section = Model.SectionNumber, page = Model.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
-            <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
-        </a>
-    </div>       
-    <br />
-    <div class="panel panel-primary no-margin">
-        <div class="panel-body">
-            @if (Model.Message != null)
-            {
-                string alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.E || Model.Message.MessageType == ViewModelsMessageType.F
-                    ? "alert-success" :
-                    Model.Message.MessageType == ViewModelsMessageType.B
-                        ? "alert-danger"
-                        : "alert-warning";
-                <div class="alert @alertType alert-custom text-center" role="alert">
-                    <strong>@Model.Message.MessageText</strong>
-                    <button type="button" class="close" data-dismiss="alert">
-                        <span aria-hidden="true">&times;</span>
-                        <span class="sr-only">Close</span>
-                    </button>
-                </div>
-            }
-            <form class="form-horizontal" action="@Url.Action("DownloadFile")" method="POST" role="form">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
-                <input type="hidden" name="section" value="@Model.SectionNumber" />
-                <input type="hidden" name="page" value="@Model.PageNumber" />
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileId">#:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileId">@Model.FileModel.Id</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileName">Name:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileName">@Model.FileModel.Name</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileSection">Section:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileSection">@Model.FileModel.Section.Name</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileTags">Tags:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileTags">@Model.FileModel.Tags</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileDescription">Description:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileDescription">@Model.FileModel.Description</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileUploadUpload">Upload date:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileUploadUpload">@Model.FileModel.UploadDate</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileSize">Size (KB):</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileSize">@Model.FileModel.Size</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="fileOwner">Owner:</label>
-                    <div class="col-md-10">
-                        <div class="form-control-static" id="fileOwner">@Model.FileModel.Owner.Name</div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-warning width-200" @if (!Model.IsAuthenticated && !Model.FileModel.IsAllowedAnonymousAction)
-                                                                                {
-                                                                                    <text> disabled="disabled" </text>
-                                                                                }>
-                            <span class="glyphicon glyphicon-download"></span>&emsp;Download file
-                        </button>&emsp;
-                        @if (Model.IsAuthenticated && !Model.IsOwner && !Model.IsSubscribed)
-                        {
-                            <a class="btn btn-danger btn-subscribe" href="javascript:void(0)" role="button">
-                                <span class="glyphicon glyphicon-ok"></span>&emsp;Subscribe to file changes
-                            </a>
-                        }
-                        @if (Model.IsAuthenticated && !Model.IsOwner && Model.IsSubscribed)
-                        {
-                            <a class="btn btn-primary btn-unsubscribe" href="javascript:void(0)" role="button">
-                                <span class="glyphicon glyphicon-remove"></span>&emsp;Unsubscribe of file changes
-                            </a>
-                        }
-                    </div>
-                </div>
-            </form>
-            <form id="subscribeForm" action="@Url.Action("ChangeSubscription")" method="POST">
-                @Html.AntiForgeryToken()
-                <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
-                <input type="hidden" name="page" value="@Model.PageNumber" />
-                <input type="hidden" name="subscription" />
-            </form>
-            <div id="commentsPanel"></div>
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">@ViewBag.Title</h3>
+        <hr />
+        <div>
+            @*<a class="btn btn-primary width-200" href="@Url.Action("Index", new {category = Model.CategoryNumber, page = Model.PageNumber, sortOrder = Model.CurrentSort, searchName = Model.CurrentNameFilter, searchTag = Model.CurrentTagFilter})" role="button">
+                <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+            </a>*@
+            <a class="btn btn-primary width-200" href="@Model.ReturnUrl" role="button">
+                <span class="glyphicon glyphicon-arrow-left"></span>&emsp;Back to files list
+            </a>
         </div>
+        <br />
+        @if (Model.Message != null)
+        {
+            string alertType = Model.Message.MessageType == ViewModelsMessageType.A || Model.Message.MessageType == ViewModelsMessageType.E || Model.Message.MessageType == ViewModelsMessageType.F
+                ? "alert-success" :
+                Model.Message.MessageType == ViewModelsMessageType.B
+                    ? "alert-danger"
+                    : "alert-warning";
+            <div class="alert @alertType alert-custom text-center" role="alert">
+                <strong>@Model.Message.MessageText</strong>
+                <button type="button" class="close" data-dismiss="alert">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                </button>
+            </div>
+        }
+        <form class="form-horizontal" action="@Url.Action("DownloadFile")" method="POST" role="form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+            @*<input type="hidden" name="category" value="@Model.CategoryNumber" />
+            <input type="hidden" name="page" value="@Model.PageNumber" />*@
+            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileId">#:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileId">@Model.FileModel.Id</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileName">Name:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileName">@Model.FileModel.Name</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileSection">Section:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileSection">@Model.FileModel.Category.Name</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileTags">Tags:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileTags">@Model.FileModel.Tags</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileDescription">Description:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileDescription">@Model.FileModel.Description</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileUploadUpload">Upload date:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileUploadUpload">@Model.FileModel.UploadDate</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileSize">Size (KB):</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileSize">@Model.FileModel.Size</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label" for="fileOwner">Owner:</label>
+                <div class="col-md-10">
+                    <div class="form-control-static" id="fileOwner">@Model.FileModel.Owner.Name</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-warning width-200" @if (!Model.IsAuthenticated && !Model.FileModel.IsAllowedAnonymousAction) { <text> disabled="disabled" </text>   }>
+                        <span class="glyphicon glyphicon-download"></span>&emsp;Download file
+                    </button>&emsp;
+                    @if (Model.IsAuthenticated && !Model.IsOwner && !Model.IsSubscribed)
+                    {
+                        <a class="btn btn-danger btn-subscribe" href="javascript:void(0)" role="button">
+                            <span class="glyphicon glyphicon-ok"></span>&emsp;Subscribe to file changes
+                        </a>
+                    }
+                    @if (Model.IsAuthenticated && !Model.IsOwner && Model.IsSubscribed)
+                    {
+                        <a class="btn btn-primary btn-unsubscribe" href="javascript:void(0)" role="button">
+                            <span class="glyphicon glyphicon-remove"></span>&emsp;Unsubscribe of file changes
+                        </a>
+                    }
+                </div>
+            </div>
+        </form>
+        <form id="subscribeForm" action="@Url.Action("ChangeSubscription")" method="POST">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="fileId" value="@Model.FileModel.Id" />
+            @*<input type="hidden" name="category" value="@Model.CategoryNumber" />
+            <input type="hidden" name="page" value="@Model.PageNumber" />*@
+            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+            <input type="hidden" name="subscription" />
+        </form>
+        <div id="commentsPanel"></div>
     </div>
 </div>
 
-@Scripts.Render("~/bundles/custom")
+@section scripts {
+    @Scripts.Render("~/bundles/custom")
 
-<script type="text/javascript">
-    (function($) {
-        var $subscribeButon = $('.btn-subscribe');
-        var $unsubscribeButon = $('.btn-unsubscribe');
-        var $subscribeForm = $('#subscribeForm');
-        var $subscription = $('input[name=subscription]', $subscribeForm);
+    <script type="text/javascript">
+        (function ($) {
+            var $subscribeButon = $('.btn-subscribe');
+            var $unsubscribeButon = $('.btn-unsubscribe');
+            var $subscribeForm = $('#subscribeForm');
+            var $subscription = $('input[name=subscription]', $subscribeForm);
 
-        $subscribeButon.on('click', function(event) {
-            event.preventDefault();
-            $subscription.val('Subscribe');
-            $subscribeForm.submit();
-        });
+            $subscribeButon.on('click', function (event) {
+                event.preventDefault();
+                $subscription.val('Subscribe');
+                $subscribeForm.submit();
+            });
 
-        $unsubscribeButon.on('click', function(event) {
-            event.preventDefault();
-            $subscription.val('Unsubscribe');
-            $subscribeForm.submit();
-        });
-    })(jQuery);
-</script>
+            $unsubscribeButon.on('click', function (event) {
+                event.preventDefault();
+                $subscription.val('Unsubscribe');
+                $subscribeForm.submit();
+            });
+        })(jQuery);
+    </script>
+}

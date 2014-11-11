@@ -46,16 +46,16 @@ namespace FileHosting.Database
             return _dbSet.Where(predicate);
         }
 
-        public T Single(Expression<Func<T, bool>> predicate)
+        public int Count()
         {
-            return _dbSet.Single(predicate);
+            return _dbSet.Count();
         }
 
-        public T SingleOrDefault(Expression<Func<T, bool>> predicate)
+        public T GetById(int id)
         {
-            return _dbSet.SingleOrDefault(predicate);
+            return _dbSet.Find(id);
         }
-
+        
         public T First(Expression<Func<T, bool>> predicate)
         {
             return _dbSet.First(predicate);
@@ -64,12 +64,17 @@ namespace FileHosting.Database
         public T FirstOrDefault(Expression<Func<T, bool>> predicate)
         {
             return _dbSet.FirstOrDefault(predicate);
+        }        
+
+        public T Single(Expression<Func<T, bool>> predicate)
+        {
+            return _dbSet.Single(predicate);
         }
 
-        public T GetById(int id)
+        public T SingleOrDefault(Expression<Func<T, bool>> predicate)
         {
-            return _dbSet.Find(id);
-        }
+            return _dbSet.SingleOrDefault(predicate);
+        }        
 
         public void Add(T entity)
         {
@@ -79,14 +84,6 @@ namespace FileHosting.Database
             _dbSet.Add(entity);
         }
 
-        public void Delete(T entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-
-            _dbSet.Remove(entity);
-        }
-
         public void Attach(T entity)
         {
             if (entity == null)
@@ -94,6 +91,14 @@ namespace FileHosting.Database
 
             _dbSet.Attach(entity);
         }
+
+        public void Delete(T entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
+            _dbSet.Remove(entity);
+        }        
 
         #endregion
     }

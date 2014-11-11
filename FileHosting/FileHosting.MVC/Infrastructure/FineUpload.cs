@@ -7,7 +7,7 @@ namespace FileHosting.MVC.Infrastructure
     public class FineUpload
     {
         public string FileName { get; set; }
-        public string FileSection { get; set; }
+        public string FileCategory { get; set; }
         public Stream InputStream { get; set; }
 
         public void SaveAs(string destination, bool overwrite = false, bool autoCreateDirectory = true)
@@ -30,7 +30,7 @@ namespace FileHosting.MVC.Infrastructure
                 var formUpload = request.Files.Count > 0;
 
                 //find file section
-                string formFileSection = request["fileSection"];
+                string formFileCategory = request["fileCategory"];
 
                 // find file name
                 string xFileName = request.Headers["X-File-Name"];
@@ -40,7 +40,7 @@ namespace FileHosting.MVC.Infrastructure
 
                 FineUpload upload = new FineUpload
                 {
-                    FileSection = formFileSection,
+                    FileCategory = formFileCategory,
                     FileName = xFileName ?? qqFile ?? qqFileName ?? formFileName,
                     InputStream = formUpload ? request.Files[0].InputStream : request.InputStream
                 };

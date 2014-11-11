@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Configuration;
 using System.Data;
 using System.IO;
@@ -10,6 +11,7 @@ using System.Web.Security;
 using FileHosting.Database.Models;
 using FileHosting.Domain.Enums;
 using FileHosting.Domain.Models;
+using FileHosting.MVC.Extensions;
 using FileHosting.MVC.Helpers;
 using FileHosting.MVC.Infrastructure;
 using FileHosting.MVC.Providers;
@@ -39,79 +41,45 @@ namespace FileHosting.MVC.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult Index(string sortOrder, string currentFilter, string searchString, int? section, int? page)
+        public ActionResult GetCategories()
         {
             if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
                 return View("_UnauthorizedAccessAttemp");
 
-            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
+            Dictionary<int, string> categoriesDictionary = _fileService.GetCategoriesDictionary();
 
-            Dictionary<int, string> fileSectionDictionary = _homeService.GetFileSectionsDictianary();
+            return categoriesDictionary.Any() ? PartialView("_CategoriesAjaxPartial", categoriesDictionary) : null;
+        }
 
-            int sectionNumber = (section ?? 1);
-            if (sectionNumber < 1)
-                sectionNumber = 1;
-            if (sectionNumber > fileSectionDictionary.Count)
-                sectionNumber = fileSectionDictionary.Count;
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult GetTags()
+        {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
 
-            List<FileModel> files = _fileService.GetFilesForSection(sectionNumber, user);
+            Dictionary<string, int> tagsDictionary = _fileService.GetTagsDictionary();
 
-            string currentSort = sortOrder;
-            string idSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
-            string nameSortParm = sortOrder == "name" ? "name_desc" : "name";
-            string sectionSortParm = sortOrder == "section" ? "section_desc" : "section";
-            string sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
-            string dateSortParm = sortOrder == "date" ? "date_desc" : "date";
+            return tagsDictionary.Any() ? PartialView("_TagsAjaxPartial", tagsDictionary) : null;
+        }
+        
+        [HttpGet]
+        [AllowAnonymous]
+        public ActionResult Index(int? page, SearchFilesType searchType, string searchParam, string sortOrder)
+        {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+                       
+            User user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
 
-            if (searchString != null)
+            List<FileModel> files = _fileService.GetFiles(searchType, searchParam, user);
+
+            if (files.Count > 1)
             {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-            currentFilter = searchString;
+                files = SortFiles(files, sortOrder);
+            }            
 
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                files = files.Where(f => f.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "id_desc":
-                    files = files.OrderByDescending(f => f.Id).ToList();
-                    break;
-                case "name":
-                    files = files.OrderBy(f => f.Name).ToList();
-                    break;
-                case "name_desc":
-                    files = files.OrderByDescending(f => f.Name).ToList();
-                    break;
-                case "section":
-                    files = files.OrderBy(f => f.Section).ToList();
-                    break;
-                case "section_desc":
-                    files = files.OrderByDescending(f => f.Section).ToList();
-                    break;
-                case "size":
-                    files = files.OrderBy(f => f.Size).ToList();
-                    break;
-                case "size_desc":
-                    files = files.OrderByDescending(f => f.Size).ToList();
-                    break;
-                case "date":
-                    files = files.OrderBy(f => f.UploadDate).ToList();
-                    break;
-                case "date_desc":
-                    files = files.OrderByDescending(f => f.UploadDate).ToList();
-                    break;
-                default:
-                    files = files.OrderBy(f => f.Id).ToList();
-                    break;
-            }
-
-            int pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
+            var pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
 
             var pageInfo = new PageInfo
             {
@@ -126,21 +94,20 @@ namespace FileHosting.MVC.Controllers
                 pageNumber = pageInfo.TotalPages;
             pageInfo.PageNumber = pageNumber;
 
-            List<FileModel> filesPerPages = files.Skip((pageNumber - 1)*pageSize).Take(pageSize).ToList();
+            List<FileModel> filesPerPages = files.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();            
 
             var viewModel = new FilesIndexViewModel
             {
-                FileSectionDictionary = fileSectionDictionary,
                 Files = filesPerPages,
-                IdSortParm = idSortParm,
-                NameSortParm = nameSortParm,
-                SectionSortParm = sectionSortParm,
-                SizeSortParm = sizeSortParm,
-                DateSortParm = dateSortParm,
-                CurrentSort = currentSort,
-                CurrentFilter = currentFilter,
-                IsAuthenticated = user != null,
-                SectionNumber = sectionNumber,
+                SearchType = searchType,
+                SearchParam = searchParam,                
+                IdSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : string.Empty,
+                NameSortParm = sortOrder == "name" ? "name_desc" : "name",
+                CategorySortParm = sortOrder == "category" ? "category_desc" : "category",
+                SizeSortParm = sortOrder == "size" ? "size_desc" : "size",
+                DateSortParm = sortOrder == "size" ? "size_desc" : "size",
+                SortOrder = sortOrder,                
+                IsAuthenticated = user != null,                
                 PageInfo = pageInfo
             };
 
@@ -148,70 +115,240 @@ namespace FileHosting.MVC.Controllers
         }
 
         [HttpGet]
-        public ActionResult UserFiles(string sortOrder, string currentFilter, string searchString, int? page)
+        [AllowAnonymous]
+        public ActionResult FileDetails(int fileId, string returnUrl, ViewModelsMessageType? messageType)
+        {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+
+            User user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            File file = _fileService.GetFileById(fileId, user);
+            if (file == null)
+                return HttpNotFound();
+
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                NameValueCollection queryString = Request.QueryString.ToEditable();
+                queryString.Remove("fileId");
+                returnUrl = Url.Action("Index") + "?" + queryString;
+            }            
+
+            var viewModel = new FileDetailsViewModel
+            {
+                FileModel = _fileService.GetModelForFile(file, isAuthenticated: false),
+                IsAuthenticated = user != null,
+                IsSubscribed = user != null && file.SubscribedUsers.Contains(user),
+                IsOwner = user != null && file.Owner == user,
+                Message = messageType.HasValue
+                    ? new Message
+                    {
+                        MessageType = messageType.Value,
+                        MessageText = messageType == ViewModelsMessageType.A
+                            ? "Success! Comment was added."
+                            : messageType == ViewModelsMessageType.B
+                                ? "Error! Comment was not added."
+                                : messageType == ViewModelsMessageType.C
+                                    ? "Warning! Comment cannot be empty."
+                                    : messageType == ViewModelsMessageType.D
+                                        ? "Warning! You have exceeded the download amount limit. File will not be downloaded."
+                                        : messageType == ViewModelsMessageType.E
+                                            ? "Success! You are subscribed to file changes."
+                                            : "Succes! You are not subscribed to file changes."
+                    }
+                    : null,                
+                ReturnUrl = returnUrl
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public ActionResult DownloadFile(int fileId, string returnUrl)
+        {
+            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
+                return View("_UnauthorizedAccessAttemp");
+
+            User user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            File file = _fileService.GetFileById(fileId, user);
+            if (file == null)
+                return HttpNotFound();
+
+            if (string.IsNullOrWhiteSpace(returnUrl))
+            {
+                NameValueCollection queryString = Request.QueryString.ToEditable();
+                queryString.Remove("fileId");
+                returnUrl = Url.Action("Index") + "?" + queryString;
+            }
+
+            string ipAdress = ConfigurationManager.AppSettings.Get("Server");
+            string pathToFile = Path.Combine(ipAdress, file.Path);
+
+            var totalDownloadAmountLimit =
+                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
+            var totalDownloadSpeedLimit =
+                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
+            const decimal divider = 1048576; // 1024 * 1024
+            decimal currentDownloadAmount;
+
+            if (user == null)
+            {
+                if (totalDownloadAmountLimit != 0)
+                {
+                    string userHostAddress = HttpContext.Request.UserHostAddress;
+
+                    currentDownloadAmount = Convert.ToDecimal(Session[userHostAddress] ?? 0);
+                    currentDownloadAmount += decimal.Round(file.Size / divider, 2);
+
+                    if (currentDownloadAmount > totalDownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, returnUrl, messageType = ViewModelsMessageType.D });
+
+                    _fileService.WriteDownload(file, null);
+                    Session[userHostAddress] = currentDownloadAmount;
+
+                    return totalDownloadSpeedLimit != 0
+                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, MediaTypeNames.Application.Octet)
+                        : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
+                }
+
+                _fileService.WriteDownload(file, null);
+
+                return totalDownloadSpeedLimit != 0
+                    ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, MediaTypeNames.Application.Octet)
+                    : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
+            }
+
+            if (user.Downloads.Any())
+            {
+                long downloadsSum = user.Downloads.Sum(d => d.File.Size);
+                currentDownloadAmount = decimal.Round(downloadsSum / divider, 2);
+
+                if (user.DownloadAmountLimit != 0)
+                {
+                    if (currentDownloadAmount > user.DownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, returnUrl, messageType = ViewModelsMessageType.D });
+                }
+
+                if (totalDownloadAmountLimit != 0)
+                {
+                    if (currentDownloadAmount > totalDownloadAmountLimit)
+                        return RedirectToAction("FileDetails", new { fileId, returnUrl, messageType = ViewModelsMessageType.D });
+                }
+
+                _fileService.WriteDownload(file, user);
+
+                return user.DownloadSpeedLimit != 0
+                    ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit, MediaTypeNames.Application.Octet)
+                    : totalDownloadSpeedLimit != 0
+                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, MediaTypeNames.Application.Octet)
+                        : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
+            }
+
+            if (totalDownloadAmountLimit != 0)
+            {
+                currentDownloadAmount = decimal.Round(file.Size / divider, 2);
+
+                if (currentDownloadAmount > totalDownloadAmountLimit)
+                    return RedirectToAction("FileDetails", new { fileId, returnUrl, messageType = ViewModelsMessageType.D });
+            }
+
+            _fileService.WriteDownload(file, user);
+
+            return totalDownloadSpeedLimit != 0
+                ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit, MediaTypeNames.Application.Octet)
+                : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangeSubscription(int fileId, string returnUrl, SubscribeActionType subscription)
+        {
+            User user = ((MyMembershipProvider)Membership.Provider).GetUserByEmail(User.Identity.Name);
+
+            File file = _fileService.GetFileById(fileId, user);
+            if (file == null)
+                return HttpNotFound();
+
+            if (user == null || user.Files.Contains(file))
+                return RedirectToAction("Index", "Home");
+
+            try
+            {
+                _fileService.ChangeSubscription(file, user, subscription == SubscribeActionType.Subscribe);
+            }
+            catch (DataException)
+            {
+                return RedirectToAction("FileDetails",
+                    new
+                    {
+                        fileId,                        
+                        returnUrl,
+                        messageType =
+                            subscription == SubscribeActionType.Subscribe
+                                ? ViewModelsMessageType.F
+                                : ViewModelsMessageType.E                        
+                    });
+            }
+
+            return RedirectToAction("FileDetails",
+                new
+                {
+                    fileId,                    
+                    returnUrl,
+                    messageType =
+                        subscription == SubscribeActionType.Subscribe
+                            ? ViewModelsMessageType.E
+                            : ViewModelsMessageType.F                    
+                });
+        }
+
+        [HttpGet]
+        public ActionResult UserFiles(int? page, string sortOrder)
         {
             User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
             if (user == null)
                 return RedirectToAction("Index", "Home");
 
-            string currentSort = sortOrder;
-            string idSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
-            string nameSortParm = sortOrder == "name" ? "name_desc" : "name";
-            string sectionSortParm = sortOrder == "section" ? "section_desc" : "section";
-            string sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
-            string dateSortParm = sortOrder == "date" ? "date_desc" : "date";
-
-            if (searchString != null)
-            {
-                page = 1;
-            }
-            else
-            {
-                searchString = currentFilter;
-            }
-            currentFilter = searchString;
-
             List<FileModel> files = _fileService.GetFilesForUser(user.Id);
-
-            if (!String.IsNullOrEmpty(searchString))
+            if (files.Count > 1)
             {
-                files = files.Where(f => f.Name.ToUpper().Contains(searchString.ToUpper())).ToList();
-            }
-            switch (sortOrder)
-            {
-                case "id_desc":
-                    files = files.OrderByDescending(f => f.Id).ToList();
-                    break;
-                case "name":
-                    files = files.OrderBy(f => f.Name).ToList();
-                    break;
-                case "name_desc":
-                    files = files.OrderByDescending(f => f.Name).ToList();
-                    break;
-                case "section":
-                    files = files.OrderBy(f => f.Section).ToList();
-                    break;
-                case "section_desc":
-                    files = files.OrderByDescending(f => f.Section).ToList();
-                    break;
-                case "size":
-                    files = files.OrderBy(f => f.Size).ToList();
-                    break;
-                case "size_desc":
-                    files = files.OrderByDescending(f => f.Size).ToList();
-                    break;
-                case "date":
-                    files = files.OrderBy(f => f.UploadDate).ToList();
-                    break;
-                case "date_desc":
-                    files = files.OrderByDescending(f => f.UploadDate).ToList();
-                    break;
-                default:
-                    files = files.OrderBy(f => f.Id).ToList();
-                    break;
-            }
-
-            Dictionary<int, string> fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
+                switch (sortOrder)
+                {
+                    case "id_desc":
+                        files = files.OrderByDescending(f => f.Id).ToList();
+                        break;
+                    case "name":
+                        files = files.OrderBy(f => f.Name).ToList();
+                        break;
+                    case "name_desc":
+                        files = files.OrderByDescending(f => f.Name).ToList();
+                        break;
+                    case "category":
+                        files = files.OrderBy(f => f.Category).ToList();
+                        break;
+                    case "category_desc":
+                        files = files.OrderByDescending(f => f.Category).ToList();
+                        break;
+                    case "size":
+                        files = files.OrderBy(f => f.Size).ToList();
+                        break;
+                    case "size_desc":
+                        files = files.OrderByDescending(f => f.Size).ToList();
+                        break;
+                    case "date":
+                        files = files.OrderBy(f => f.UploadDate).ToList();
+                        break;
+                    case "date_desc":
+                        files = files.OrderByDescending(f => f.UploadDate).ToList();
+                        break;
+                    default:
+                        files = files.OrderBy(f => f.Id).ToList();
+                        break;
+                }
+            }            
 
             int pageSize = int.Parse(ConfigurationManager.AppSettings.Get("FilesPageSize"));
 
@@ -229,18 +366,22 @@ namespace FileHosting.MVC.Controllers
             pageInfo.PageNumber = pageNumber;
 
             List<FileModel> filesPerPages = files.Skip((pageNumber - 1)*pageSize).Take(pageSize).ToList();
+            string currentSort = sortOrder;
+            string idSortParm = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
+            string nameSortParm = sortOrder == "name" ? "name_desc" : "name";
+            string categorySortParm = sortOrder == "section" ? "section_desc" : "section";
+            string sizeSortParm = sortOrder == "size" ? "size_desc" : "size";
+            string dateSortParm = sortOrder == "date" ? "date_desc" : "date";
 
             var viewModel = new UserFilesViewModel
             {
-                FileSectionsDictionary = fileSectionsDictionary,
                 Files = filesPerPages,
                 IdSortParm = idSortParm,
                 NameSortParm = nameSortParm,
-                SectionSortParm = sectionSortParm,
+                CategorySortParm = categorySortParm,
                 SizeSortParm = sizeSortParm,
                 DateSortParm = dateSortParm,
-                CurrentSort = currentSort,
-                CurrentFilter = currentFilter,
+                CurrentSort = currentSort,                
                 PageInfo = pageInfo
             };
 
@@ -253,13 +394,13 @@ namespace FileHosting.MVC.Controllers
             if (((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name) == null)
                 return RedirectToAction("Index", "Home");
 
-            Dictionary<int, string> fileSectionsDictionary = _homeService.GetFileSectionsDictianary();
+            Dictionary<int, string> categoriesDictionary = _fileService.GetCategoriesDictionary();
 
             int pageNumber = (page ?? 1);
 
             var viewModel = new UploadNewFilesViewModel
             {
-                FileSectionsDictionary = fileSectionsDictionary,
+                CategoriesDictionary = categoriesDictionary,
                 CurrentFilter = currentFilter,
                 CurrentSort = sortOrder,
                 PageNumber = pageNumber
@@ -283,11 +424,9 @@ namespace FileHosting.MVC.Controllers
 
             string fullName = fileName + Guid.NewGuid().ToString().Replace("-", "") + fileExtension;
 
-            int fileSectionNumber = int.Parse(upload.FileSection);
-
             string ipAddress = ConfigurationManager.AppSettings.Get("Server");
 
-            string filePath = string.Format("UploadedFiles/{0}/{1}", fileSectionNumber, fullName);
+            string filePath = string.Format("UploadedFiles/{0}/{1}", upload.FileCategory, fullName);
 
             string pathToSave = Path.Combine(ipAddress, filePath);
             if (System.IO.File.Exists(pathToSave))
@@ -295,14 +434,11 @@ namespace FileHosting.MVC.Controllers
 
             long fileSize = upload.InputStream.Length;
 
-            upload.SaveAs(pathToSave);
-
-            Section fileSection = _homeService.GetFileSectionById(fileSectionNumber);
+            upload.SaveAs(pathToSave);            
 
             try
             {
-                _fileService.AddFile(fileName + fileExtension, fullName, fileSize, filePath, ipAddress, fileSection,
-                    user);
+                _fileService.AddFile(fileName + fileExtension, fullName, upload.FileCategory, fileSize, filePath, user, ipAddress);
             }
             catch (DataException ex)
             {
@@ -310,201 +446,7 @@ namespace FileHosting.MVC.Controllers
             }
 
             return new FineUploaderResult(true, new {message = "Upload is finished successfully!"});
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public ActionResult DownloadFile(int fileId, int section, int page)
-        {
-            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return View("_UnauthorizedAccessAttemp");
-
-            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
-
-            File file = _fileService.GetFileById(fileId, user);
-            if (file == null)
-                return HttpNotFound();
-
-            string ipAdress = ConfigurationManager.AppSettings.Get("Server");
-            string pathToFile = Path.Combine(ipAdress, file.Path);
-
-            decimal totalDownloadAmountLimit =
-                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadAmountLimit"));
-            decimal totalDownloadSpeedLimit =
-                decimal.Parse(ConfigurationManager.AppSettings.Get("TotalDownloadSpeedLimit"));
-            const decimal divider = 1048576; // 1024 * 1024
-            decimal currentDownloadAmount;
-
-            if (user == null)
-            {
-                if (totalDownloadAmountLimit != 0)
-                {
-                    string userHostAddress = HttpContext.Request.UserHostAddress;
-
-                    currentDownloadAmount = Convert.ToDecimal(Session[userHostAddress] ?? 0);
-                    currentDownloadAmount += decimal.Round(file.Size/divider, 2);
-
-                    if (currentDownloadAmount > totalDownloadAmountLimit)
-                        return RedirectToAction("FileDetails",
-                            new {fileId, section, page, messageType = ViewModelsMessageType.D});
-
-                    _fileService.WriteDownload(file, null);
-                    Session[userHostAddress] = currentDownloadAmount;
-
-                    return totalDownloadSpeedLimit != 0
-                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit,
-                            MediaTypeNames.Application.Octet)
-                        : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
-                }
-
-                _fileService.WriteDownload(file, null);
-
-                return totalDownloadSpeedLimit != 0
-                    ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit,
-                        MediaTypeNames.Application.Octet)
-                    : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
-            }
-
-            if (user.Downloads.Any())
-            {
-                long downloadsSum = user.Downloads.Sum(d => d.File.Size);
-                currentDownloadAmount = decimal.Round(downloadsSum/divider, 2);
-
-                if (user.DownloadAmountLimit != 0)
-                {
-                    if (currentDownloadAmount > user.DownloadAmountLimit)
-                        return RedirectToAction("FileDetails",
-                            new {fileId, section, page, messageType = ViewModelsMessageType.D});
-                }
-
-                if (totalDownloadAmountLimit != 0)
-                {
-                    if (currentDownloadAmount > totalDownloadAmountLimit)
-                        return RedirectToAction("FileDetails",
-                            new {fileId, section, page, messageType = ViewModelsMessageType.D});
-                }
-
-                _fileService.WriteDownload(file, user);
-
-                return user.DownloadSpeedLimit != 0
-                    ? new FileThrottleResult(pathToFile, file.Name, user.DownloadSpeedLimit,
-                        MediaTypeNames.Application.Octet)
-                    : totalDownloadSpeedLimit != 0
-                        ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit,
-                            MediaTypeNames.Application.Octet)
-                        : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
-            }
-
-            if (totalDownloadAmountLimit != 0)
-            {
-                currentDownloadAmount = decimal.Round(file.Size/divider, 2);
-
-                if (currentDownloadAmount > totalDownloadAmountLimit)
-                    return RedirectToAction("FileDetails",
-                        new {fileId, section, page, messageType = ViewModelsMessageType.D});
-            }
-
-            _fileService.WriteDownload(file, user);
-
-            return totalDownloadSpeedLimit != 0
-                ? new FileThrottleResult(pathToFile, file.Name, totalDownloadSpeedLimit,
-                    MediaTypeNames.Application.Octet)
-                : File(pathToFile, MediaTypeNames.Application.Octet, file.Name);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public ActionResult FileDetails(int fileId, string sortOrder, string currentFilter, int? section, int? page,
-            ViewModelsMessageType? messageType)
-        {
-            if (Roles.Provider.IsUserInRole(User.Identity.Name, "BlockedUser"))
-                return View("_UnauthorizedAccessAttemp");
-
-            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
-
-            File file = _fileService.GetFileById(fileId, user);
-            if (file == null)
-                return HttpNotFound();
-
-            int sectionNumber = (section ?? 1);
-
-            int pageNumber = (page ?? 1);
-
-            var viewModel = new FileDetailsViewModel
-            {
-                FileModel = _fileService.GetModelForFile(file, false),
-                IsAuthenticated = user != null,
-                IsSubscribed = user != null && file.SubscribedUsers.Contains(user),
-                IsOwner = user != null && file.Owner == user,
-                Message = messageType.HasValue
-                    ? new Message
-                    {
-                        MessageType = messageType.Value,
-                        MessageText = messageType == ViewModelsMessageType.A
-                            ? "Success! Comment was added."
-                            : messageType == ViewModelsMessageType.B
-                                ? "Error! Comment was not added."
-                                : messageType == ViewModelsMessageType.C
-                                    ? "Warning! Comment cannot be empty."
-                                    : messageType == ViewModelsMessageType.D
-                                        ? "Warning! You have exceeded the download amount limit. File will not be downloaded."
-                                        : messageType == ViewModelsMessageType.E
-                                            ? "Success! You are subscribed to file changes."
-                                            : "Succes! You are not subscribed to file changes."
-                    }
-                    : null,
-                CurrentSort = sortOrder,
-                CurrentFilter = currentFilter,
-                SectionNumber = sectionNumber,
-                PageNumber = pageNumber
-            };
-
-            return View(viewModel);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult ChangeSubscription(int fileId, int page, SubscribeActionType subscription)
-        {
-            User user = ((MyMembershipProvider) Membership.Provider).GetUserByEmail(User.Identity.Name);
-
-            File file = _fileService.GetFileById(fileId, user);
-            if (file == null)
-                return HttpNotFound();
-
-            if (user == null || user.Files.Contains(file))
-                return RedirectToAction("Index", "Home");
-
-            try
-            {
-                _fileService.ChangeSubscription(file, user, subscription == SubscribeActionType.Subscribe);
-            }
-            catch (DataException)
-            {
-                return RedirectToAction("FileDetails",
-                    new
-                    {
-                        fileId,
-                        page,
-                        messageType =
-                            subscription == SubscribeActionType.Subscribe
-                                ? ViewModelsMessageType.F
-                                : ViewModelsMessageType.E
-                    });
-            }
-
-            return RedirectToAction("FileDetails",
-                new
-                {
-                    fileId,
-                    page,
-                    messageType =
-                        subscription == SubscribeActionType.Subscribe
-                            ? ViewModelsMessageType.E
-                            : ViewModelsMessageType.F
-                });
-        }
+        }        
 
         [HttpGet]
         public ActionResult EditFile(int fileId, string sortOrder, string currentFilter, int? page,
@@ -538,9 +480,9 @@ namespace FileHosting.MVC.Controllers
                                     : "Warning! Tags and description cannot be empty."
                     }
                     : null,
-                CurrentSort = sortOrder,
-                CurrentFilter = currentFilter,
-                PageNumber = pageNumber
+                //CurrentSort = sortOrder,
+                //CurrentFilter = currentFilter,
+                //PageNumber = pageNumber
             };
 
             return View(viewModel);
@@ -567,7 +509,7 @@ namespace FileHosting.MVC.Controllers
 
             string fileName = file.Name;
             string fileOwner = file.Owner.Name;
-            string fileSection = file.Section.Name;
+            string fileSection = file.Category.Name;
             ICollection<User> subscribedUsers = file.SubscribedUsers;
 
             try
@@ -616,7 +558,7 @@ namespace FileHosting.MVC.Controllers
             string ipAdress = ConfigurationManager.AppSettings.Get("Server");
             string fileName = file.Name;
             string fileOwner = file.Owner.Name;
-            string fileSection = file.Section.Name;
+            string fileSection = file.Category.Name;
             ICollection<User> subscribedUsers = file.SubscribedUsers;
 
             try
@@ -751,6 +693,49 @@ namespace FileHosting.MVC.Controllers
             bool isFileOwner = user != null && user.Files.Select(f => f.Id).Contains(fileId);
 
             return isFileOwner && _fileService.ChangeCommentState(commentId, isActive);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private List<FileModel> SortFiles(List<FileModel> files, string sortOrder)
+        {
+            switch (sortOrder)
+            {
+                case "id_desc":
+                    files = files.OrderByDescending(f => f.Id).ToList();
+                    break;
+                case "name":
+                    files = files.OrderBy(f => f.Name).ToList();
+                    break;
+                case "name_desc":
+                    files = files.OrderByDescending(f => f.Name).ToList();
+                    break;
+                case "category":
+                    files = files.OrderBy(f => f.Category).ToList();
+                    break;
+                case "category_desc":
+                    files = files.OrderByDescending(f => f.Category).ToList();
+                    break;
+                case "size":
+                    files = files.OrderBy(f => f.Size).ToList();
+                    break;
+                case "size_desc":
+                    files = files.OrderByDescending(f => f.Size).ToList();
+                    break;
+                case "date":
+                    files = files.OrderBy(f => f.UploadDate).ToList();
+                    break;
+                case "date_desc":
+                    files = files.OrderByDescending(f => f.UploadDate).ToList();
+                    break;
+                default:
+                    files = files.OrderBy(f => f.Id).ToList();
+                    break;
+            }
+
+            return files;
         }
 
         #endregion

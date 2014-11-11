@@ -15,8 +15,8 @@ namespace FileHosting.Database.Models
         public bool IsAllowedAnonymousBrowsing { get; set; }
         public bool IsAllowedAnonymousAction { get; set; }
 
-        public int SectionId { get; set; }
-        public virtual Section Section { get; set; }
+        public int CategoryId { get; set; }
+        public virtual Category Category { get; set; }
 
         public int OwnerId { get; set; }
         public virtual User Owner { get; set; }

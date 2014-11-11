@@ -156,19 +156,7 @@ namespace FileHosting.Services
 
         #endregion
 
-        #region Common methods
-
-        public Dictionary<int, string> GetFileSectionsDictianary()
-        {
-            return _context.SectionRepository
-                .GetAll()
-                .ToDictionary(s => s.Id, s => s.Name);
-        }
-
-        public Section GetFileSectionById(int sectionId)
-        {
-            return _context.SectionRepository.GetById(sectionId);
-        }
+        #region Common methods        
 
         public Task SendEmail(EmailType emailType, IEnumerable<User> recipients, string fileName = null,
             string fileOwner = null, string fileSection = null)
@@ -209,7 +197,7 @@ namespace FileHosting.Services
                     smtpClient.Send(msg);
                 }
             });
-        }
+        }        
 
         #endregion
     }

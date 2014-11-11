@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Mvc;
 using FileHosting.Database;
 using FileHosting.Database.Models;
+using FileHosting.Domain.Enums;
 using FileHosting.Domain.Models;
 using FileHosting.Services.Extensions;
 using File = FileHosting.Database.Models.File;
@@ -27,15 +28,55 @@ namespace FileHosting.Services
 
         #region Files
 
-        public List<FileModel> GetFilesForSection(int sectionId, User user)
+        public Dictionary<int, string> GetCategoriesDictionary()
         {
+            return _context.CategoryRepository.GetAll()
+                .ToDictionary(s => s.Id, s => s.Name);
+        }        
+
+        public Dictionary<string, int> GetTagsDictionary()
+        {
+            return _context.TagRepository.GetAll()                               
+                .ToDictionary(t => t.Name, t => t.Files.Count);
+        }
+
+        public List<FileModel> GetFiles(SearchFilesType searchType, string searchParam, User user)
+        {
+            var files = new List<File>();
+            var fileModels = new List<FileModel>();            
+
+            switch (searchType)
+            {
+                case SearchFilesType.ByName:
+                    files = _context.FileRepository.Find(f => f.Name.ToUpper().Contains(searchParam.ToUpper())).ToList();
+                    
+                    break;
+
+                case SearchFilesType.ByCategory:
+                    int categoriesCount = _context.CategoryRepository.Count();
+                    int categoryId;                    
+                    if (!int.TryParse(searchParam, out categoryId) || categoryId < 1)
+                        categoryId = 1;                    
+                    if (categoryId > categoriesCount)
+                        categoryId = categoriesCount;
+                    
+                    files = _context.FileRepository.Find(f => f.Category.Id == categoryId).ToList();
+                    
+                    break;
+
+                case SearchFilesType.ByTag:
+                    files = _context.FileRepository.Find(f => f.Tags.Select(t => t.Name).Contains(searchParam)).ToList();
+                    
+                    break;                
+            }
+
             if (user == null)
             {
-                return _context.FileRepository.Find(f => f.Section.Id == sectionId && f.IsAllowedAnonymousBrowsing)
+                return files.Where(f => f.IsAllowedAnonymousBrowsing)
                     .Select(f => new FileModel
                     {
                         Id = f.Id,
-                        Section = f.Section,
+                        Category = f.Category,
                         Name = f.Name,
                         Size = f.Size,
                         UploadDate = f.UploadDate,
@@ -45,9 +86,6 @@ namespace FileHosting.Services
                     .ToList();
             }
 
-            IEnumerable<File> files = _context.FileRepository.Find(f => f.Section.Id == sectionId);
-            var fileModels = new List<FileModel>();
-
             foreach (File file in files)
             {
                 if (file.AllowedUsers.Any())
@@ -56,7 +94,7 @@ namespace FileHosting.Services
                         fileModels.Add(new FileModel
                         {
                             Id = file.Id,
-                            Section = file.Section,
+                            Category = file.Category,
                             Name = file.Name,
                             Size = file.Size,
                             UploadDate = file.UploadDate
@@ -67,7 +105,7 @@ namespace FileHosting.Services
                     fileModels.Add(new FileModel
                     {
                         Id = file.Id,
-                        Section = file.Section,
+                        Category = file.Category,
                         Name = file.Name,
                         Size = file.Size,
                         UploadDate = file.UploadDate
@@ -75,8 +113,8 @@ namespace FileHosting.Services
                 }
             }
 
-            return fileModels.OrderBy(f => f.Id).ToList();
-        }
+            return fileModels;
+        }        
 
         public List<FileModel> GetFilesForUser(int userId)
         {
@@ -84,12 +122,11 @@ namespace FileHosting.Services
                 .Select(f => new FileModel
                 {
                     Id = f.Id,
-                    Section = f.Section,
+                    Category = f.Category,
                     Name = f.Name,
                     Size = f.Size,
                     UploadDate = f.UploadDate
-                })
-                .OrderBy(f => f.Id)
+                })                
                 .ToList();
         }
 
@@ -119,7 +156,7 @@ namespace FileHosting.Services
                 {
                     Id = file.Id,
                     Name = file.Name,
-                    Section = file.Section,
+                    Category = file.Category,
                     Tags = file.Tags.Any() ? file.Tags.ToTagsString() : "",
                     Description = !string.IsNullOrWhiteSpace(file.Description) ? file.Description : "",
                     UploadDate = file.UploadDate,
@@ -134,7 +171,7 @@ namespace FileHosting.Services
                 {
                     Id = file.Id,
                     Name = file.Name,
-                    Section = file.Section,
+                    Category = file.Category,
                     Tags = file.Tags.Any() ? file.Tags.ToTagsString() : "N/A",
                     Description = string.IsNullOrWhiteSpace(file.Description) ? "N/A" : file.Description,
                     UploadDate = file.UploadDate,
@@ -145,8 +182,7 @@ namespace FileHosting.Services
                 };
         }
 
-        public void AddFile(string fileName, string fullName, long fileSize, string filePath, string ipAddress,
-            Section fileSection, User owner)
+        public void AddFile(string name, string fullName, string categoryName, long size, string path, User owner, string ipAddress)
         {
             File[] files = _context.FileRepository.Find(f => f.FullName == fullName).ToArray();
             if (files.Any())
@@ -157,14 +193,16 @@ namespace FileHosting.Services
                 }
             }
 
+            Category category = _context.CategoryRepository.First(c => c.Name == categoryName);
+            
             _context.FileRepository.Add(new File
             {
-                Name = fileName,
+                Name = name,
                 FullName = fullName,
-                Section = fileSection,
+                Category = category,
                 UploadDate = DateTime.UtcNow,
-                Size = fileSize,
-                Path = filePath,
+                Size = size,
+                Path = path,
                 Owner = owner,
                 IsAllowedAnonymousBrowsing = true,
                 IsAllowedAnonymousAction = true,
@@ -179,15 +217,15 @@ namespace FileHosting.Services
 
         public void DeleteFile(File file, string ipAddress, bool multiple = true)
         {
-            _context.FileRepository.Delete(file);
-
-            if (!multiple)
-                _context.Commit();
-
             string filePath = Path.Combine(ipAddress, file.Path);
 
             if (System.IO.File.Exists(filePath))
                 System.IO.File.Delete(filePath);
+            
+            _context.FileRepository.Delete(file);
+
+            if (!multiple)
+                _context.Commit();            
         }
 
         public void ChangeFile(File file, string fileTagsString, string newFileDescription, bool allowAnonymousBrowsing,

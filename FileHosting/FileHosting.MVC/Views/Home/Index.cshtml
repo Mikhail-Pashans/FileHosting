@@ -3,94 +3,87 @@
 @{
     ViewBag.Title = "Home page";
 }
-<h1 class="text-center">@ViewBag.Title</h1>
-<br />
-<div class="well well-custom">
-    <ul class="nav nav-pills nav-justified" role="tablist">
-        @foreach (var item in Model.FileSections)
+@section search {
+    @Html.Partial("_SearchPartial")
+}
+@section categories {
+    @Html.Partial("_CategoriesPartial")
+}
+@section tags {
+    @Html.Partial("_TagsPartial")
+}
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">@ViewBag.Title</h3>
+        <hr />
+        @if (Model.IsModerator)
         {
-            <li>
-                <a href="@Url.Action("Index", "Files", new {section = item.Key})">@item.Value</a>
-            </li>
+            <div>
+                <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new {page = Model.PageInfo.PageNumber})" role="button">
+                    <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
+                </a>
+            </div>
+            <br />
         }
-    </ul>
-    <br />
-    <div class="panel panel-primary no-margin">
-        <div class="panel-body">
-            @if (Model.IsModerator)
-            {
-                <div>
-                    <a class="btn btn-primary width-200" href="@Url.Action("AddNews", new {page = Model.PageInfo.PageNumber})" role="button">
-                        <span class="glyphicon glyphicon-plus"></span>&emsp;Add news
-                    </a>
-                </div>
-                <br />
-            }
-            @if (Model.News != null && Model.News.Any())
-            {
-                <div class="panel-group no-margin" id="accordion">
-                    @for (int i = 0; i < Model.News.Count; i++)
-                    {
-                        <div class="panel panel-success no-margin news-wrapper">
-                            <div class="panel-heading">
-                                <div class="panel-title">
-                                    <strong>
-                                        @Model.News[i].PublishDate
-                                    </strong>
-                                    @if (Model.IsModerator)
-                                    {
-                                        <div class="pull-right">
-                                            <a class="close" href="@Url.Action("EditNews", new {newsId = Model.News[i].Id, page = Model.PageInfo.PageNumber})" data-toggle="tooltip" data-placement="top" title="Edit news">
-                                                <span class="glyphicon glyphicon-pencil"></span>
-                                            </a>
-                                        </div>
-                                    }
-                                </div>
-                                <a data-toggle="collapse" data-parent="#accordion" href="#@Model.News[i].Id">
-                                    <h4>@Html.Raw(Model.News[i].Name)</h4>
-                                </a>
+        @if (Model.News != null && Model.News.Any())
+        {
+            <div class="panel-group no-margin" id="accordion">
+                @for (int i = 0; i < Model.News.Count; i++)
+                {
+                    <div class="panel panel-success no-margin news-wrapper">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <strong>
+                                    @Model.News[i].PublishDate
+                                </strong>
+                                @if (Model.IsModerator)
+                                {
+                                    <div class="pull-right">
+                                        <a class="close" href="@Url.Action("EditNews", new {newsId = Model.News[i].Id, page = Model.PageInfo.PageNumber})" data-toggle="tooltip" data-placement="top" title="Edit news">
+                                            <span class="glyphicon glyphicon-pencil"></span>
+                                        </a>
+                                    </div>
+                                }
                             </div>
-                            <div class="panel-collapse collapse @if (i == 0)
-                                                                {
-                                                                    <text>in</text>
-                                                                }" id="@Model.News[i].Id">
-                                <div class="panel-body">
-                                    <img class="img-rounded thumbnail" src="/@Model.News[i].Picture" alt="A picture to the news">
-                                    <div>
-                                        @Html.Raw(Model.News[i].Text)
-                                    </div>                                    
+                            <a data-toggle="collapse" data-parent="#accordion" href="#@Model.News[i].Id">
+                                <h4>@Html.Raw(Model.News[i].Name)</h4>
+                            </a>
+                        </div>
+                        <div class="panel-collapse collapse @if (i == 0){<text>in</text>}" id="@Model.News[i].Id">
+                            <div class="panel-body">
+                                <img class="img-rounded thumbnail" src="/@Model.News[i].Picture" alt="A picture to the news">
+                                <div>
+                                    @Html.Raw(Model.News[i].Text)
                                 </div>
                             </div>
                         </div>
-                        if (i != Model.News.Count - 1)
-                        {
-                            <br />
-                        }
+                    </div>
+                    if (i != Model.News.Count - 1)
+                    {
+                        <br />
                     }
-                </div>
-            }
-            else
-            {
-                <div class="alert alert-danger no-margin text-center" role="alert">
-                    <strong>There are no any published news!</strong>
-                </div>
-            }
-        </div>
+                }
+            </div>
+            <br />
+            <div>
+                Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+            </div>
+            @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
+        }
+        else
+        {
+            <div class="alert alert-danger no-margin text-center" role="alert">
+                <strong>There are no any published news!</strong>
+            </div>
+        }
     </div>
-    @if (Model.News != null && Model.News.Any())
-    {
-        <br />
-        <div>
-            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
-        </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new {page = x}))
-    }
 </div>
+@section scripts {
+    <script type="text/javascript">
+        (function ($) {
+            var $editButtons = $('.close');
 
-<script type="text/javascript">
-    (function($) {
-        var $editButtons = $('.close');
-
-        $editButtons.tooltip();
-    })(jQuery);
-</script>
+            $editButtons.tooltip();
+        })(jQuery);
+    </script>
+}

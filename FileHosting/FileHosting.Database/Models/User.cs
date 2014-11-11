@@ -19,9 +19,9 @@ namespace FileHosting.Database.Models
 
         public virtual ICollection<File> Files { get; set; }
 
-        public virtual ICollection<File> FilesWithPermission { get; set; }
+        public virtual ICollection<File> AllowedFiles { get; set; }
 
-        public virtual ICollection<File> FilesWithSubscription { get; set; }
+        public virtual ICollection<File> SubscribedFiles { get; set; }
 
         public virtual ICollection<News> News { get; set; }
 

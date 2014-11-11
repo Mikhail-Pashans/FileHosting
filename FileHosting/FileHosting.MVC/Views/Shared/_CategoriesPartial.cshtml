@@ -1,0 +1,11 @@
+﻿@{
+    Layout = null;
+}
+<div id="categoriesPanel"></div>
+<script type="text/javascript">
+    (function ($) {
+        var $categoriesPanel = $('#categoriesPanel');
+
+        $categoriesPanel.load('/Files/GetCategories');
+    })(jQuery);
+</script>

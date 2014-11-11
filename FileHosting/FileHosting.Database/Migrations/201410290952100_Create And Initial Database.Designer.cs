@@ -13,7 +13,7 @@ namespace FileHosting.Database.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201410271551417_Create And Initial Database"; }
+            get { return "201410290952100_Create And Initial Database"; }
         }
         
         string IMigrationMetadata.Source

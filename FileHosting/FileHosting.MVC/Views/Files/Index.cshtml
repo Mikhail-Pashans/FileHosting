@@ -4,105 +4,93 @@
 @{
     ViewBag.Title = "Files";
 }
-<h1 class="text-center">@ViewBag.Title</h1>
-<br />
-<div class="well well-custom">
-    <ul class="nav nav-pills nav-justified" role="tablist">
-        @foreach (var item in Model.FileSectionDictionary)
+@section search {
+    @Html.Partial("_SearchPartial")
+}
+@section categories {
+    @Html.Partial("_CategoriesPartial")
+}
+@section tags {
+    @Html.Partial("_TagsPartial")
+}
+<div class="panel panel-primary no-margin">
+    <div class="panel-body">
+        <h3 class="no-margin">@ViewBag.Title</h3>
+        <hr />
+        @if (Model.Files != null && Model.Files.Any())
         {
-            <li @if (Request.RawUrl.Contains("/Files?section=" + item.Key))
-                {
-                    <text> class="active" </text>
-                }>
-                <a href="@Url.Action("Index", new {section = item.Key})">@item.Value</a>
-            </li>
-        }
-    </ul>
-    <br />
-    <form class="form-inline pull-right" action="@Url.Action("Index")" method="GET" role="form">
-        <div class="form-group">
-            <label class="control-label" for="searchString">Find by name:&nbsp;</label>
-            <input type="hidden" name="section" value="@Model.SectionNumber" />
-            <input class="form-control" type="text" id="searchString" name="searchString" value="@Model.CurrentFilter" />
-        </div>
-        <div class="form-group">
-            <button class="btn btn-danger" type="submit">
-                <span class="glyphicon glyphicon-search"></span>&ensp;Search
-            </button>
-        </div>
-    </form>
-    <br />
-    <br />
-    <div class="panel panel-primary no-margin">
-        <div class="panel-body">
-            @if (Model.Files != null && Model.Files.Any())
-            {
-                <table class="table table-striped">
-                    <thead>
+            <table class="table table-striped">
+                <thead>
+                    <tr>                        
+                        <th>
+                            @Html.ActionLink("#", "Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.IdSortParm })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Name", "Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.NameSortParm })
+                        </th>
+                        <th>
+                            @Html.ActionLink("Category", "Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.CategorySortParm })
+                        </th>
+                        <th class="th-numbers">
+                            @Html.ActionLink("Size (KB)", "Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.SizeSortParm })
+                        </th>
+                        <th class="th-numbers">
+                            @Html.ActionLink("Upload date", "Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.DateSortParm })
+                        </th>
+                        <th class="th-control"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (FileModel file in Model.Files)
+                    {
                         <tr>
-                            <th>
-                                @Html.ActionLink("#", "Index", new {section = Model.SectionNumber, sortOrder = Model.IdSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th>
-                                @Html.ActionLink("Name", "Index", new {section = Model.SectionNumber, sortOrder = Model.NameSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th>
-                                @Html.ActionLink("Section", "Index", new {section = Model.SectionNumber, sortOrder = Model.SectionSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th class="th-numbers">
-                                @Html.ActionLink("Size (KB)", "Index", new {section = Model.SectionNumber, sortOrder = Model.SizeSortParm, currentFilter = Model.CurrentFilter})
-                            </th>
-                            <th class="th-numbers">
-                                @Html.ActionLink("Upload date", "Index", new {section = Model.SectionNumber, sortOrder = Model.DateSortParm, currentFilter = Model.CurrentFilter})
-                            </th>                            
-                            <th class="th-control"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (FileModel file in Model.Files)
-                        {
-                            <tr>
-                                <td>@file.Id</td>
-                                <td>@file.Name</td>
-                                <td>@file.Section.Name</td>
-                                <td>@file.Size</td>
-                                <td>@file.UploadDate</td>
-                                <td class="text-right">
-                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new {fileId = file.Id, section = Model.SectionNumber, page = Model.PageInfo.PageNumber, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter})" role="button">
+                            <td>@file.Id</td>
+                            <td>@file.Name</td>
+                            <td>@file.Category.Name</td>
+                            <td>@file.Size</td>
+                            <td>@file.UploadDate</td>
+                            <td class="text-right">
+                                <div class="btn-group-vertical">
+                                    <a class="btn btn-info" href="@Url.Action("FileDetails", new { fileId = file.Id })" role="button">
                                         <span class="glyphicon glyphicon-info-sign"></span>&ensp;Details
                                     </a>
-                                    <form class="display-inline" action="@Url.Action("DownloadFile")" method="POST">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="fileId" value="@file.Id" />
-                                        <input type="hidden" name="section" value="@Model.SectionNumber" />
-                                        <input type="hidden" name="page" value="@Model.PageInfo.PageNumber" />
-                                        <button class="btn btn-success" @if (!Model.IsAuthenticated && !file.IsAllowedAnonymousAction)
-                                                                        {
-                                                                            <text>disabled="disabled"</text>
-                                                                        }>
-                                            <span class="glyphicon glyphicon-download"></span>&ensp;Download
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <div class="alert alert-danger no-margin text-center" role="alert">
-                    <strong>There are no any uploaded files!</strong>
-                </div>
-            }
-        </div>
+                                    <a class="btn btn-success btn-download @if (!Model.IsAuthenticated && !file.IsAllowedAnonymousAction) { <text> disabled </text> }" href="javascript:void(0)" role="button">
+                                        <span class="glyphicon glyphicon-download"></span>&ensp;Download
+                                    </a>
+                                </div>
+                                <form action="@Url.Action("DownloadFile")" method="POST">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="fileId" value="@file.Id" />                                    
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div>
+                Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
+            </div>
+            @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { searchType = Model.SearchType, searchParam = Model.SearchParam, sortOrder = Model.SortOrder, page = x }))
+        }
+        else
+        {
+            <div class="alert alert-danger no-margin text-center" role="alert">
+                <strong>There are no any uploaded files!</strong>
+            </div>
+        }
     </div>
-    @if (Model.Files != null && Model.Files.Any())
-    {
-        <br />
-        <div>
-            Page @(Model.PageInfo.TotalPages < Model.PageInfo.PageNumber ? 0 : Model.PageInfo.PageNumber) of @Model.PageInfo.TotalPages
-        </div>
-        @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new {section = Model.SectionNumber, page = x, sortOrder = Model.CurrentSort, currentFilter = Model.CurrentFilter}))
-    }
 </div>
+@section scripts {
+    <script type="text/javascript">
+        (function ($) {
+            var $downloadButton = $('.btn-download');
+
+            $downloadButton.on('click', function (event) {
+                event.preventDefault();
+                var $button = $(this);
+                var $form = $button.parent().parent().find('form');
+                $form.submit();
+            });
+        })(jQuery);
+    </script>
+}

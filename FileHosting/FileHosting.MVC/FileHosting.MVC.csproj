@@ -157,7 +157,7 @@
     <Compile Include="Controllers\NewsController.cs" />
     <Compile Include="Controllers\FilesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
-    <Compile Include="Extensions\MVCExtensions.cs" />
+    <Compile Include="Extensions\MvcExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -337,7 +337,9 @@
     <Content Include="Scripts\Knockout\knockout-3.2.0.js" />
     <Content Include="Scripts\Modernizr\modernizr-2.8.3.js" />
     <Content Include="Scripts\_references.js" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
@@ -367,6 +369,11 @@
     <Content Include="Scripts\jQuery\jquery-2.1.1.min.js.map">
       <DependentUpon>jquery-2.1.1.min.js</DependentUpon>
     </Content>
+    <Content Include="Views\Shared\_CategoriesPartial.cshtml" />
+    <Content Include="Views\Shared\_TagsPartial.cshtml" />
+    <Content Include="Views\Shared\_TagsAjaxPartial.cshtml" />
+    <Content Include="Views\Shared\_SearchPartial.cshtml" />
+    <Content Include="Views\Shared\_CategoriesAjaxPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
