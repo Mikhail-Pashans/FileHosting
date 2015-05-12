@@ -7,6 +7,15 @@
     decimal totalDownloadAmountLimit = Model.TotalDownloadAmountLimit;
     decimal totalDownloadSpeedLimit = Model.TotalDownloadSpeedLimit;
 }
+@section search {
+    @Html.Partial("_SearchPartial")
+}
+@section categories {
+    @Html.Partial("_CategoriesPartial")
+}
+@section tags {
+    @Html.Partial("_TagsPartial")
+}
 <div class="panel panel-primary no-margin">
     <div class="panel-body">
         <h3 class="no-margin">@ViewBag.Title</h3>
